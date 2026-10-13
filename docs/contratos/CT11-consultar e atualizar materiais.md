@@ -34,4 +34,3 @@
 | Quantidade inválida | Backend rejeita a atualização com `QUANTIDADE_INVALIDA` |
 | Falha de leitura ou gravação | Falha de persistência tratada pelo Backend |
 
-**Observação:** tabela e colunas físicas dependem do modelo de dados aprovado.
