@@ -1,6 +1,6 @@
 Contratos técnicos — ArchFlow
 
-1.  Organização
+1. Organização
 
 CT01 — Autenticação.
 
