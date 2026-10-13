@@ -40,4 +40,3 @@
 | Dados inválidos | Backend rejeita a operação e informa a validação correspondente |
 | Falha ao consultar ou gravar | Falha de persistência tratada pelo Backend |
 
-**Observação:** o banco não define sozinho as permissões ou as transições de status; o Backend deve validar as regras antes de gravar.
