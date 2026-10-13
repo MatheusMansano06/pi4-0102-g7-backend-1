@@ -31,5 +31,3 @@
 | :--- | :--- |
 | Nenhum usuário corresponde ao e-mail | Resultado vazio; Backend trata como credencial inválida |
 | Falha na consulta | Falha de persistência tratada pelo Backend |
-
-**Observação:** os nomes da tabela e das colunas são ilustrativos e precisam coincidir com o modelo de dados aprovado.
