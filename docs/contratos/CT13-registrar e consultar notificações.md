@@ -39,4 +39,3 @@
 | Solicitação associada inexistente | Backend trata como referência inválida |
 | Falha ao registrar ou consultar | Falha de persistência tratada pelo Backend |
 
-**Observação:** CT13 é uma operação interna de persistência; o contrato HTTP para consultar notificações é CT07.
