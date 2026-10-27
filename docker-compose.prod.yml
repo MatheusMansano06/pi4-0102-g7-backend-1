@@ -12,7 +12,6 @@ services:
 
   banco:
     image: postgres:15-alpine
-    container_name: archflow_banco_demo
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -30,7 +29,6 @@ services:
 
   backend:
     build: .
-    container_name: archflow_backend_demo
     environment:
       BANCO_URL: jdbc:postgresql://banco:5432/${POSTGRES_DB}
       BANCO_USUARIO: ${POSTGRES_USER}
@@ -45,7 +43,6 @@ services:
 
   frontend:
     build: ../pi4-0102-g7-frontend
-    container_name: archflow_frontend_demo
     ports:
       - "80:80"
     depends_on:
