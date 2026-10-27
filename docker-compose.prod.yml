@@ -1,0 +1,61 @@
+# Ambiente de APRESENTACAO (maquina limpa, card H11.3).
+#
+# Aqui o React e compilado e servido pelo nginx, sem atualizacao automatica.
+# E mais parecido com um sistema de verdade e nao depende do Node ficar rodando.
+#
+#   docker compose -f docker-compose.prod.yml up --build
+#
+# ATENCAO: este arquivo precisa que exista um Dockerfile na raiz do repositorio
+# do frontend. O texto dele esta em docs/pendencias.md, para a Mirele commitar.
+
+services:
+
+  banco:
+    image: postgres:15-alpine
+    container_name: archflow_banco_demo
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - dados_do_banco_demo:/var/lib/postgresql/data
+      - ./banco:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - rede_archflow
+
+  backend:
+    build: .
+    container_name: archflow_backend_demo
+    environment:
+      BANCO_URL: jdbc:postgresql://banco:5432/${POSTGRES_DB}
+      BANCO_USUARIO: ${POSTGRES_USER}
+      BANCO_SENHA: ${POSTGRES_PASSWORD}
+    ports:
+      - "${PORTA_BACKEND}:8080"
+    depends_on:
+      banco:
+        condition: service_healthy
+    networks:
+      - rede_archflow
+
+  frontend:
+    build: ../pi4-0102-g7-frontend
+    container_name: archflow_frontend_demo
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - rede_archflow
+
+volumes:
+  dados_do_banco_demo:
+
+networks:
+  rede_archflow:
+    driver: bridge

@@ -1,0 +1,18 @@
+# Compilado do Java
+target/
+*.class
+
+# Variaveis de ambiente (cada um tem o seu)
+.env
+
+# Arquivos das IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: archflow
+
+  # Os valores depois dos dois-pontos sao o padrao, usado quando a variavel
+  # de ambiente nao existe. No Docker, o compose manda os valores certos.
+  datasource:
+    url: ${BANCO_URL:jdbc:postgresql://localhost:5432/archflow}
+    username: ${BANCO_USUARIO:archflow}
+    password: ${BANCO_SENHA:archflow123}
+
+  jpa:
+    hibernate:
+      # "validate" = o Java confere se as tabelas batem com as classes, mas nao cria
+      # e nao apaga nada. Quem cria as tabelas e o script SQL da pasta banco/.
+      # Ver docs/adr/0005.
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.archflow: DEBUG

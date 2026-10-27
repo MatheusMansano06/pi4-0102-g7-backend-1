@@ -1,0 +1,75 @@
+# Ambiente de DESENVOLVIMENTO (o do dia a dia).
+#
+# Sobe banco + backend + frontend com um comando:
+#   docker compose up
+#
+# O frontend sobe com atualizacao automatica: salvou o arquivo, a tela muda sozinha.
+# As duas pastas precisam estar lado a lado (ver README.md).
+
+services:
+
+  banco:
+    image: postgres:15-alpine
+    container_name: archflow_banco
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${PORTA_BANCO}:5432"
+    volumes:
+      # Guarda os dados entre um "docker compose up" e outro.
+      - dados_do_banco:/var/lib/postgresql/data
+      # Todo arquivo .sql daqui roda sozinho na PRIMEIRA vez que o banco sobe.
+      # Esta pasta e da Lara (ver banco/LEIAME.md).
+      - ./banco:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # O backend so comeca depois que este teste passar.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - rede_archflow
+
+  backend:
+    build: .
+    container_name: archflow_backend
+    environment:
+      BANCO_URL: jdbc:postgresql://banco:5432/${POSTGRES_DB}
+      BANCO_USUARIO: ${POSTGRES_USER}
+      BANCO_SENHA: ${POSTGRES_PASSWORD}
+    ports:
+      - "${PORTA_BACKEND}:8080"
+    depends_on:
+      banco:
+        # Espera o banco ficar pronto de verdade, nao so o container existir.
+        condition: service_healthy
+    networks:
+      - rede_archflow
+
+  frontend:
+    # Nao precisa de Dockerfile no repositorio do front: usamos a imagem do Node
+    # direto e mandamos o comando. Assim a Mirele nao precisa mexer em Docker.
+    image: node:20-alpine
+    container_name: archflow_frontend
+    working_dir: /app
+    volumes:
+      - ../pi4-0102-g7-frontend:/app
+      # Mantem a pasta node_modules dentro do container, separada da maquina.
+      - node_modules_do_front:/app/node_modules
+    command: sh -c "npm install && npm run dev -- --host"
+    ports:
+      - "${PORTA_FRONTEND}:5173"
+    depends_on:
+      - backend
+    networks:
+      - rede_archflow
+
+volumes:
+  dados_do_banco:
+  node_modules_do_front:
+
+networks:
+  rede_archflow:
+    driver: bridge
