@@ -80,20 +80,8 @@ git checkout 51f9923 -- docs/
 os contratos dizem `materialId` e `quantidadeDisponivel`. Como ainda nao ha nenhuma chamada de
 API no front, e barato alinhar agora.
 
-**d) O Compose de apresentacao precisa de um Dockerfile na raiz do repositorio do frontend.**
-O do dia a dia nao precisa de nada. Conteudo para commitar:
-
-```dockerfile
-# Etapa 1: compilar o React.
-FROM node:20-alpine AS compilacao
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# Etapa 2: servir os arquivos prontos pelo nginx.
-FROM nginx:alpine
-COPY --from=compilacao /app/dist /usr/share/nginx/html
-EXPOSE 80
-```
+**d) ~~O Compose de apresentacao precisa de um Dockerfile na raiz do repositorio do frontend.~~**
+Resolvido em 28/10/2026. O `Dockerfile` e o `nginx.conf` estao na raiz do repositorio do
+frontend (PR anadiasxavier/pi4-0102-g7-frontend#1). O nginx serve o React compilado e repassa
+`/api` para o backend por dentro da rede do Docker, entao a versao de apresentacao nao tem CORS,
+qualquer que seja a decisao da pendencia 2. O ambiente do dia a dia nao mudou.

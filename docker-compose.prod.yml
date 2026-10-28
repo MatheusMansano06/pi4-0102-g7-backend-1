@@ -5,8 +5,8 @@
 #
 #   docker compose -f docker-compose.prod.yml up --build
 #
-# ATENCAO: este arquivo precisa que exista um Dockerfile na raiz do repositorio
-# do frontend. O texto dele esta em docs/pendencias.md, para a Mirele commitar.
+# O Dockerfile e o nginx.conf ja estao na raiz do repositorio do frontend. O nginx
+# repassa /api para este backend por dentro da rede, por isso a tela sai na porta 80.
 
 services:
 
