@@ -81,19 +81,9 @@ os contratos dizem `materialId` e `quantidadeDisponivel`. Como ainda nao ha nenh
 API no front, e barato alinhar agora.
 
 **d) O Compose de apresentacao precisa de um Dockerfile na raiz do repositorio do frontend.**
-O do dia a dia nao precisa de nada. Conteudo para commitar:
+O do dia a dia nao precisa de nada. Os dois arquivos prontos para commitar estao em
+`docs/para-o-frontend/` neste repositorio: `Dockerfile` e `nginx.conf`, os dois na raiz do
+repositorio do front.
 
-```dockerfile
-# Etapa 1: compilar o React.
-FROM node:20-alpine AS compilacao
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# Etapa 2: servir os arquivos prontos pelo nginx.
-FROM nginx:alpine
-COPY --from=compilacao /app/dist /usr/share/nginx/html
-EXPOSE 80
-```
+O `nginx.conf` repassa `/api` para o backend por dentro da rede do Docker. Com isso a versao de
+apresentacao nao tem CORS, qualquer que seja a decisao da pendencia 2.
