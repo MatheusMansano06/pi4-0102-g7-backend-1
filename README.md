@@ -63,8 +63,9 @@ Para a demonstracao existe uma versao com o React ja compilado e servido pelo ng
 docker compose -f docker-compose.prod.yml up --build
 ```
 
-Essa versao exige um `Dockerfile` commitado no repositorio do frontend. O conteudo esta em
-`docs/pendencias.md`, secao 5.
+O `Dockerfile` e o `nginx.conf` ja estao commitados na raiz do repositorio do frontend. Nesta
+versao o nginx repassa `/api` para o backend por dentro do Docker, entao a tela fica so em
+http://localhost e nao existe CORS.
 
 ## Organizacao das pastas
 
