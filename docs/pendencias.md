@@ -36,6 +36,25 @@ Saem das decisoes tomadas junto com as telas ja prontas do frontend.
 | `usuarios` | campo `curso` | a barra superior do frontend mostra o curso do aluno |
 | **nova** `sessoes` | token, usuario, validade | onde o token do login fica guardado (ADR 0003) |
 
+A tabela `solicitacoes` ainda nao existe no script, e o H05.1 (fila de atendimento) ja le dela.
+A classe `Solicitacao` do backend espera estas colunas, com estes nomes:
+
+```
+solicitacao_id     identidade, gerada pelo banco
+usuario_id         o aluno que pediu
+material_id        o material pedido
+quantidade         inteiro maior que zero
+status             texto, um de PENDENTE, EM_SEPARACAO, AGUARDANDO_COMPRA,
+                   PRONTO_PARA_RETIRADA, CONCLUIDO, CANCELADO
+criada_em          data e hora da criacao
+atualizada_em      data e hora da ultima troca de status
+previsao_retirada  data e hora, aceita vazio
+observacao         texto, aceita vazio
+```
+
+Enquanto o script nao criar a tabela, o backend compila e os testes passam, mas a aplicacao nao
+sobe: o `ddl-auto: validate` recusa classe sem tabela.
+
 Os scripts ficam em `banco/`. Ver `banco/LEIAME.md`.
 
 ## 4. Mudancas nos contratos - para a Lara e o Luis
