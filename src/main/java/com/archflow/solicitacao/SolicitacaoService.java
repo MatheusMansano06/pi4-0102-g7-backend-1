@@ -22,7 +22,7 @@ public class SolicitacaoService {
     public List<SolicitacaoFilaSaida> listarFila(String perfil, String status) {
         // 1) Quem nao e o responsavel nao passa daqui.
         this.exigirResponsavel(perfil);
-        // 2) Sem status no pedido da tela, a fila volta inteira.
+        // 2) Sem status no pedido da tela, a fila volta sem os pedidos concluidos.
         List<Solicitacao> encontradas = this.procurar(status);
         // 3) A tela recebe so os campos do contrato, nunca a entidade.
         List<SolicitacaoFilaSaida> fila = new ArrayList<SolicitacaoFilaSaida>();
@@ -45,10 +45,11 @@ public class SolicitacaoService {
         }
     }
 
-    // Status em branco nao e erro: significa a fila inteira.
+    // Status em branco nao e erro: significa a fila do que ainda falta atender,
+    // por isso o pedido concluido fica de fora enquanto ninguem pedir por ele.
     private List<Solicitacao> procurar(String status) {
         if (status == null || status.trim().isEmpty()) {
-            return this.solicitacaoRepository.findAllByOrderByCriadaEmAsc();
+            return this.solicitacaoRepository.findByStatusNotOrderByCriadaEmAsc(StatusSolicitacao.CONCLUIDO);
         }
         return this.solicitacaoRepository.findByStatusOrderByCriadaEmAsc(this.converterStatus(status));
     }
