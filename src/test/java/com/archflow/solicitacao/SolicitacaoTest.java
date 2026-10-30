@@ -1,7 +1,9 @@
 package com.archflow.solicitacao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.archflow.material.Material;
@@ -61,5 +63,56 @@ public class SolicitacaoTest {
 
         assertEquals(StatusSolicitacao.EM_SEPARACAO, pedido.getStatus());
         assertNotNull(pedido.getAtualizadaEm());
+    }
+
+    private Solicitacao pedidoEm(StatusSolicitacao status) {
+        Solicitacao pedido = new Solicitacao(12L, this.madeira(), 2, null);
+        pedido.setStatus(status);
+        return pedido;
+    }
+
+    @Test
+    public void pedidoPendenteVaiParaSeparacaoCompraOuCancelamento() {
+        Solicitacao pedido = this.pedidoEm(StatusSolicitacao.PENDENTE);
+
+        assertTrue(pedido.podeIrPara(StatusSolicitacao.EM_SEPARACAO));
+        assertTrue(pedido.podeIrPara(StatusSolicitacao.AGUARDANDO_COMPRA));
+        assertTrue(pedido.podeIrPara(StatusSolicitacao.CANCELADO));
+    }
+
+    @Test
+    public void pedidoPendenteNaoPulaDireitoParaORetirarOuConcluir() {
+        Solicitacao pedido = this.pedidoEm(StatusSolicitacao.PENDENTE);
+
+        assertFalse(pedido.podeIrPara(StatusSolicitacao.PRONTO_PARA_RETIRADA));
+        assertFalse(pedido.podeIrPara(StatusSolicitacao.CONCLUIDO));
+    }
+
+    @Test
+    public void pedidoEmSeparacaoVoltaParaPendenteParaCorrigirEngano() {
+        Solicitacao pedido = this.pedidoEm(StatusSolicitacao.EM_SEPARACAO);
+
+        assertTrue(pedido.podeIrPara(StatusSolicitacao.PENDENTE));
+        assertTrue(pedido.podeIrPara(StatusSolicitacao.PRONTO_PARA_RETIRADA));
+        assertFalse(pedido.podeIrPara(StatusSolicitacao.CONCLUIDO));
+    }
+
+    @Test
+    public void somentePedidoProntoParaRetiradaPodeSerConcluido() {
+        Solicitacao pedido = this.pedidoEm(StatusSolicitacao.PRONTO_PARA_RETIRADA);
+
+        assertTrue(pedido.podeIrPara(StatusSolicitacao.CONCLUIDO));
+        assertFalse(this.pedidoEm(StatusSolicitacao.AGUARDANDO_COMPRA)
+                .podeIrPara(StatusSolicitacao.CONCLUIDO));
+    }
+
+    @Test
+    public void pedidoFechadoNaoMudaMaisDeStatus() {
+        Solicitacao concluido = this.pedidoEm(StatusSolicitacao.CONCLUIDO);
+        Solicitacao cancelado = this.pedidoEm(StatusSolicitacao.CANCELADO);
+
+        assertFalse(concluido.podeIrPara(StatusSolicitacao.EM_SEPARACAO));
+        assertFalse(concluido.podeIrPara(StatusSolicitacao.CANCELADO));
+        assertFalse(cancelado.podeIrPara(StatusSolicitacao.PENDENTE));
     }
 }

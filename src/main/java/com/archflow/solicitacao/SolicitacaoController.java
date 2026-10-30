@@ -2,6 +2,9 @@ package com.archflow.solicitacao;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,5 +30,14 @@ public class SolicitacaoController {
             @RequestHeader(name = "X-Perfil", required = false) String perfil,
             @RequestParam(required = false) String status) {
         return this.solicitacaoService.listarFila(perfil, status);
+    }
+
+    // CT06: PATCH /api/solicitacoes/{solicitacaoId}/status
+    @PatchMapping("/{solicitacaoId}/status")
+    public SolicitacaoStatusSaida atualizarStatus(
+            @RequestHeader(name = "X-Perfil", required = false) String perfil,
+            @PathVariable Long solicitacaoId,
+            @RequestBody SolicitacaoStatusEntrada entrada) {
+        return this.solicitacaoService.atualizarStatus(perfil, solicitacaoId, entrada);
     }
 }

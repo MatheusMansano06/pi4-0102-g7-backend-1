@@ -125,6 +125,49 @@ public class Solicitacao {
         this.observacao = observacao;
     }
 
+    // CT06: a tabela de transicoes da secao 4 de docs/pendencias.md diz para
+    // onde o pedido pode ir a partir de onde ele esta. As setas que voltam
+    // existem para o responsavel corrigir engano.
+    public boolean podeIrPara(StatusSolicitacao novoStatus) {
+        return this.estaNaLista(novoStatus, this.destinosPermitidos());
+    }
+
+    private StatusSolicitacao[] destinosPermitidos() {
+        if (this.status == StatusSolicitacao.PENDENTE) {
+            return new StatusSolicitacao[] { StatusSolicitacao.EM_SEPARACAO,
+                    StatusSolicitacao.AGUARDANDO_COMPRA, StatusSolicitacao.CANCELADO };
+        }
+        if (this.status == StatusSolicitacao.EM_SEPARACAO) {
+            return new StatusSolicitacao[] { StatusSolicitacao.PRONTO_PARA_RETIRADA,
+                    StatusSolicitacao.AGUARDANDO_COMPRA, StatusSolicitacao.PENDENTE,
+                    StatusSolicitacao.CANCELADO };
+        }
+        return this.destinosDepoisDaSeparacao();
+    }
+
+    // Pedido CONCLUIDO ou CANCELADO esta fechado: nao tem para onde ir, e por
+    // isso a lista dele volta vazia.
+    private StatusSolicitacao[] destinosDepoisDaSeparacao() {
+        if (this.status == StatusSolicitacao.AGUARDANDO_COMPRA) {
+            return new StatusSolicitacao[] { StatusSolicitacao.EM_SEPARACAO,
+                    StatusSolicitacao.CANCELADO };
+        }
+        if (this.status == StatusSolicitacao.PRONTO_PARA_RETIRADA) {
+            return new StatusSolicitacao[] { StatusSolicitacao.CONCLUIDO,
+                    StatusSolicitacao.EM_SEPARACAO, StatusSolicitacao.CANCELADO };
+        }
+        return new StatusSolicitacao[0];
+    }
+
+    private boolean estaNaLista(StatusSolicitacao novoStatus, StatusSolicitacao[] permitidos) {
+        for (int i = 0; i < permitidos.length; i++) {
+            if (permitidos[i] == novoStatus) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "Pedido de " + this.quantidade + " " + this.material.getNome() + " (" + this.status + ")";
