@@ -3,8 +3,10 @@ package com.archflow.solicitacao;
 import com.archflow.comum.AcessoNegadoException;
 import com.archflow.comum.CodigosDeErro;
 import com.archflow.comum.NaoAutenticadoException;
+import com.archflow.comum.NaoEncontradoException;
 import com.archflow.comum.NegocioException;
 import com.archflow.comum.PerfilUsuario;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,64 @@ public class SolicitacaoService {
             fila.add(new SolicitacaoFilaSaida(solicitacao));
         }
         return fila;
+    }
+
+    // CT06: so o responsavel muda o status, e so pelos caminhos que a tabela
+    // de transicoes permite.
+    public SolicitacaoStatusSaida atualizarStatus(String perfil, Long solicitacaoId,
+            SolicitacaoStatusEntrada entrada) {
+        // 1) Quem nao e o responsavel nao passa daqui.
+        this.exigirResponsavel(perfil);
+        // 2) O status pedido tem que ser um dos nomes do contrato.
+        StatusSolicitacao novoStatus = this.converterStatus(entrada.getStatus());
+        // 3) Previsao no passado nao serve para avisar o aluno.
+        this.exigirPrevisaoNoFuturo(entrada.getPrevisaoRetirada());
+        // 4) O pedido tem que existir e aceitar esse caminho.
+        Solicitacao solicitacao = this.buscar(solicitacaoId);
+        this.exigirTransicaoPermitida(solicitacao, novoStatus);
+        // 5) A entidade marca a hora da mudanca sozinha quando o status troca.
+        solicitacao.setStatus(novoStatus);
+        this.guardarPrevisao(solicitacao, entrada.getPrevisaoRetirada());
+        return new SolicitacaoStatusSaida(this.solicitacaoRepository.save(solicitacao));
+    }
+
+    private Solicitacao buscar(Long solicitacaoId) {
+        Solicitacao solicitacao = this.solicitacaoRepository.findBySolicitacaoId(solicitacaoId);
+        if (solicitacao == null) {
+            throw new NaoEncontradoException(CodigosDeErro.SOLICITACAO_NAO_ENCONTRADA,
+                    "O pedido " + solicitacaoId + " não existe.");
+        }
+        return solicitacao;
+    }
+
+    // A mensagem diz de onde para onde o pedido ia, porque o responsavel ve a
+    // fila inteira e precisa saber qual pedido recusou a mudanca.
+    private void exigirTransicaoPermitida(Solicitacao solicitacao, StatusSolicitacao novoStatus) {
+        if (solicitacao.podeIrPara(novoStatus)) {
+            return;
+        }
+        throw new NegocioException(CodigosDeErro.STATUS_INVALIDO,
+                "Um pedido " + solicitacao.getStatus() + " não pode ir para " + novoStatus + ".");
+    }
+
+    // A previsao e opcional no contrato: sem ela a mudanca de status vale.
+    private void exigirPrevisaoNoFuturo(LocalDateTime previsaoRetirada) {
+        if (previsaoRetirada == null) {
+            return;
+        }
+        if (previsaoRetirada.isBefore(LocalDateTime.now())) {
+            throw new NegocioException(CodigosDeErro.PREVISAO_INVALIDA,
+                    "A previsão de retirada não pode ser no passado.");
+        }
+    }
+
+    // Pedido que chega sem previsao mantem a que ja tinha, para a mudanca de
+    // status nao apagar a data que o aluno ja viu no painel de prazos.
+    private void guardarPrevisao(Solicitacao solicitacao, LocalDateTime previsaoRetirada) {
+        if (previsaoRetirada == null) {
+            return;
+        }
+        solicitacao.setPrevisaoRetirada(previsaoRetirada);
     }
 
     // Perfil em branco significa que ninguem se identificou. O aluno se

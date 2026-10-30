@@ -7,11 +7,12 @@ import com.archflow.comum.AcessoNegadoException;
 import com.archflow.comum.CodigosDeErro;
 import com.archflow.comum.NaoAutenticadoException;
 import com.archflow.comum.NegocioException;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 
-// Confere as recusas do CT04. O repositorio entra como null de proposito:
-// nos tres casos o metodo recusa antes de chegar ao banco, e um teste que
-// nao toca no banco roda na CI em qualquer maquina.
+// Confere as recusas do CT04 e do CT06. O repositorio entra como null de
+// proposito: em todos estes casos o metodo recusa antes de chegar ao banco, e
+// um teste que nao toca no banco roda na CI em qualquer maquina.
 public class SolicitacaoServiceTest {
 
     private SolicitacaoService servico() {
@@ -45,6 +46,55 @@ public class SolicitacaoServiceTest {
             fail("O status ENTREGUE nao existe e nao podia ter sido aceito.");
         } catch (NegocioException erro) {
             assertEquals(CodigosDeErro.STATUS_INVALIDO, erro.getCodigo());
+        }
+    }
+
+    private SolicitacaoStatusEntrada pedidoDeMudanca(String status, LocalDateTime previsao) {
+        SolicitacaoStatusEntrada entrada = new SolicitacaoStatusEntrada();
+        entrada.setStatus(status);
+        entrada.setPrevisaoRetirada(previsao);
+        return entrada;
+    }
+
+    @Test
+    public void semPerfilAMudancaDeStatusRecusaPorFaltaDeAutenticacao() {
+        try {
+            this.servico().atualizarStatus(null, 1L, this.pedidoDeMudanca("EM_SEPARACAO", null));
+            fail("O status nao podia ter mudado para quem nao se identificou.");
+        } catch (NaoAutenticadoException erro) {
+            assertEquals(CodigosDeErro.NAO_AUTENTICADO, erro.getCodigo());
+        }
+    }
+
+    @Test
+    public void alunoNaoMudaOStatusDoPedido() {
+        try {
+            this.servico().atualizarStatus("ALUNO", 1L, this.pedidoDeMudanca("EM_SEPARACAO", null));
+            fail("O aluno nao podia ter mudado o status de um pedido.");
+        } catch (AcessoNegadoException erro) {
+            assertEquals(CodigosDeErro.ACESSO_NEGADO, erro.getCodigo());
+        }
+    }
+
+    @Test
+    public void statusForaDaListaDoContratoNaoMudaNada() {
+        try {
+            this.servico().atualizarStatus("RESPONSAVEL", 1L, this.pedidoDeMudanca("ENTREGUE", null));
+            fail("O status ENTREGUE nao existe e nao podia ter sido aceito.");
+        } catch (NegocioException erro) {
+            assertEquals(CodigosDeErro.STATUS_INVALIDO, erro.getCodigo());
+        }
+    }
+
+    @Test
+    public void previsaoDeRetiradaNoPassadoERecusada() {
+        LocalDateTime ontem = LocalDateTime.now().minusDays(1);
+        try {
+            this.servico().atualizarStatus("RESPONSAVEL", 1L,
+                    this.pedidoDeMudanca("PRONTO_PARA_RETIRADA", ontem));
+            fail("Uma previsao de retirada no passado nao podia ter sido aceita.");
+        } catch (NegocioException erro) {
+            assertEquals(CodigosDeErro.PREVISAO_INVALIDA, erro.getCodigo());
         }
     }
 }
