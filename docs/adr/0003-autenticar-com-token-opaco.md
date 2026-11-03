@@ -1,7 +1,8 @@
 # ADR 0003: proposta de token opaco guardado no banco
 
-**Status:** proposto; abordagem ainda não escolhida pelo grupo. Esclarecido na
-revisão #1136 e confirmado pelo usuário em 03/11: registrar propostas pendentes.
+**Status:** proposta não adotada, substituída pela [decisão de usar Keycloak](0007-adotar-keycloak.md), confirmada pelo usuário após consultar o grupo em 03/11/2026.
+
+O conteúdo abaixo preserva a proposta anterior para rastreabilidade; não orienta a implementação atual.
 
 **Contexto:** CT01 prevê uma credencial de acesso e perfis. É necessário definir
 emissão, validação, validade e encerramento. Token é uma credencial de transporte;

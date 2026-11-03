@@ -1,7 +1,7 @@
 # Autenticação, identidade e rotas — proposta #1136
 
 **Proposta em revisão**, vinculada ao [alinhamento H01.4](H01.4-alinhamento.md).
-Transportar um token não decide como ele será emitido ou validado.
+A equipe escolheu Keycloak em 03/11/2026; ver [ADR 0007](../adr/0007-adotar-keycloak.md). O fluxo de integração e os demais detalhes abaixo ainda precisam de definição.
 
 ## Transporte proposto
 
@@ -17,7 +17,7 @@ Não prescrever UUID, JWT ou tabela sessoes como decisões já aceitas.
 
 | CT | Método e rota | Acesso alvo |
 | --- | --- | --- |
-| CT01 | POST /api/auth/login | Público; recebe credenciais |
+| CT01 | Fluxo de login a revisar com Keycloak | Sem token prévio; POST anterior não confirmado |
 | CT02 | GET /api/materiais | ALUNO ou RESPONSAVEL autenticado |
 | CT03 | POST /api/solicitacoes | ALUNO autenticado, dono do novo pedido |
 | CT04 | GET /api/solicitacoes/fila | RESPONSAVEL |
@@ -52,12 +52,17 @@ um valor livre enviado pela tela. X-Perfil não autentica e deve sair quando H02
 for integrado. O redirecionamento da tela para /admin não substitui autorização
 da API.
 
-## Decisão de implementação pendente
+## Provedor decidido; integração pendente
 
-O ADR 0003 propõe login local, hash e token opaco persistido. O detalhamento
-recebido relata Keycloak como alternativa permitida para login. Antes de #1138 e
-H02.2, registrar uma escolha única com a equipe e ajustar o CT01 caso o provedor
-altere o fluxo. Esta documentação não instala nem autoriza dependências novas.
+Keycloak foi escolhido pelo grupo. O ADR 0003 de login local/token opaco foi
+substituído pelo ADR 0007. Não implementar a validação própria de senhas nem
+criar sessoes com base naquela proposta.
+
+CT01 e CT10 precisam ser ajustados ao fluxo de integração antes de #1138/H02.2.
+Não assumir que o React enviará a senha ao backend. Os erros de login acima são
+referência da ficha anterior: sua origem e seu mapeamento precisam de revisão.
+Configuração do provedor, perfis, vínculo com usuarioId, transporte, validade,
+renovação, armazenamento e logout continuam pendentes. Esta revisão é documental.
 
 Critérios de integração: login real de aluno e responsável; credencial enviada
 nas rotas protegidas; ausência/invalidade recusadas; acesso ao registro de outro

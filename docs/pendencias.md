@@ -4,7 +4,7 @@ O que ainda nao esta decidido, e com quem.
 
 Atualização #1136: a revisão funcional está em
 [H01.4-alinhamento](especificacao/H01.4-alinhamento.md). As propostas de autenticação,
-unidades e parâmetros aguardam validação da equipe. A lista abaixo não comprova
+unidades e parâmetros aguardam validação da equipe. Keycloak foi escolhido em 03/11; os detalhes de integração seguem pendentes ([ADR 0007](adr/0007-adotar-keycloak.md)). A lista abaixo não comprova
 que os campos ou as tabelas já estejam implementados.
 
 ## 1. Para o professor
@@ -13,9 +13,7 @@ que os campos ou as tabelas já estejam implementados.
   entrega 15/11 e o escopo fala em doze semanas e dezembro. Sao tres prazos diferentes.
 - **Quem e o PO?** Os cards H12 e H13 dizem "so entra no quadro se o PO confirmar", e o grupo
   nao definiu essa pessoa. Os dois cards estao parados por isso.
-- **Qual abordagem de autenticação?** O detalhamento recebido relata Keycloak como
-  alternativa permitida para login. A equipe ainda precisa escolher entre essa
-  opção e o token opaco proposto no ADR 0003; nenhuma dependência nova foi aprovada.
+- **Autenticação definida pelo grupo:** Keycloak, confirmado pelo usuário em 03/11. Detalhar integração, perfis e vínculo com os usuários de domínio antes de implementar; a proposta própria do ADR 0003 foi substituída.
 
 ## 2. Decisao do grupo que ainda falta
 
@@ -42,7 +40,7 @@ Saem das decisoes tomadas junto com as telas ja prontas do frontend.
 | política de parâmetros | aceitos e obrigatórios por material | proposta de metadados a validar; não inferir regras do texto especificacao |
 | `solicitacoes` | status `CANCELADO` | sem ele, pedido errado ou desistencia ficam presos na fila para sempre |
 | `usuarios` | campo `curso` | a barra superior do frontend mostra o curso do aluno |
-| **condicional** `sessoes` | token, usuario, validade | somente se a proposta de token opaco do ADR 0003 for escolhida |
+| identidade Keycloak ↔ usuarioId | definir vínculo com usuário de domínio | Keycloak escolhido; sessoes e senhaHash da proposta própria não são requisitos aprovados |
 
 A tabela `solicitacoes` ainda nao existe no script, e o H05.1 (fila de atendimento) ja le dela.
 A classe `Solicitacao` do backend espera estas colunas, com estes nomes:
@@ -74,12 +72,12 @@ de validação; a lista completa está em [requisitos-banco](especificacao/requi
 
 | Contrato | Mudanca |
 | :--- | :--- |
-| CT01 | proposta de transporte Bearer documentada; formato/abordagem de emissão ainda a decidir, sem impor UUID |
+| CT01 | proposta de transporte Bearer documentada; Keycloak escolhido; revisar fluxo e rota antigos, sem impor emissão própria |
 | CT02 | incluir `especificacao` e `statusEstoque` (DISPONIVEL, BAIXO, INDISPONIVEL) |
 | CT03/CT12 | manter dimensao, diametro e observacao no pedido; proposta em mm e adaptação do modal em revisão #1136 |
 | CT06 | incluir `CANCELADO` na tabela de transicoes |
 | CT10 | incluir `curso` |
-| novo | logout e invalidação conforme a abordagem de autenticação que for escolhida |
+| novo | logout e invalidação conforme a integração Keycloak a definir |
 | todos | a coluna de numero HTTP de cada erro, conforme o ADR 0004 |
 
 A **tabela de transições do modelo atual** foi incluída no CT06 nesta revisão.

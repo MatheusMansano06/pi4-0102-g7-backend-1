@@ -1,5 +1,7 @@
 # CT10: consultarUsuario
 
+> Revisão necessária após a escolha do [Keycloak](../adr/0007-adotar-keycloak.md). A ficha abaixo preserva o modelo anterior de login local; senhaHash e consulta por e-mail não são requisitos aprovados da integração. Definir vínculo entre identidade autenticada e usuarioId de domínio; ausência desse vínculo não significa automaticamente senha inválida.
+
 | Linha | Valor |
 | :--- | :--- |
 | Fronteira | Backend ↔ Banco de dados (interno; não é HTTP) |

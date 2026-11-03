@@ -7,14 +7,14 @@ O Java permanece em ddl-auto: validate.
 
 | Conjunto | Dados esperados | Diferença identificada / alinhamento |
 | --- | --- | --- |
-| usuarios | usuarioId, nome, email, senhaHash, perfil, ativo; curso a alinhar no CT10 | Autenticação local depende desses dados; senha nunca em texto puro |
+| usuarios (domínio) | usuarioId, nome, email, perfil, ativo; curso e vínculo com identidade Keycloak a alinhar | Keycloak escolhido; senhaHash da proposta local não é requisito aprovado. Definir vínculo e origem dos dados/perfis com a equipe |
 | materiais | materialId, nome, descricao, especificacao, quantidadeDisponivel, quantidadeMinima, ativo | Entidade já contém esses campos; não há SQL oficial na main |
 | Política de parâmetros do material | Quais parâmetros aceita e exige | Proposta parametrosAceitos/parametrosObrigatorios; decidir colunas ou relação própria sem inferir política do texto |
 | Horário do estoque | materiais.atualizadaEm, nome físico sugerido atualizada_em | Ainda não existe na entidade; gravar junto com o saldo; alinhar início/backfill, precisão e fuso |
 | solicitacoes | solicitacaoId, usuarioId, materialId, quantidade, status, criadaEm, atualizadaEm, previsaoRetirada | Entidade parcial já contém; referências a usuário/material e estado PENDENTE na criação |
 | Parâmetros do pedido | dimensao, diametro, observacao | dimensao/diametro faltam na entidade; observacao existe; CT03 e CT12 precisam preservar os três |
 | notificacoes | notificacaoId, usuarioId, solicitacaoId opcional, tipo, mensagem, criadaEm, lida | Referência CT13; parte do detalhamento de notificações com a responsável H09.1 |
-| sessoes, somente se token opaco for aprovado | Token, usuário associado e validade | Condicional ao ADR 0003; não criar por suposição se Keycloak for escolhido |
+| Autenticação própria (proposta superada) | senhaHash e sessoes do antigo ADR 0003 | Não criar por causa da proposta antiga: Keycloak foi escolhido. Revisar campos existentes antes de qualquer migração |
 
 Regras que os scripts/modelos devem representar conforme a decisão validada:
 

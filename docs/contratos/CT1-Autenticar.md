@@ -9,7 +9,9 @@
 | Quem responde | Backend API |
 | Atende | E1 |
 | Como chamar | `POST /api/auth/login` |
-| Autenticação | Login público, sem token prévio; abordagem de emissão ainda pendente |
+| Autenticação | Login público, sem token prévio; Keycloak escolhido; fluxo e rota anteriores a revisar |
+
+> **Decisão posterior, 03/11/2026:** Keycloak escolhido pelo grupo ([ADR 0007](../adr/0007-adotar-keycloak.md)). A rota, as entradas, as saídas e os erros abaixo preservam a ficha anterior; precisam ser revisados conforme o fluxo de integração. Não implementar recebimento de senha ou emissão própria de token a partir desta ficha.
 
 ## Entrada
 
@@ -40,11 +42,10 @@ Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/
 
 ## Integração e limites da proposta
 
-Na hipótese de login local, CT10 busca por e-mail e fornece senhaHash para validar
-a senha, além do estado ativo. A resposta nunca inclui senha ou hash. Keycloak é
-alternativa ainda não escolhida; se adotado, revisar o fluxo de emissão e este
-contrato antes de implementar #1138/H02.2. A revisão não fixa UUID nem cria sessoes.
+Keycloak é o provedor confirmado. A proposta de CT10 fornecer senhaHash para
+validar senha no backend foi superada. Definir o vínculo da identidade autenticada
+com o usuarioId de domínio, os perfis e os dados retornados à interface.
 
-Sucesso proposto: HTTP 200 com usuarioId, nome, perfil e token. Nas chamadas CT02–CT09,
-o frontend envia `Authorization: Bearer <token>`. Regras de validade, renovação,
-logout e armazenamento da credencial continuam pendentes no alinhamento H01.4.
+O transporte Bearer, a validade, a renovação, o logout e o armazenamento continuam
+em revisão em [autenticação](../especificacao/autenticacao.md). A escolha do
+provedor não confirma o POST /api/auth/login nem o formato antigo de sucesso.
