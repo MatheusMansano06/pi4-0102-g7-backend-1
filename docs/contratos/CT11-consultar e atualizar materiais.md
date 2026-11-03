@@ -1,5 +1,7 @@
 # CT11: consultar e atualizar materiais/estoque
 
+> Revisão #1136: contrato alvo em revisão; propostas e diferenças para o código estão em [H01.4](../especificacao/H01.4-alinhamento.md).
+
 | Linha | Valor |
 | :--- | :--- |
 | Fronteira | Backend ↔ Banco de dados (interno; não é HTTP) |
@@ -34,3 +36,18 @@
 | Quantidade inválida | Backend rejeita a atualização com `QUANTIDADE_INVALIDA` |
 | Falha de leitura ou gravação | Falha de persistência tratada pelo Backend |
 
+## Campos necessários para conciliar CT02, CT03 e CT05
+
+| Campo adicional na consulta interna | Situação / regra |
+| --- | --- |
+| especificacao, quantidadeMinima, ativo | Já existem na entidade Material |
+| parametrosAceitos, parametrosObrigatorios | Metadados propostos, política e armazenamento a validar |
+| atualizadaEm | Persistir junto da atualização do saldo, não gerar só na resposta |
+
+statusEstoque é derivado do saldo e do mínimo, sem exigir coluna própria.
+Os parâmetros aceitos/obrigatórios são consultados para validar a criação do pedido;
+não serão inferidos da descrição. Veja [materiais e pedidos](../especificacao/materiais-e-pedidos.md).
+Este contrato é interno: a identidade/permissão já foi conferida na camada de API;
+não é um endpoint que recebe Authorization diretamente. Falha de gravação não
+pode ser apresentada como sucesso em CT05. Tipos físicos e regras de migração
+seguem para [alinhamento com o banco](../especificacao/requisitos-banco.md).

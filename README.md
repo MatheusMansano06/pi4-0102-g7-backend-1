@@ -94,6 +94,10 @@ inteira sem procurar em outro lugar.
 
 ## Como trabalhamos
 
+A revisão funcional em andamento do card #1136 está em
+[H01.4 — alinhamento de contratos, telas e banco](docs/especificacao/H01.4-alinhamento.md).
+As propostas pendentes não devem ser tratadas como decisões já aceitas ou código pronto.
+
 - Uma branch por card do OpenProject, com o nome do card: `h05-listar-fila`.
 - Antes de escrever codigo, leia `docs/convencoes-codigo.md`.
 - Toda decisao que muda o rumo do projeto vira um arquivo em `docs/adr/`.

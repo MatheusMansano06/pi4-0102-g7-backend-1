@@ -1,15 +1,29 @@
-# ADR 0003: autenticar com token opaco guardado no banco
+# ADR 0003: proposta de token opaco guardado no banco
 
-**Status:** proposto (aguardando aprovacao do grupo)
+**Status:** proposto; abordagem ainda não escolhida pelo grupo. Esclarecido na
+revisão #1136 e confirmado pelo usuário em 03/11: registrar propostas pendentes.
 
-**Contexto:** O CT01 devolve um campo chamado `token`, com o exemplo "token de sessao". As duas palavras aparecem no mesmo lugar e nenhum documento do projeto decide entre as duas coisas, que sao diferentes: na sessao o servidor guarda quem esta logado e o navegador leva um cookie sozinho; no token o servidor nao guarda nada e o frontend envia a credencial a cada chamada. O frontend em React roda numa porta diferente da API, o que torna o uso de cookie mais trabalhoso e expoe o sistema a CSRF.
+**Contexto:** CT01 prevê uma credencial de acesso e perfis. É necessário definir
+emissão, validação, validade e encerramento. Token é uma credencial de transporte;
+pode ter estado no servidor. Um token opaco persistido não é uma solução sem estado.
 
-**Decisao:** Autenticar por token opaco. No login o backend gera um UUID, grava numa tabela `sessoes` junto com o usuario e a validade, e devolve esse valor no campo `token` do CT01. O frontend envia o token em cada requisicao e o backend confere na tabela antes de atender.
+**Proposta original, ainda não aprovada:** no login local, conferir o hash da senha
+e a conta ativa; emitir token opaco, registrar usuário e validade e devolver a
+credencial ao frontend. UUID era o formato sugerido, não uma exigência já aceita.
+Essa opção precisa da tabela sessoes, além de usuarios. A conferência de token
+e perfil pertence ao H02.2; a operação de login do Luis é H02.1/#1138.
 
-**Alternativas consideradas:**
-- JWT: descartado porque exige biblioteca externa (jjwt) que nao faz parte do material da disciplina, e porque um token assinado nao pode ser revogado sem guardar estado assim mesmo.
-- Sessao com cookie e Spring Security: descartado porque contradiz o campo `token` do CT01, exige configuracao extra de CORS com credenciais e abre risco de CSRF.
+**Alternativa a avaliar:** o detalhamento recebido relata Keycloak como recomendação
+permitida pelo professor para login, com Spring Security/OAuth2 nessa parte. Isso
+não escolhe a alternativa nem autoriza adicionar dependências por esta revisão.
+Se adotada, revisar o fluxo de CT01/CT10 e a divisão de H02.1/H02.2 antes de codificar.
 
-**Consequencias:**
-- Positivas: nao depende de biblioteca de fora; o logout funciona de verdade, apagando a linha da tabela; nao ha risco de CSRF porque nada viaja automatico no navegador; a conferencia do token cabe num interceptor escrito em Java puro, usando `interface` e `implements`, que a disciplina ensina.
-- Negativas: cada requisicao faz uma consulta a mais no banco; a tabela `sessoes` precisa ser criada pela Lara; sessoes vencidas precisam ser limpas em algum momento.
+**Transporte proposto, comum à revisão:** `Authorization: Bearer <token>` nas rotas
+CT02–CT09. Ver [matriz de autenticação](../especificacao/autenticacao.md). Cabeçalho
+de transporte e mecanismo de emissão são decisões distintas. Cookie, armazenamento,
+renovação e logout não estão aprovados por este ADR.
+
+**Consequências condicionais:** a opção opaca faz consultas à sessão e precisa de
+política de expiração/invalidação; a opção de provedor exige sua configuração e
+integração. Não prometer ausência de riscos só por escolher token. Não implementar
+ambas simultaneamente nem tratar o X-Perfil atual como autenticação real.
