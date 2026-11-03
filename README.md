@@ -16,6 +16,11 @@ Projeto Integrador IV - PUC-Campinas - Turma 0102 - Grupo 7.
 
 Precisa ter **Docker** instalado. Nao precisa de Java nem de Maven: o Docker compila tudo.
 
+Se os scripts SQL ainda nao foram entregues, comece por
+[preparar o Docker sem banco pronto](docs/DOCKER-SEM-BANCO.md). Ja e possivel
+executar os testes em container e conferir um PostgreSQL vazio e isolado. A API
+completa continua dependendo das tabelas; o healthcheck do banco nao as valida.
+
 **1.** Clone os dois repositorios **lado a lado**, numa pasta qualquer:
 
 ```bash
@@ -52,7 +57,18 @@ Pronto. Fica disponivel em:
 | API | http://localhost:8080/api |
 | Banco | localhost:5432 |
 
-Para parar, `Ctrl+C`. Para parar e apagar os dados do banco, `docker compose down -v`.
+Para parar, `Ctrl+C`. Para remover os containers preservando os dados, use
+`docker compose down`. A opcao `-v` tambem apaga os volumes e seus dados; nao a
+utilize como procedimento habitual de atualizacao dos scripts.
+
+## Testes sem banco ou frontend
+
+```bash
+docker compose -p archflow-testes -f docker-compose.testes.yml run --build --rm testes
+```
+
+Executa a suite da branch atual sem iniciar a API, sem portas publicadas e sem
+depender de `.env`. Detalhes e limites em [DOCKER-SEM-BANCO.md](docs/DOCKER-SEM-BANCO.md).
 
 ## Versao de apresentacao
 

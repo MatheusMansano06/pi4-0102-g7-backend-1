@@ -1,0 +1,7 @@
+# Roda a suite do backend sem banco, frontend ou Java instalado na maquina.
+# docker compose -p archflow-testes -f docker-compose.testes.yml run --build --rm testes
+services:
+  testes:
+    build:
+      context: .
+      target: testes

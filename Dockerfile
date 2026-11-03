@@ -11,6 +11,11 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn clean package -DskipTests -B
 
+# Testes sem PostgreSQL nem frontend. Reaproveita a compilacao acima.
+# Usado somente quando o Compose de testes pede o target "testes".
+FROM compilacao AS testes
+CMD ["mvn", "-B", "test"]
+
 # Etapa 2: rodar.
 # A imagem final leva so o Java e o programa compilado, sem o Maven. Fica bem menor.
 FROM eclipse-temurin:17-jre

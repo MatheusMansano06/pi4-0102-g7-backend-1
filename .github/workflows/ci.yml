@@ -30,3 +30,24 @@ jobs:
 
       - name: Compilar e rodar os testes
         run: mvn -B test
+
+  docker:
+    name: Conferir ambiente Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Baixar o codigo
+        uses: actions/checkout@v4
+
+      - name: Conferir os arquivos Compose
+        run: |
+          docker compose --env-file .env.example config --quiet
+          docker compose --env-file .env.example -f docker-compose.prod.yml config --quiet
+          docker compose -f docker-compose.testes.yml config --quiet
+
+      - name: Compilar a imagem de testes
+        run: docker build --target testes -t archflow-testes .
+
+      - name: Rodar os testes no container
+        run: docker run --rm archflow-testes
