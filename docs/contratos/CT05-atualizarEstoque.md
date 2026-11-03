@@ -23,6 +23,18 @@ Exemplo do corpo JSON:
 }
 ```
 
+A operação substitui o saldo atual pelo valor informado: saldo 10 com entrada 24
+resulta em 24, não em 34. Zero é válido. Campo ausente, `null`, fração, texto,
+booleano e valores fora do intervalo de um inteiro Java são recusados; o backend
+não arredonda nem converte texto em quantidade.
+
+### Estado da implementação
+
+A rota utiliza temporariamente `X-Perfil: RESPONSAVEL`, como a fila e a alteração
+de status. Esse cabeçalho é informado pelo próprio cliente e **não autentica o
+usuário**. A ligação com a sessão/token do H02.2 permanece pendente; a operação
+não deve ser considerada protegida para uso real antes dessa integração.
+
 ## Saída
 
 | Campo | Tipo | Obrigatório | Exemplo |
@@ -31,12 +43,19 @@ Exemplo do corpo JSON:
 | quantidadeDisponivel | inteiro | sim | 24 |
 | atualizadaEm | data e hora (ISO 8601) | sim | 2026-10-13T12:05:00 |
 
+Resposta de sucesso: HTTP 200. `atualizadaEm` informa o horário da operação após
+a gravação, sem histórico persistido de alterações nem coluna nova no banco.
+
 ## Erros
 
-| Quando | O que volta |
-| :--- | :--- |
-| Usuário sem autenticação | Erro `NAO_AUTENTICADO` |
-| Perfil diferente de RESPONSAVEL | Erro `ACESSO_NEGADO` |
-| Material inexistente | Erro `MATERIAL_NAO_ENCONTRADO` |
-| Quantidade negativa ou inválida | Erro `QUANTIDADE_INVALIDA` |
-| Falha ao gravar | Erro `ERRO_INTERNO` |
+| Quando | HTTP | O que volta |
+| :--- | :--- | :--- |
+| Usuário sem autenticação; provisoriamente, perfil ausente/vazio | 401 | Erro `NAO_AUTENTICADO` |
+| Perfil diferente de RESPONSAVEL | 403 | Erro `ACESSO_NEGADO` |
+| Material inexistente | 404 | Erro `MATERIAL_NAO_ENCONTRADO` |
+| Quantidade ausente, negativa ou inválida; corpo ilegível | 400 | Erro `QUANTIDADE_INVALIDA` |
+| Falha ao gravar | 500 | Erro `ERRO_INTERNO` |
+
+Os erros mantêm o formato `{ "codigo": "...", "mensagem": "..." }` do ADR 0004.
+Banco PostgreSQL e autenticação real são dependências da demonstração integrada;
+os testes da rota substituem apenas o repositório e não comprovam essas integrações.
