@@ -22,12 +22,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 // Exercita a rota e as regras reais, substituindo apenas o acesso ao banco.
 // X-Perfil é provisório: estes testes não comprovam autenticação por token.
-@WebMvcTest(MaterialController.class)
+@WebMvcTest({MaterialController.class, MaterialEstoqueController.class})
 @Import(MaterialService.class)
+@TestPropertySource(properties = "archflow.estoque.em-desenvolvimento=true")
 public class MaterialEstoqueTest {
 
     @MockBean

@@ -30,10 +30,15 @@ não arredonda nem converte texto em quantidade.
 
 ### Estado da implementação
 
-A rota utiliza temporariamente `X-Perfil: RESPONSAVEL`, como a fila e a alteração
-de status. Esse cabeçalho é informado pelo próprio cliente e **não autentica o
-usuário**. A ligação com a sessão/token do H02.2 permanece pendente; a operação
-não deve ser considerada protegida para uso real antes dessa integração.
+**Entrega parcial do #1154:** a rota não é registrada na configuração padrão.
+O catálogo continua disponível. O controller de estoque é separado e ativado
+somente na suíte de testes pela propriedade `archflow.estoque.em-desenvolvimento=true`.
+Não definir essa propriedade nos ambientes compartilhados ou de apresentação.
+
+Os testes da operação ainda usam `X-Perfil: RESPONSAVEL`. Esse cabeçalho é
+informado pelo próprio cliente e **não autentica o usuário**. O grupo escolheu
+Keycloak; integrar a identidade e as permissões do H02.2 antes de liberar a rota.
+Ver [escopo e pendências da entrega parcial](../ESTOQUE-PARCIAL.md).
 
 ## Saída
 
@@ -43,8 +48,10 @@ não deve ser considerada protegida para uso real antes dessa integração.
 | quantidadeDisponivel | inteiro | sim | 24 |
 | atualizadaEm | data e hora (ISO 8601) | sim | 2026-10-13T12:05:00 |
 
-Resposta de sucesso: HTTP 200. `atualizadaEm` informa o horário da operação após
-a gravação, sem histórico persistido de alterações nem coluna nova no banco.
+Contrato alvo: HTTP 200, devolvendo a data gravada junto com a quantidade.
+Na implementação parcial exercitada pelos testes, `atualizadaEm` ainda é calculada
+apenas na resposta. Isso **não atende** a persistência exigida no CT11/#1154.
+Alinhar a coluna com o SQL da equipe antes de implementar e liberar a operação.
 
 ## Erros
 
