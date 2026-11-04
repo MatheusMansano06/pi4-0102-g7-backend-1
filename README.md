@@ -8,6 +8,10 @@ O controle de estoque tem uma [entrega parcial](docs/ESTOQUE-PARCIAL.md): regras
 e testes preparados, com a rota de alteração desativada por padrão enquanto
 faltam autenticação Keycloak e persistência da data. O catálogo segue disponível.
 
+Para construir o banco a partir do backend atual, consultar o
+[guia consolidado para a Lara](docs/GUIA-BANCO-PARA-LARA.md): entidades,
+entregas da equipe, campos pendentes e sequência de validação.
+
 | | |
 | :--- | :--- |
 | Linguagem | Java 17 |

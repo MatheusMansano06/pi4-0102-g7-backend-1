@@ -2,6 +2,11 @@
 
 Esta pasta e do modulo de banco de dados (Lara), conforme a tabela de modulos da especificacao.
 
+Começar pelo [guia consolidado do backend](../docs/GUIA-BANCO-PARA-LARA.md),
+conferido após a PR #8: campos das entidades, alterações da equipe e pendências
+de estoque, Keycloak, pedido e notificações. Ele distingue a main das propostas
+da PR #10 e não substitui os scripts SQL da responsável.
+
 Todo arquivo `.sql` aqui dentro e executado pelo PostgreSQL **na primeira vez** que o banco sobe.
 Eles rodam em ordem alfabetica, por isso o numero na frente do nome:
 
