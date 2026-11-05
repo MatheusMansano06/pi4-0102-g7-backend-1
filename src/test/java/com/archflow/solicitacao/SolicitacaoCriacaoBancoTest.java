@@ -106,7 +106,7 @@ public class SolicitacaoCriacaoBancoTest {
         SolicitacaoStatusEntrada entrada = new SolicitacaoStatusEntrada();
         entrada.setStatus("EM_SEPARACAO");
         entrada.setPrevisaoRetirada(LocalDateTime.now().plusDays(2));
-        this.status.atualizarStatus("RESPONSAVEL", pedidoId, entrada);
+        this.status.atualizarStatus(this.responsavel(), pedidoId, entrada);
         this.entidades.flush();
         this.entidades.clear();
         Solicitacao gravada = this.solicitacoes.findBySolicitacaoId(pedidoId);
@@ -157,7 +157,7 @@ public class SolicitacaoCriacaoBancoTest {
         Long pedidoId = this.criarPedido();
         this.entidades.flush();
         this.entidades.clear();
-        List<SolicitacaoHistoricoSaida> historico = this.status.listarHistorico("ALUNO", 12L);
+        List<SolicitacaoHistoricoSaida> historico = this.status.listarHistorico(this.aluno(12L));
         boolean encontrado = false;
         for (SolicitacaoHistoricoSaida pedido : historico) {
             if (pedido.getSolicitacaoId().equals(pedidoId)) {
@@ -166,10 +166,18 @@ public class SolicitacaoCriacaoBancoTest {
             }
         }
         assertTrue(encontrado, "O pedido criado deve aparecer no histórico do seu aluno.");
-        for (SolicitacaoHistoricoSaida pedido : this.status.listarHistorico("ALUNO", 13L)) {
+        for (SolicitacaoHistoricoSaida pedido : this.status.listarHistorico(this.aluno(13L))) {
             assertFalse(pedido.getSolicitacaoId().equals(pedidoId),
                     "O pedido não pode aparecer no histórico de outro aluno.");
         }
+    }
+
+    private UsuarioAutenticado aluno(long numero) {
+        return new UsuarioAutenticado(Long.valueOf(numero), PerfilUsuario.ALUNO);
+    }
+
+    private UsuarioAutenticado responsavel() {
+        return new UsuarioAutenticado(9L, PerfilUsuario.RESPONSAVEL);
     }
 
     private Long criarPedido() throws Exception {

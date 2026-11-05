@@ -12,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.archflow.comum.NegocioException;
+import com.archflow.comum.PerfilUsuario;
+import com.archflow.comum.UsuarioAutenticado;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +28,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 // Exercita a rota e as regras reais, substituindo apenas o acesso ao banco.
-// X-Perfil é provisório: estes testes não comprovam autenticação por token.
+// A identidade entra como atributo do pedido, no lugar em que o
+// FiltroDeIdentidade a guarda depois de conferir o token do Keycloak. Quem
+// confere o token é o LeitorDeTokenTest.
 @WebMvcTest({MaterialController.class, MaterialEstoqueController.class})
 @Import(MaterialService.class)
 @TestPropertySource(properties = "archflow.estoque.em-desenvolvimento=true")
@@ -40,8 +44,14 @@ public class MaterialEstoqueTest {
 
     private Material madeira;
 
+    private UsuarioAutenticado responsavel;
+
+    private UsuarioAutenticado aluno;
+
     @BeforeEach
     public void preparar() {
+        this.responsavel = new UsuarioAutenticado(9L, PerfilUsuario.RESPONSAVEL);
+        this.aluno = new UsuarioAutenticado(1L, PerfilUsuario.ALUNO);
         this.madeira = new Material("Madeira", "Chapa", "12 mm", 10, 2);
         ReflectionTestUtils.setField(this.madeira, "materialId", 7L);
         when(this.repositorio.findByMaterialId(7L)).thenReturn(this.madeira);
@@ -49,7 +59,7 @@ public class MaterialEstoqueTest {
     }
 
     @Test
-    public void semPerfilNaoAlteraEstoque() throws Exception {
+    public void semIdentidadeNaoAlteraEstoque() throws Exception {
         this.api.perform(patch("/api/materiais/7/estoque")
                 .contentType(MediaType.APPLICATION_JSON).content("{\"quantidadeDisponivel\":24}"))
                 .andExpect(status().isUnauthorized())
@@ -58,26 +68,8 @@ public class MaterialEstoqueTest {
     }
 
     @Test
-    public void perfilVazioNaoAlteraEstoque() throws Exception {
-        this.api.perform(patch("/api/materiais/7/estoque").header("X-Perfil", "   ")
-                .contentType(MediaType.APPLICATION_JSON).content("{\"quantidadeDisponivel\":24}"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.codigo").value("NAO_AUTENTICADO"));
-        this.exigirSemGravacao();
-    }
-
-    @Test
     public void alunoNaoAlteraEstoque() throws Exception {
-        this.api.perform(patch("/api/materiais/7/estoque").header("X-Perfil", "ALUNO")
-                .contentType(MediaType.APPLICATION_JSON).content("{\"quantidadeDisponivel\":24}"))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.codigo").value("ACESSO_NEGADO"));
-        this.exigirSemGravacao();
-    }
-
-    @Test
-    public void perfilDesconhecidoNaoAlteraEstoque() throws Exception {
-        this.api.perform(patch("/api/materiais/7/estoque").header("X-Perfil", "ADMIN")
+        this.api.perform(patch("/api/materiais/7/estoque").requestAttr("usuarioAutenticado", this.aluno)
                 .contentType(MediaType.APPLICATION_JSON).content("{\"quantidadeDisponivel\":24}"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.codigo").value("ACESSO_NEGADO"));
@@ -86,7 +78,7 @@ public class MaterialEstoqueTest {
 
     @Test
     public void materialInexistenteNaoGrava() throws Exception {
-        this.api.perform(patch("/api/materiais/999/estoque").header("X-Perfil", "RESPONSAVEL")
+        this.api.perform(patch("/api/materiais/999/estoque").requestAttr("usuarioAutenticado", this.responsavel)
                 .contentType(MediaType.APPLICATION_JSON).content("{\"quantidadeDisponivel\":24}"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.codigo").value("MATERIAL_NAO_ENCONTRADO"));
@@ -122,7 +114,7 @@ public class MaterialEstoqueTest {
 
     @Test
     public void saldoSubstituiQuantidadeAnteriorEDevolveHorario() throws Exception {
-        this.api.perform(patch("/api/materiais/7/estoque").header("X-Perfil", " responsavel ")
+        this.api.perform(patch("/api/materiais/7/estoque").requestAttr("usuarioAutenticado", this.responsavel)
                 .contentType(MediaType.APPLICATION_JSON).content("{\"quantidadeDisponivel\":24}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.materialId").value(7))
@@ -138,7 +130,7 @@ public class MaterialEstoqueTest {
         List<Material> materiais = new ArrayList<Material>();
         materiais.add(this.madeira);
         when(this.repositorio.findByAtivoTrueOrderByNomeAsc()).thenReturn(materiais);
-        this.api.perform(patch("/api/materiais/7/estoque").header("X-Perfil", "RESPONSAVEL")
+        this.api.perform(patch("/api/materiais/7/estoque").requestAttr("usuarioAutenticado", this.responsavel)
                 .contentType(MediaType.APPLICATION_JSON).content("{\"quantidadeDisponivel\":0}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.quantidadeDisponivel").value(0));
         this.api.perform(get("/api/materiais"))
@@ -150,7 +142,7 @@ public class MaterialEstoqueTest {
     @Test
     public void falhaDeGravacaoNaoRetornaSucessoNemDetalheInterno() throws Exception {
         when(this.repositorio.save(this.madeira)).thenThrow(new RuntimeException("senha do banco"));
-        this.api.perform(patch("/api/materiais/7/estoque").header("X-Perfil", "RESPONSAVEL")
+        this.api.perform(patch("/api/materiais/7/estoque").requestAttr("usuarioAutenticado", this.responsavel)
                 .contentType(MediaType.APPLICATION_JSON).content("{\"quantidadeDisponivel\":24}"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.codigo").value("ERRO_INTERNO"))
@@ -162,7 +154,7 @@ public class MaterialEstoqueTest {
     public void chamadaDiretaComEntradaNulaTambemRecusa() {
         MaterialService servico = new MaterialService(this.repositorio);
         try {
-            servico.atualizarEstoque("RESPONSAVEL", 7L, null);
+            servico.atualizarEstoque(this.responsavel, 7L, null);
             fail("Entrada nula não podia alterar o estoque.");
         } catch (NegocioException erro) {
             assertEquals("QUANTIDADE_INVALIDA", erro.getCodigo());
@@ -171,7 +163,7 @@ public class MaterialEstoqueTest {
     }
 
     private void exigirQuantidadeInvalida(String corpo) throws Exception {
-        this.api.perform(patch("/api/materiais/7/estoque").header("X-Perfil", "RESPONSAVEL")
+        this.api.perform(patch("/api/materiais/7/estoque").requestAttr("usuarioAutenticado", this.responsavel)
                 .contentType(MediaType.APPLICATION_JSON).content(corpo))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.codigo").value("QUANTIDADE_INVALIDA"));

@@ -6,6 +6,7 @@ import com.archflow.comum.NaoAutenticadoException;
 import com.archflow.comum.NaoEncontradoException;
 import com.archflow.comum.NegocioException;
 import com.archflow.comum.PerfilUsuario;
+import com.archflow.comum.UsuarioAutenticado;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +22,9 @@ public class SolicitacaoService {
     }
 
     // CT04: a fila e so do responsavel, em ordem de chegada.
-    public List<SolicitacaoFilaSaida> listarFila(String perfil, String status) {
+    public List<SolicitacaoFilaSaida> listarFila(UsuarioAutenticado identidade, String status) {
         // 1) Quem nao e o responsavel nao passa daqui.
-        this.exigirResponsavel(perfil);
+        this.exigirResponsavel(identidade);
         // 2) Sem status no pedido da tela, a fila volta sem os pedidos concluidos.
         List<Solicitacao> encontradas = this.procurar(status);
         // 3) A tela recebe so os campos do contrato, nunca a entidade.
@@ -36,10 +37,10 @@ public class SolicitacaoService {
 
     // CT06: so o responsavel muda o status, e so pelos caminhos que a tabela
     // de transicoes permite.
-    public SolicitacaoStatusSaida atualizarStatus(String perfil, Long solicitacaoId,
+    public SolicitacaoStatusSaida atualizarStatus(UsuarioAutenticado identidade, Long solicitacaoId,
             SolicitacaoStatusEntrada entrada) {
         // 1) Quem nao e o responsavel nao passa daqui.
-        this.exigirResponsavel(perfil);
+        this.exigirResponsavel(identidade);
         // 2) O status pedido tem que ser um dos nomes do contrato.
         StatusSolicitacao novoStatus = this.converterStatus(entrada.getStatus());
         // 3) Previsao no passado nao serve para avisar o aluno.
@@ -54,11 +55,12 @@ public class SolicitacaoService {
     }
 
     // CT08: o aluno ve so os pedidos dele; o responsavel ve os de todos.
-    public List<SolicitacaoHistoricoSaida> listarHistorico(String perfil, Long usuarioId) {
+    public List<SolicitacaoHistoricoSaida> listarHistorico(UsuarioAutenticado identidade) {
         // 1) Quem nao se identificou nao tem historico para ver.
-        PerfilUsuario perfilDeQuemPediu = this.converterPerfil(perfil);
-        // 2) O aluno so e dono de um historico se der para saber quem ele e.
-        List<Solicitacao> encontradas = this.procurarHistorico(perfilDeQuemPediu, usuarioId);
+        this.exigirIdentificado(identidade);
+        // 2) O aluno so leva os pedidos dele; o numero vem do token.
+        List<Solicitacao> encontradas = this.procurarHistorico(identidade.getPerfil(),
+                identidade.getUsuarioId());
         // 3) A tela recebe so os campos do contrato, nunca a entidade.
         List<SolicitacaoHistoricoSaida> historico = new ArrayList<SolicitacaoHistoricoSaida>();
         for (Solicitacao solicitacao : encontradas) {
@@ -80,19 +82,10 @@ public class SolicitacaoService {
         return this.solicitacaoRepository.findByUsuarioIdOrderByCriadaEmDesc(usuarioId);
     }
 
-    // Perfil em branco significa que ninguem se identificou. Perfil que nao
-    // esta na lista do CT01 nao e recusa de login: e tentativa de entrar com
-    // um papel que o sistema nao reconhece.
-    private PerfilUsuario converterPerfil(String perfil) {
-        if (perfil == null || perfil.trim().isEmpty()) {
+    private void exigirIdentificado(UsuarioAutenticado identidade) {
+        if (identidade == null) {
             throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
                     "É preciso estar autenticado para ver o histórico.");
-        }
-        try {
-            return PerfilUsuario.valueOf(perfil.trim().toUpperCase());
-        } catch (IllegalArgumentException erro) {
-            throw new AcessoNegadoException(CodigosDeErro.ACESSO_NEGADO,
-                    "O perfil \"" + perfil + "\" não pode ver o histórico.");
         }
     }
 
@@ -135,14 +128,14 @@ public class SolicitacaoService {
         solicitacao.setPrevisaoRetirada(previsaoRetirada);
     }
 
-    // Perfil em branco significa que ninguem se identificou. O aluno se
-    // identificou, mas a fila dos outros nao e da conta dele.
-    private void exigirResponsavel(String perfil) {
-        if (perfil == null || perfil.trim().isEmpty()) {
+    // Sem identidade ninguem se identificou. O aluno se identificou, mas a
+    // fila dos outros nao e da conta dele.
+    private void exigirResponsavel(UsuarioAutenticado identidade) {
+        if (identidade == null) {
             throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
                     "É preciso estar autenticado para ver a fila.");
         }
-        if (!PerfilUsuario.RESPONSAVEL.name().equals(perfil.trim().toUpperCase())) {
+        if (!PerfilUsuario.RESPONSAVEL.equals(identidade.getPerfil())) {
             throw new AcessoNegadoException(CodigosDeErro.ACESSO_NEGADO,
                     "Só o responsável vê a fila de atendimento.");
         }

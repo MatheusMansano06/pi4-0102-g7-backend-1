@@ -21,7 +21,7 @@ H01.2, sem ter de elaborar regras funcionais que faltavam na especificação.
 | Pendência | Quem conduz / próximo trabalho |
 | --- | --- |
 | Banco existente receber a configuração/colunas | H01.2/Lara coordena execução do [script definido](sql/H04.1-colunas-propostas.sql), com cópia de segurança e validate |
-| Keycloak/contexto de usuário | H02.1/Luis e H02.2/Matheus: validar identidade/perfis e vínculo com usuarioId |
+| Integração do login | PR #16/H02.2 fornece contexto validado; #1141/Luis deve ajustar porta 8081, enviar Bearer e provar pela tela; revisar escopo legado #1138/CT01/CT10 |
 | Metadados aceitos/obrigatórios no catálogo | Derivar dos booleanos no DTO; contrato alvo definido, ainda sem implementação |
 | Formulário enviar pedido | #1147/Luis com H04.2/Mirele, após identidade e API/banco prontos |
 | Data limite do formulário | Definir significado em recorte próprio; CT03 ainda recusa dataLimite |
