@@ -1,44 +1,93 @@
-# CT03: criarSolicitacao
+# CT03 criarSolicitacao
 
-> Implementação proposta no #1145: ver [H04.1](../H04.1-CRIAR-SOLICITACAO.md).
-> A branch prepara POST/201 e persistência de medidas, mas depende de novas colunas,
-> regras por material e identidade Keycloak. A ficha abaixo deve ser conciliada
-> com a PR #10 antes de integrar; não comprova operação liberada na main.
+Definição #1136 conciliada com o POST parcial integrado pela PR #14.
+[Campos e regras](../especificacao/colunas-materiais-e-solicitacoes.md) definidos
+pelo Luis; [integração de identidade](../H04.1-CRIAR-SOLICITACAO.md) ainda necessária.
 
 | Linha | Valor |
-| :--- | :--- |
-| Fronteira | HTTP |
-| Quem chama | Frontend |
-| Quem responde | Backend API |
+| --- | --- |
+| Fronteira | HTTP, frontend → Backend API |
 | Atende | E3 |
-| Como chamar | `POST /api/solicitacoes` |
+| Chamada | POST /api/solicitacoes |
+| Acesso | ALUNO; identidade validada no servidor, a integrar com Keycloak/H02.2 |
+| Transporte alvo da credencial | Authorization: Bearer; não confundir header livre com contexto validado |
+| Sucesso | HTTP 201 após gravação confirmada |
 
 ## Entrada
 
-| Campo | Tipo | Obrigatório | Exemplo |
-| :--- | :--- | :--- | :--- |
-| materialId | inteiro | sim | 7 |
-| quantidade | inteiro | sim | 2 |
-| dimensao | texto | não | 30 x 20 cm |
-| diametro | decimal | não | 4.5 |
-| observacao | texto | não | Uso em maquete |
+| Campo | Tipo | Obrigatório | Regra |
+| --- | --- | --- | --- |
+| materialId | inteiro positivo, Long | sim | material existente e ativo |
+| quantidade | inteiro positivo, Integer | sim | sem arredondar ou converter texto |
+| dimensao | texto, capacidade 255 caracteres | não | mm; não apenas espaços; exemplo 300 x 200 mm |
+| diametro | número JSON positivo/finito | não | mm, exemplo 4.5; não enviar unidade no número |
+| observacao | texto, capacidade 255 caracteres | não | preservado no pedido |
+
+Dimensão e diâmetro são permitidos e opcionais para TODOS os materiais do MVP,
+conforme confirmação do Luis em 04/11/2026. Pode enviar ambos, um ou nenhum.
+Ausente/null é permitido; configuração NULL no material não equivale a essa
+opcionalidade e continua sendo erro 503 até atualizar/configurar o banco.
+
+```json
+{
+  "materialId": 1,
+  "quantidade": 2,
+  "dimensao": "300 x 200 mm",
+  "diametro": 4.5,
+  "observacao": "Uso em maquete"
+}
+```
+
+Também é válido:
+
+```json
+{
+  "materialId": 1,
+  "quantidade": 2
+}
+```
+
+Não aceita outros campos: usuarioId, perfil, status, criadaEm, atualizadaEm,
+dataLimite e nomes desconhecidos recebem DADOS_INVALIDOS. PENDENTE, aluno e datas
+são definidos no servidor. dataLimite não é previsaoRetirada.
 
 ## Saída
 
-| Campo | Tipo | Obrigatório | Exemplo |
-| :--- | :--- | :--- | :--- |
-| solicitacaoId | inteiro | sim | 101 |
-| materialId | inteiro | sim | 7 |
-| quantidade | inteiro | sim | 2 |
-| status | um de: PENDENTE, EM_SEPARACAO, AGUARDANDO_COMPRA, PRONTO_PARA_RETIRADA, CONCLUIDO | sim | PENDENTE |
-| criadaEm | data e hora (ISO 8601) | sim | 2026-10-13T12:00:00 |
+| Campo | Tipo | Regra |
+| --- | --- | --- |
+| solicitacaoId | inteiro | gerado pelo banco |
+| materialId | inteiro | material salvo |
+| quantidade | inteiro | quantidade salva |
+| status | texto | sempre PENDENTE na criação |
+| criadaEm | data/hora ISO 8601 | horário do servidor |
+| dimensao | texto ou null | valor salvo |
+| diametro | número ou null | valor salvo |
+| observacao | texto ou null | valor salvo |
 
 ## Erros
 
-| Quando | O que volta |
-| :--- | :--- |
-| Usuário sem autenticação | Erro `NAO_AUTENTICADO` |
-| Material inexistente ou inativo | Erro `MATERIAL_NAO_ENCONTRADO` |
-| Quantidade menor ou igual a zero | Erro `QUANTIDADE_INVALIDA` |
-| Dados incompatíveis com o material | Erro `PARAMETROS_INVALIDOS` |
-| Falha ao registrar solicitação | Erro `ERRO_INTERNO` |
+| Situação | HTTP | Código |
+| --- | --- | --- |
+| Identidade validada ausente | 401 | NAO_AUTENTICADO |
+| Identidade não ALUNO | 403 | ACESSO_NEGADO |
+| materialId/corpo/campo desconhecido inválido | 400 | DADOS_INVALIDOS |
+| Quantidade ausente, não inteira ou não positiva | 400 | QUANTIDADE_INVALIDA |
+| Material inexistente/inativo | 404 | MATERIAL_NAO_ENCONTRADO |
+| Medida inválida ou incompatível com política explicitamente configurada | 400 | PARAMETROS_INVALIDOS |
+| Política NULL/incoerente no material | 503 | CONFIGURACAO_PENDENTE |
+| Falha de gravação | 500 | ERRO_INTERNO |
+
+Formato: objeto com codigo e mensagem. Binding de corpo ilegível pode gerar 400
+antes do serviço; ordem de autenticação real será validada no filtro H02.2.
+X-Perfil, X-Usuario-Id e nome de Principal genérico não autenticam este POST.
+
+## Persistência e diferenças para a integração
+
+CT12 grava pedido PENDENTE, horários inicialmente iguais, aluno validado e os
+opcionais; medidas são preservadas em mudanças de status/previsão. Não baixa ou
+reserva saldo e não cria notificações nesta operação.
+
+A API atual ainda não analisa os números no texto dimensao nem antecipa o limite
+de 255 caracteres; não declarar essas verificações implementadas. O formulário
+compõe largura/altura em mm na futura integração #1147. Keycloak ainda precisa
+produzir UsuarioAutenticado; corpo válido sem esse contexto recebe 401.

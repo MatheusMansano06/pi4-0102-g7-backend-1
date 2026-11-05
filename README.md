@@ -4,9 +4,7 @@ Backend do ArchFlow, sistema de solicitacao e controle de materiais do Atelie CE
 
 Projeto Integrador IV - PUC-Campinas - Turma 0102 - Grupo 7.
 
-A [proposta de criação de solicitação H04.1](docs/H04.1-CRIAR-SOLICITACAO.md)
-implementa o POST com validações e testes. Requer alinhamento das colunas novas
-com o banco e do contexto de identidade com Keycloak antes de integrar esta branch.
+A [criação de solicitação H04.1](docs/H04.1-CRIAR-SOLICITACAO.md) já foi integrada parcialmente. O [dicionário das seis colunas](docs/especificacao/colunas-materiais-e-solicitacoes.md) define medidas permitidas e opcionais para todos os materiais. Aplicar a atualização no banco existente e integrar a identidade Keycloak antes de demonstrar o fluxo real.
 
 O controle de estoque tem uma [entrega parcial](docs/ESTOQUE-PARCIAL.md): regras
 e testes preparados, com a rota de alteração desativada por padrão enquanto
@@ -105,6 +103,10 @@ Controller, Service, Repository, Entity e DTOs. Quem abre a pasta `solicitacao` 
 inteira sem procurar em outro lugar.
 
 ## Como trabalhamos
+
+A revisão funcional em andamento do card #1136 está em
+[H01.4 — alinhamento de contratos, telas e banco](docs/especificacao/H01.4-alinhamento.md).
+As propostas pendentes não devem ser tratadas como decisões já aceitas ou código pronto.
 
 - Uma branch por card do OpenProject, com o nome do card: `h05-listar-fila`.
 - Antes de escrever codigo, leia `docs/convencoes-codigo.md`.

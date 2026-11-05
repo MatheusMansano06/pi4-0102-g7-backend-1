@@ -1,5 +1,7 @@
 # CT05: atualizarEstoque
 
+> Revisão #1136: contrato alvo em revisão; propostas e diferenças para o código estão em [H01.4](../especificacao/H01.4-alinhamento.md).
+
 | Linha | Valor |
 | :--- | :--- |
 | Fronteira | HTTP |
@@ -7,6 +9,7 @@
 | Quem responde | Backend API |
 | Atende | E5 |
 | Como chamar | `PATCH /api/materiais/{materialId}/estoque` |
+| Autenticação proposta | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
 
 ## Entrada
 
@@ -46,7 +49,7 @@ Ver [escopo e pendências da entrega parcial](../ESTOQUE-PARCIAL.md).
 | :--- | :--- | :--- | :--- |
 | materialId | inteiro | sim | 7 |
 | quantidadeDisponivel | inteiro | sim | 24 |
-| atualizadaEm | data e hora (ISO 8601) | sim | 2026-10-13T12:05:00 |
+| atualizadaEm | data e hora persistida (ISO 8601) | sim | 2026-10-13T12:05:00 |
 
 Contrato alvo: HTTP 200, devolvendo a data gravada junto com a quantidade.
 Na implementação parcial exercitada pelos testes, `atualizadaEm` ainda é calculada

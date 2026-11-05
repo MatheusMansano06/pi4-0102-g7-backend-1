@@ -1,5 +1,7 @@
 # CT08: listarHistorico
 
+> Revisão #1136: contrato alvo em revisão; propostas e diferenças para o código estão em [H01.4](../especificacao/H01.4-alinhamento.md).
+
 | Linha | Valor |
 | :--- | :--- |
 | Fronteira | HTTP |
@@ -7,6 +9,7 @@
 | Quem responde | Backend API |
 | Atende | E8 |
 | Como chamar | `GET /api/solicitacoes/historico` |
+| Autenticação proposta | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
 
 ## Entrada
 
@@ -27,8 +30,16 @@
 
 ## Erros
 
-| Quando | O que volta |
-| :--- | :--- |
-| Usuário sem autenticação | Erro `NAO_AUTENTICADO` |
-| Tentativa de acessar registros não autorizados | Erro `ACESSO_NEGADO` |
-| Falha ao consultar histórico | Erro `ERRO_INTERNO` |
+| Quando | HTTP | O que volta |
+| :--- | :--- | :--- |
+| Usuário sem autenticação | 401 | Erro `NAO_AUTENTICADO` |
+| Tentativa de acessar registros não autorizados | 403 | Erro `ACESSO_NEGADO` |
+| Falha ao consultar histórico | 500 | Erro `ERRO_INTERNO` |
+
+Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida segue a proposta comum de HTTP 401 / NAO_AUTENTICADO.
+
+Proposta de resposta: HTTP 200 com objeto { "solicitacoes": [] } quando vazio.
+ALUNO só acessa seus pedidos. O alcance do RESPONSAVEL (global ou restrito) e
+quais estados entram no histórico precisam de confirmação com o responsável pelo
+módulo. Não usar um usuarioId livre da tela para ampliar a consulta CT12. A rota
+não existe na main; esta revisão não implementa filtros novos.

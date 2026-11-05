@@ -6,11 +6,12 @@ CREATE TABLE materiais (
     quantidade_disponivel INTEGER NOT NULL,
     quantidade_minima INTEGER NOT NULL,
     ativo BOOLEAN NOT NULL,
-    -- Politicas pendentes ficam NULL, sem supor regras para materiais reais.
-    aceita_dimensao BOOLEAN,
-    exige_dimensao BOOLEAN,
-    aceita_diametro BOOLEAN,
-    exige_diametro BOOLEAN
+    -- Regra do MVP confirmada pelo Luis no #1136: ambas permitidas e opcionais.
+    -- NULL explicito continua representando configuracao incompleta, recusada pela API.
+    aceita_dimensao BOOLEAN DEFAULT TRUE,
+    exige_dimensao BOOLEAN DEFAULT FALSE,
+    aceita_diametro BOOLEAN DEFAULT TRUE,
+    exige_diametro BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE solicitacoes (

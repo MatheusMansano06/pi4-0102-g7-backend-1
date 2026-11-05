@@ -1,5 +1,7 @@
 # CT09: listarPrazos
 
+> Revisão #1136: contrato alvo em revisão; propostas e diferenças para o código estão em [H01.4](../especificacao/H01.4-alinhamento.md).
+
 | Linha | Valor |
 | :--- | :--- |
 | Fronteira | HTTP |
@@ -7,6 +9,7 @@
 | Quem responde | Backend API |
 | Atende | E9 |
 | Como chamar | `GET /api/prazos` |
+| Autenticação proposta | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
 
 ## Entrada
 
@@ -26,7 +29,15 @@
 
 ## Erros
 
-| Quando | O que volta |
-| :--- | :--- |
-| Usuário sem autenticação | Erro `NAO_AUTENTICADO` |
-| Falha ao consultar prazos | Erro `ERRO_INTERNO` |
+| Quando | HTTP | O que volta |
+| :--- | :--- | :--- |
+| Usuário sem autenticação | 401 | Erro `NAO_AUTENTICADO` |
+| Falha ao consultar prazos | 500 | Erro `ERRO_INTERNO` |
+
+Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida segue a proposta comum de HTTP 401 / NAO_AUTENTICADO.
+
+Proposta de resposta: HTTP 200 com objeto { "solicitacoes": [] } quando vazio.
+Identificar o ALUNO pela credencial e consultar apenas seus pedidos no CT12;
+perfil não permitido retorna 403 / ACESSO_NEGADO. Previsão ausente permanece null,
+sem data inventada. A rota não existe na main. Definir com o módulo quais estados
+do pedido compõem o painel; não confundir esta ficha com o histórico completo.

@@ -3,6 +3,7 @@ package com.archflow.solicitacao;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -114,6 +115,27 @@ public class SolicitacaoCriacaoBancoTest {
         assertEquals(4.5, gravada.getDiametro());
         assertEquals("Preservar observação", gravada.getObservacao());
         assertEquals(12L, gravada.getUsuarioId());
+    }
+
+    @Test
+    public void politicaPadraoDoBancoPermitePedidoSemMedidasNoMvp() throws Exception {
+        Long materialId = this.sql.queryForObject(
+                "INSERT INTO materiais (nome, quantidade_disponivel, quantidade_minima, ativo) "
+                        + "VALUES ('Fixture defaults MVP', 10, 2, TRUE) RETURNING material_id", Long.class);
+        String resposta = this.api.perform(post("/api/solicitacoes")
+                .requestAttr("usuarioAutenticado", new UsuarioAutenticado(12L, PerfilUsuario.ALUNO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"materialId\":" + materialId + ",\"quantidade\":2}"))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.status").value("PENDENTE"))
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        Long pedidoId = this.json.readTree(resposta).get("solicitacaoId").longValue();
+        this.entidades.flush();
+        this.entidades.clear();
+        Solicitacao gravada = this.solicitacoes.findBySolicitacaoId(pedidoId);
+        assertEquals(12L, gravada.getUsuarioId());
+        assertNull(gravada.getDimensao());
+        assertNull(gravada.getDiametro());
+        assertEquals(10, gravada.getMaterial().getQuantidadeDisponivel());
     }
 
     @Test
