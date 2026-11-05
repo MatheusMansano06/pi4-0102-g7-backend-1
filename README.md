@@ -60,7 +60,13 @@ Pronto. Fica disponivel em:
 | :--- | :--- |
 | Tela do sistema | http://localhost:5173 |
 | API | http://localhost:8080/api |
+| Login (Keycloak) | http://localhost:8081 |
 | Banco | localhost:5432 |
+
+O Keycloak guarda as contas e entrega o token que a tela usa para chamar a API: sem token a API
+responde 401. O realm, os papeis (`aluno` e `responsavel`) e o tema da tela de login vem do
+repositorio do front e sao importados quando o container sobe. O painel de administracao abre em
+http://localhost:8081, com o usuario e a senha do `.env`.
 
 Para parar, `Ctrl+C`. Para parar e apagar os dados do banco, `docker compose down -v`.
 

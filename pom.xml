@@ -52,6 +52,14 @@
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
+        <!-- Le e confere o token que o Keycloak emite: assinatura, validade e
+             perfis. O professor liberou o Keycloak para o login, e esta
+             biblioteca e a parte que o backend precisa para conferir o token. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+
         <!-- Usado so nos testes JUnit. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

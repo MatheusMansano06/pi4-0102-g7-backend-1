@@ -2,6 +2,7 @@ package com.archflow.material;
 
 import com.archflow.comum.CodigosDeErro;
 import com.archflow.comum.ErroSaida;
+import com.archflow.comum.UsuarioAutenticado;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,10 +30,10 @@ public class MaterialEstoqueController {
 
     @PatchMapping("/{materialId}/estoque")
     public MaterialEstoqueSaida atualizarEstoque(
-            @RequestHeader(name = "X-Perfil", required = false) String perfil,
+            @RequestAttribute(name = "usuarioAutenticado", required = false) UsuarioAutenticado identidade,
             @PathVariable Long materialId,
             @RequestBody MaterialEstoqueEntrada entrada) {
-        return this.materialService.atualizarEstoque(perfil, materialId, entrada);
+        return this.materialService.atualizarEstoque(identidade, materialId, entrada);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

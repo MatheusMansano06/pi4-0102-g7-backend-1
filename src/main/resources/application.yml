@@ -20,6 +20,12 @@ spring:
       hibernate:
         format_sql: true
 
+# Endereco das chaves publicas que o Keycloak usa para assinar o token. O
+# backend busca essas chaves para conferir se o token e de verdade.
+archflow:
+  keycloak:
+    certificados: ${KEYCLOAK_CERTIFICADOS:http://localhost:8081/realms/Archflow/protocol/openid-connect/certs}
+
 server:
   port: 8080
 
