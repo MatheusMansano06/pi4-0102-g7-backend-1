@@ -53,6 +53,49 @@ public class SolicitacaoService {
         return new SolicitacaoStatusSaida(this.solicitacaoRepository.save(solicitacao));
     }
 
+    // CT08: o aluno ve so os pedidos dele; o responsavel ve os de todos.
+    public List<SolicitacaoHistoricoSaida> listarHistorico(String perfil, Long usuarioId) {
+        // 1) Quem nao se identificou nao tem historico para ver.
+        PerfilUsuario perfilDeQuemPediu = this.converterPerfil(perfil);
+        // 2) O aluno so e dono de um historico se der para saber quem ele e.
+        List<Solicitacao> encontradas = this.procurarHistorico(perfilDeQuemPediu, usuarioId);
+        // 3) A tela recebe so os campos do contrato, nunca a entidade.
+        List<SolicitacaoHistoricoSaida> historico = new ArrayList<SolicitacaoHistoricoSaida>();
+        for (Solicitacao solicitacao : encontradas) {
+            historico.add(new SolicitacaoHistoricoSaida(solicitacao));
+        }
+        return historico;
+    }
+
+    // O aluno so leva os pedidos dele. Deixar passar sem numero devolveria o
+    // historico da turma inteira para quem nao pode ver.
+    private List<Solicitacao> procurarHistorico(PerfilUsuario perfil, Long usuarioId) {
+        if (PerfilUsuario.RESPONSAVEL.equals(perfil)) {
+            return this.solicitacaoRepository.findAllByOrderByCriadaEmDesc();
+        }
+        if (usuarioId == null) {
+            throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
+                    "É preciso estar autenticado para ver o histórico.");
+        }
+        return this.solicitacaoRepository.findByUsuarioIdOrderByCriadaEmDesc(usuarioId);
+    }
+
+    // Perfil em branco significa que ninguem se identificou. Perfil que nao
+    // esta na lista do CT01 nao e recusa de login: e tentativa de entrar com
+    // um papel que o sistema nao reconhece.
+    private PerfilUsuario converterPerfil(String perfil) {
+        if (perfil == null || perfil.trim().isEmpty()) {
+            throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
+                    "É preciso estar autenticado para ver o histórico.");
+        }
+        try {
+            return PerfilUsuario.valueOf(perfil.trim().toUpperCase());
+        } catch (IllegalArgumentException erro) {
+            throw new AcessoNegadoException(CodigosDeErro.ACESSO_NEGADO,
+                    "O perfil \"" + perfil + "\" não pode ver o histórico.");
+        }
+    }
+
     private Solicitacao buscar(Long solicitacaoId) {
         Solicitacao solicitacao = this.solicitacaoRepository.findBySolicitacaoId(solicitacaoId);
         if (solicitacao == null) {
