@@ -11,16 +11,15 @@ O que ainda nao esta decidido, e com quem.
 - **Spring Security e permitido?** Optamos por escrever a autenticacao a mao (ADR 0003), entre
   outros motivos porque o Spring Security 6 so configura com lambda, que a disciplina nao ensina.
 
-## 2. Decisao do grupo que ainda falta
+## 2. ~~Decisao do grupo que ainda falta~~ - decidida em 04/11/2026
 
-**Como o navegador chama a API.** Duas opcoes:
+**Como o navegador chama a API: chamada direta.** O front chama
+`http://localhost:8080/api/materiais` com o endereco inteiro, e o backend autoriza a tela pelo
+CORS. A opcao de proxy no Vite foi descartada: ela resolveria o CORS sozinha, mas esconde o
+caminho da chamada de quem le o codigo.
 
-- *Proxy no frontend*: o front chama `/api/materiais` sem host e o Vite repassa para o backend
-  por dentro do Docker. Acaba com o CORS e tira a porta do codigo do front.
-- *Direto*: o front chama `http://localhost:8080/api/materiais`. Mais obvio de ler, mas exige
-  configuracao de CORS no backend e deixa a porta fixa no codigo do front.
-
-Precisa estar decidida **antes do card H02.4** (login funcionando de ponta a ponta).
+Ver [`docs/integracao/LEIAME.md`](integracao/LEIAME.md), que explica as duas pecas e como
+conferir que funciona.
 
 ## 3. Mudancas no banco - para a Lara
 
