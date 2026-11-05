@@ -6,6 +6,7 @@ import com.archflow.comum.NaoAutenticadoException;
 import com.archflow.comum.NaoEncontradoException;
 import com.archflow.comum.NegocioException;
 import com.archflow.comum.PerfilUsuario;
+import com.archflow.comum.UsuarioAutenticado;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -30,10 +31,10 @@ public class MaterialService {
     }
 
     // CT05: a quantidade recebida substitui o saldo, sem somar movimentações.
-    public MaterialEstoqueSaida atualizarEstoque(String perfil, Long materialId,
+    public MaterialEstoqueSaida atualizarEstoque(UsuarioAutenticado identidade, Long materialId,
             MaterialEstoqueEntrada entrada) {
-        // 1) O mesmo perfil provisório da fila restringe a operação ao responsável.
-        this.exigirResponsavel(perfil);
+        // 1) A identidade conferida no token restringe a operação ao responsável.
+        this.exigirResponsavel(identidade);
         // 2) Campo ausente não pode virar zero nem quantidade negativa chegar ao banco.
         this.exigirQuantidadeValida(entrada);
         // 3) O material deve existir antes de alterar seu saldo.
@@ -43,12 +44,12 @@ public class MaterialService {
         return new MaterialEstoqueSaida(this.materialRepository.save(material));
     }
 
-    private void exigirResponsavel(String perfil) {
-        if (perfil == null || perfil.trim().isEmpty()) {
+    private void exigirResponsavel(UsuarioAutenticado identidade) {
+        if (identidade == null) {
             throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
                     "É preciso estar autenticado para atualizar o estoque.");
         }
-        if (!PerfilUsuario.RESPONSAVEL.name().equalsIgnoreCase(perfil.trim())) {
+        if (!PerfilUsuario.RESPONSAVEL.equals(identidade.getPerfil())) {
             throw new AcessoNegadoException(CodigosDeErro.ACESSO_NEGADO,
                     "Só o responsável pode atualizar o estoque.");
         }

@@ -21,6 +21,12 @@ public class ConfiguracaoDeCors implements WebMvcConfigurer {
 
     private static final String TELA_NO_DOCKER = "http://127.0.0.1:5173";
 
+    // A conferencia de identidade usa a mesma lista para deixar a tela ler a
+    // mensagem de uma recusa. Ver FiltroDeIdentidade.
+    public static boolean eTelaDoArchflow(String origem) {
+        return TELA_NO_COMPUTADOR.equals(origem) || TELA_NO_DOCKER.equals(origem);
+    }
+
     @Override
     public void addCorsMappings(CorsRegistry registro) {
         registro.addMapping("/api/**")

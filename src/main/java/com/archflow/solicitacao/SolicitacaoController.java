@@ -1,11 +1,12 @@
 package com.archflow.solicitacao;
 
+import com.archflow.comum.UsuarioAutenticado;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,34 +23,28 @@ public class SolicitacaoController {
 
     // CT04: GET /api/solicitacoes/fila?status={status}
     //
-    // Provisorio: o perfil chega no cabecalho X-Perfil enquanto o H02.2 nao
-    // confere o token na tabela sessoes (ADR 0003). Quando conferir, o perfil
-    // sai da sessao e este cabecalho deixa de existir.
+    // A identidade vem do token conferido pelo FiltroDeIdentidade, nunca de um
+    // valor que a tela possa escrever.
     @GetMapping("/fila")
     public List<SolicitacaoFilaSaida> listarFila(
-            @RequestHeader(name = "X-Perfil", required = false) String perfil,
+            @RequestAttribute(name = "usuarioAutenticado", required = false) UsuarioAutenticado identidade,
             @RequestParam(required = false) String status) {
-        return this.solicitacaoService.listarFila(perfil, status);
+        return this.solicitacaoService.listarFila(identidade, status);
     }
 
     // CT08: GET /api/solicitacoes/historico
-    //
-    // Provisorio, pelo mesmo motivo do X-Perfil: o numero do aluno chega no
-    // cabecalho X-Usuario-Id enquanto o login nao existe. Quando existir, quem
-    // pediu sai da sessao e os dois cabecalhos deixam de existir.
     @GetMapping("/historico")
     public List<SolicitacaoHistoricoSaida> listarHistorico(
-            @RequestHeader(name = "X-Perfil", required = false) String perfil,
-            @RequestHeader(name = "X-Usuario-Id", required = false) Long usuarioId) {
-        return this.solicitacaoService.listarHistorico(perfil, usuarioId);
+            @RequestAttribute(name = "usuarioAutenticado", required = false) UsuarioAutenticado identidade) {
+        return this.solicitacaoService.listarHistorico(identidade);
     }
 
     // CT06: PATCH /api/solicitacoes/{solicitacaoId}/status
     @PatchMapping("/{solicitacaoId}/status")
     public SolicitacaoStatusSaida atualizarStatus(
-            @RequestHeader(name = "X-Perfil", required = false) String perfil,
+            @RequestAttribute(name = "usuarioAutenticado", required = false) UsuarioAutenticado identidade,
             @PathVariable Long solicitacaoId,
             @RequestBody SolicitacaoStatusEntrada entrada) {
-        return this.solicitacaoService.atualizarStatus(perfil, solicitacaoId, entrada);
+        return this.solicitacaoService.atualizarStatus(identidade, solicitacaoId, entrada);
     }
 }

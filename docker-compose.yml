@@ -33,18 +33,50 @@ services:
     networks:
       - rede_archflow
 
+  # Guarda as contas e os perfis, e entrega o token que a tela usa para chamar
+  # a API. O grupo escolheu o Keycloak no ADR 0007.
+  #
+  # Fica na porta 8081 porque a 8080 e do backend. O realm, os papeis e o tema
+  # da tela de login vem do repositorio do front, que e onde a Mirele mantem a
+  # configuracao: aqui so montamos os arquivos dela dentro do container.
+  #
+  # Nao guardamos o banco interno do Keycloak num volume de proposito: a
+  # configuracao do login fica no arquivo do realm, versionado no git, e e
+  # importada a cada vez que o container nasce. Conta criada a mao pelo painel
+  # vale enquanto o container existir; para valer sempre, entra no realm.
+  keycloak:
+    # Versao 26.6: a configuracao exportada pela Mirele usa campos que as
+    # versoes mais antigas nao sabem ler.
+    image: quay.io/keycloak/keycloak:26.6
+    command: ["start-dev", "--http-port=8081", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USUARIO}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_SENHA}
+    ports:
+      - "${PORTA_KEYCLOAK}:8081"
+    volumes:
+      - ../pi4-0102-g7-frontend/src/config/archflow-realm.json:/opt/keycloak/data/import/Archflow-realm.json:ro
+      - ../pi4-0102-g7-frontend/themes:/opt/keycloak/themes:ro
+    networks:
+      - rede_archflow
+
   backend:
     build: .
     environment:
       BANCO_URL: jdbc:postgresql://banco:5432/${POSTGRES_DB}
       BANCO_USUARIO: ${POSTGRES_USER}
       BANCO_SENHA: ${POSTGRES_PASSWORD}
+      # Chaves publicas com que o backend confere a assinatura do token. Dentro
+      # da rede do Docker o Keycloak atende pelo nome do servico.
+      KEYCLOAK_CERTIFICADOS: http://keycloak:8081/realms/Archflow/protocol/openid-connect/certs
     ports:
       - "${PORTA_BACKEND}:8080"
     depends_on:
       banco:
         # Espera o banco ficar pronto de verdade, nao so o container existir.
         condition: service_healthy
+      keycloak:
+        condition: service_started
     networks:
       - rede_archflow
 
