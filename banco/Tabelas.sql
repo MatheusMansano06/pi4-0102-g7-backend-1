@@ -5,7 +5,12 @@ CREATE TABLE materiais (
     especificacao VARCHAR(255),
     quantidade_disponivel INTEGER NOT NULL,
     quantidade_minima INTEGER NOT NULL,
-    ativo BOOLEAN NOT NULL
+    ativo BOOLEAN NOT NULL,
+    -- Politicas pendentes ficam NULL, sem supor regras para materiais reais.
+    aceita_dimensao BOOLEAN,
+    exige_dimensao BOOLEAN,
+    aceita_diametro BOOLEAN,
+    exige_diametro BOOLEAN
 );
 
 CREATE TABLE solicitacoes (
@@ -18,6 +23,8 @@ CREATE TABLE solicitacoes (
     atualizada_em TIMESTAMP,
     previsao_retirada TIMESTAMP,
     observacao VARCHAR(255),
+    dimensao VARCHAR(255),
+    diametro DOUBLE PRECISION,
 
     FOREIGN KEY (material_id)
         REFERENCES materiais(material_id)

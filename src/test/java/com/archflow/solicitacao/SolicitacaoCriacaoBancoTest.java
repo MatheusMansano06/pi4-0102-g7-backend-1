@@ -1,6 +1,7 @@
 package com.archflow.solicitacao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,6 +15,7 @@ import com.archflow.material.MaterialRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -126,6 +128,26 @@ public class SolicitacaoCriacaoBancoTest {
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.codigo").value("CONFIGURACAO_PENDENTE"));
         assertEquals(antes, this.solicitacoes.count());
+    }
+
+    @Test
+    public void pedidoCriadoApareceNoHistoricoDoAlunoCorreto() throws Exception {
+        Long pedidoId = this.criarPedido();
+        this.entidades.flush();
+        this.entidades.clear();
+        List<SolicitacaoHistoricoSaida> historico = this.status.listarHistorico("ALUNO", 12L);
+        boolean encontrado = false;
+        for (SolicitacaoHistoricoSaida pedido : historico) {
+            if (pedido.getSolicitacaoId().equals(pedidoId)) {
+                encontrado = true;
+                assertEquals(StatusSolicitacao.PENDENTE, pedido.getStatus());
+            }
+        }
+        assertTrue(encontrado, "O pedido criado deve aparecer no histórico do seu aluno.");
+        for (SolicitacaoHistoricoSaida pedido : this.status.listarHistorico("ALUNO", 13L)) {
+            assertFalse(pedido.getSolicitacaoId().equals(pedidoId),
+                    "O pedido não pode aparecer no histórico de outro aluno.");
+        }
     }
 
     private Long criarPedido() throws Exception {

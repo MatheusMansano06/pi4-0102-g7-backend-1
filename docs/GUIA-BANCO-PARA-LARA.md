@@ -6,7 +6,7 @@
 > A fotografia da main descrita abaixo não inclui esses novos campos.
 
 **Para:** Lara, responsável pelo H01.2, e equipe de backend.
-**Conferência:** 03/11/2026, após o merge autorizado da PR #8.
+**Conferência atualizada:** 04/11/2026, após a integração do banco (PR #12) e do histórico (PR #13) à main c14fb00.
 **Objetivo:** orientar os scripts do banco com base no código de todos os integrantes,
 identificando o que já existe, o que precisa ser acrescentado e o que depende de decisão.
 Este documento não executa SQL nem declara as propostas como aprovadas.
@@ -15,7 +15,7 @@ Este documento não executa SQL nem declara as propostas como aprovadas.
 
 | Referência | Situação conferida | Como usar |
 | --- | --- | --- |
-| Backend main `f90764e72ffce8fc924f7b3bb3e36638bbbb092c` | Inclui a PR #8 parcial | Base do mapeamento de entidades deste guia |
+| Backend main `c14fb003eb12ff534e01440680c8a44c909e226b` | Inclui estoque parcial, guia, banco e histórico | Base atual; a PR #14 acrescenta as seis colunas e o POST em revisão |
 | [PR #10 — especificação](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/10), commit `14995ca` | Aberta, em revisão; ainda fora da main | Contém propostas de campos e decisão Keycloak; não é esquema implementado |
 | [PR #9 — testes Docker sem banco](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/9) | Cancelada, sem merge, por decisão do grupo | Não faz parte da entrega atual |
 | Frontend main `036bf2297f7797aa6c6d51b64e53cf81a9b4feb7` | Formulário com medidas, observação e novas datas | Conferir lacunas da seção 6; não copiar os mocks como dados definitivos |
@@ -30,8 +30,7 @@ O backend usa Java 17, Spring Boot 3.2.5, JPA e PostgreSQL 15. Em
 [application.yml](../src/main/resources/application.yml), `ddl-auto: validate`
 está ativo: os scripts precisam criar as estruturas compatíveis antes de iniciar
 a aplicação. Essa opção não cria nem atualiza tabelas e não valida todas as regras
-de negócio. Na main conferida, `banco/` contém apenas LEIAME.md, sem SQL publicado.
-Isso não informa se a Lara já possui scripts locais ou em outra branch.
+de negócio. Na main conferida, `banco/Tabelas.sql` já cria materiais e solicitacoes, sem carga de dados. A PR #14 aproveita esse arquivo e acrescenta as seis colunas do POST; elas ainda não estão na main. O ALTER em docs/sql serve para cópias já inicializadas e não apaga os dados.
 
 ## 2. Entregas acumuladas e efeito no banco
 
@@ -45,6 +44,7 @@ Isso não informa se a Lara já possui scripts locais ou em outra branch.
 | [PR #6](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/6), CT06 / `fca471d` | Mudança de status, data de atualização e previsão opcional | Preservar status como texto, datas e previsão; conferir transições abaixo |
 | [PR #7](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/7) | Convenções alinhadas ao material da disciplina | Sem mudança de esquema |
 | [PR #8](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/8), CT05 / `a9e11dc` e `6dc4348` | Validações, operação e testes do estoque, com PATCH desativado por padrão | Não adicionou coluna. Falta persistir a data do estoque em conjunto com o saldo |
+| [PR #12](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/12) e [PR #13](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/13) | SQL básico da Lara e consulta de histórico do Matheus integrados | Materiais/solicitações já têm CREATE TABLE; histórico usa datas e usuario_id. Novas colunas do POST preparadas na PR #14 |
 | PR #10 / #1136 | Contratos e propostas de material/pedido, Keycloak e requisitos do banco | Prever alinhamento das próximas colunas, sem confundir proposta com entidade pronta |
 
 O histórico atribui os commits funcionais anteriores de catálogo/fila/status a
@@ -59,8 +59,8 @@ As atribuições do planejamento e a autoria dos commits são informações dist
 - `PATCH /api/solicitacoes/{solicitacaoId}/status`: altera status/previsão; também usa `X-Perfil` provisório.
 - `PATCH /api/materiais/{materialId}/estoque`: **não registrado por padrão** após a PR #8.
   A propriedade `archflow.estoque.em-desenvolvimento` só é ativada pelos testes.
-- Login, criação de pedido por POST, notificações, histórico e painel de prazos:
-  sem endpoints implementados na main conferida. Existem contratos e/ou modelos parciais.
+- `GET /api/solicitacoes/historico`: implementado na main pela PR #13, com identidade/perfil ainda provisórios; aluno consulta seus pedidos, responsável consulta todos.
+- Login, criação de pedido por POST, notificações e painel de prazos: sem endpoints implementados na main conferida; o POST está em revisão na PR #14.
 
 Não ativar o PATCH de estoque no ambiente compartilhado para testar o banco antes
 da autorização real e da data persistida. A criação pela tela e as notificações
