@@ -1,6 +1,6 @@
 -- PROPOSTA TECNICA PARA REVISAO COM A LARA; NAO E SCRIPT DE INICIALIZACAO.
 -- Atualiza um banco que ja recebeu Tabelas.sql da PR #12 (main c14fb00).
--- O Tabelas.sql desta branch ja inclui as seis colunas para instalacoes novas.
+-- O banco/01-tabelas.sql ja inclui as seis colunas para instalacoes novas.
 -- Este arquivo fica em docs/, fora da pasta executada automaticamente pelo banco.
 -- Revisar antes de aplicar em ambiente compartilhado; testar primeiro em copia.
 -- IF NOT EXISTS permite repetir sem apagar dados; validate deve conferir os tipos.

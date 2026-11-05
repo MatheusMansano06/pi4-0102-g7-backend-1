@@ -1,9 +1,14 @@
 # Guia do banco — consolidação do backend ArchFlow
 
-> Atualização proposta no #1145: a branch H04.1 acrescenta o POST e seis campos
-> mapeados, ainda fora da main. Revisar [implementação e dependências](H04.1-CRIAR-SOLICITACAO.md)
-> e o [SQL de revisão](sql/H04.1-colunas-propostas.sql) antes de evoluir o esquema.
-> A fotografia da main descrita abaixo não inclui esses novos campos.
+> Atualização de 04/11/2026: Luis autorizou o merge parcial da PR #14 para análise
+> do Matheus na main, mantendo pendente a revisão das seis colunas pela Lara e
+> a combinação/aplicação do ALTER no banco existente. Revisar
+> [implementação e dependências](H04.1-CRIAR-SOLICITACAO.md) e o
+> [SQL de revisão](sql/H04.1-colunas-propostas.sql). Keycloak, políticas por material,
+> unidades e limites continuam pendentes; não há aplicação automática no banco
+> compartilhado. A base foi atualizada com a PR #15: banco/01-tabelas.sql mantém
+> as seis colunas e banco/02-dados-exemplo.sql mantém os exemplos dos colegas,
+> com políticas NULL. As seções abaixo são a fotografia anterior da main c14fb00.
 
 **Para:** Lara, responsável pelo H01.2, e equipe de backend.
 **Conferência atualizada:** 04/11/2026, após a integração do banco (PR #12) e do histórico (PR #13) à main c14fb00.
