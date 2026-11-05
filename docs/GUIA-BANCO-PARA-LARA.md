@@ -1,0 +1,105 @@
+# Guia do banco do backend ArchFlow
+
+Atualização #1136 de 04/11/2026 sobre main 6181761, após PRs #12–#15.
+**Luis definiu dimensão e diâmetro permitidos e opcionais para todos os materiais
+do MVP.** A especificação é sua entrega H01.4; não é pendência de a Lara decidir
+os requisitos. Lara/H01.2 revisa/implementa a estrutura e coordena a aplicação.
+
+A referência é o [dicionário das seis colunas](especificacao/colunas-materiais-e-solicitacoes.md),
+com tipo, nulabilidade, default, unidade e correspondência CT03/CT11/CT12.
+A revisão está na PR #10; PR #14 já foi integrada parcialmente e permanece como
+histórico da implementação. Não é necessária uma nova definição de colunas do zero.
+
+## Estrutura e scripts
+
+Java 17, Spring Boot 3.2.5, JPA e PostgreSQL 15; ddl-auto: validate confere
+compatibilidade e não cria/migra esquema. Regras Java não viram automaticamente
+CHECK, NOT NULL, DEFAULT ou índices no SQL.
+
+| Arquivo | Uso |
+| --- | --- |
+| [01-tabelas.sql](../banco/01-tabelas.sql) | Criação nova de materiais/solicitacoes, seis campos e defaults do MVP |
+| [02-dados-exemplo.sql](../banco/02-dados-exemplo.sql) | Materiais/pedidos de demonstração; quatro regras explícitas nos materiais |
+| [H04.1-colunas-propostas.sql](sql/H04.1-colunas-propostas.sql) | Banco existente; adiciona campos, define defaults e configura as regras; fora da inicialização automática |
+
+O script de atualização agora contém UPDATE dos quatro indicadores, porque o
+Luis confirmou a regra uniforme. Não altera saldo, ativo, identificação, pedidos
+ou datas. Pode repetir, sem DROP/recriar volume. IF NOT EXISTS não corrige tipos
+incompatíveis já existentes. Combinar destino/cópia de segurança/aplicação antes
+de iniciar a API atualizada. Esta entrega não executa o SQL no banco compartilhado.
+
+## Tabelas que o backend usa
+
+Fontes: [Material](../src/main/java/com/archflow/material/Material.java) e
+[Solicitacao](../src/main/java/com/archflow/solicitacao/Solicitacao.java).
+
+| materiais | Tipo / regra |
+| --- | --- |
+| material_id | BIGINT IDENTITY, PK |
+| nome, descricao, especificacao | VARCHAR(255); descrição fixa, não política por interpretação do nome |
+| quantidade_disponivel, quantidade_minima | INTEGER NOT NULL; Java recusa negativo |
+| ativo | BOOLEAN NOT NULL; inativo não aparece no catálogo nem aceita pedido |
+| aceita_dimensao, aceita_diametro | BOOLEAN anulável DEFAULT TRUE |
+| exige_dimensao, exige_diametro | BOOLEAN anulável DEFAULT FALSE |
+
+statusEstoque é calculado: zero INDISPONIVEL; positivo até o mínimo BAIXO;
+acima do mínimo DISPONIVEL. Não precisa de coluna. parametrosAceitos e
+parametrosObrigatorios serão projeções dos booleanos, não novas colunas.
+NULL nas regras ainda identifica configuração incompleta, recusada no POST.
+Data atualizada_em do estoque ainda não existe em Material; é outro recorte #1154.
+
+| solicitacoes | Tipo / regra |
+| --- | --- |
+| solicitacao_id | BIGINT IDENTITY, PK |
+| usuario_id | BIGINT; aluno resolvido pela identidade validada |
+| material_id | BIGINT, FK materiais.material_id |
+| quantidade | INTEGER NOT NULL, positiva no Java |
+| status | VARCHAR(255), nomes do enum |
+| criada_em, atualizada_em, previsao_retirada | TIMESTAMP; previsão opcional; criação/atualização do servidor |
+| observacao | VARCHAR(255), anulável; já existente antes da PR #14 |
+| dimensao | VARCHAR(255), anulável, texto em mm do pedido |
+| diametro | DOUBLE PRECISION, anulável, número positivo/finito em mm |
+
+Não criar largura/altura adicionais neste recorte. Não alterar especificacao do
+material ao gravar medida do pedido. Double não significa decimal exato nem fixa
+casas decimais. A API ainda precisa antecipar o limite de texto do banco.
+
+## Pedidos estados e consultas
+
+POST /api/solicitacoes retorna 201 após gravação, com PENDENTE, aluno e horários
+do servidor. Medidas/observação são preservadas em atualizações. Sem contexto
+Keycloak validado, corpo válido recebe 401; X-Perfil não libera este POST.
+
+Estados: PENDENTE, EM_SEPARACAO, AGUARDANDO_COMPRA, PRONTO_PARA_RETIRADA,
+CONCLUIDO e CANCELADO. [CT06](contratos/CT06-atualizarStatus.md) registra as
+transições do código. Status é texto, nunca posição de enum. A fila sem filtro
+exclui só CONCLUIDO atualmente. Histórico da PR #13 já existe, com identidade
+provisória a substituir; não remover pedidos históricos.
+
+PATCH de status preserva previsão se ausente/null e recusa previsão passada.
+Não criar baixa automática ou notificações por trigger: não são efeitos definidos
+por esta revisão. usuarioId ainda é número, sem relação JPA com Usuario; vínculo
+com Keycloak é separado, sem FK presumida para tabela interna do provedor.
+
+## O que resta por módulo
+
+| Item | Quem conduz / situação |
+| --- | --- |
+| Aplicar atualização no banco existente | Lara/H01.2 coordena o destino com o SQL/especificação entregues pelo Luis |
+| Keycloak e vínculo com usuarioId | Luis/H02.1 e Matheus/H02.2; provedor escolhido, integração pendente |
+| Data persistida do estoque | Luis/#1154; PATCH da PR #8 desativado por padrão e data ainda só no DTO |
+| Metadados no catálogo | Projetar booleanos conforme CT02; DTO ainda não os expõe |
+| Formulário #1147 | Frontend ea8620f já consulta catálogo na API; modal ainda não envia o pedido |
+| dataLimite | Fora de CT03/CT12; não confundir com previsaoRetirada ou relógio de criação |
+| Notificações | H09.1/Lara produz; #1161/Luis consulta; esquema próprio ainda a detalhar |
+
+Não criar senha_hash/sessoes da hipótese antiga: Keycloak foi escolhido pelo
+grupo. Não preencher dados de usuário, horários históricos ou regras por material
+por suposição. A configuração uniforme de medidas decorre da confirmação do Luis.
+
+## Verificação
+
+A PR #14 teve 67 testes padrão aprovados e quatro PostgreSQL aprovados em cada
+um de dois cenários (novo/migrado). A evidência dessa revisão de defaults e
+configuração fica na PR #10; testes de fixture não provam autenticação ou pedido
+pela tela. Não declarar cards concluídos ou atualizar OpenProject por este guia.

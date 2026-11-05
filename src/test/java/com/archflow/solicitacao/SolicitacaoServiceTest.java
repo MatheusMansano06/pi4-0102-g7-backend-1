@@ -87,6 +87,36 @@ public class SolicitacaoServiceTest {
     }
 
     @Test
+    public void semPerfilOHistoricoRecusaPorFaltaDeAutenticacao() {
+        try {
+            this.servico().listarHistorico(null, 1L);
+            fail("O historico nao podia ter respondido a quem nao se identificou.");
+        } catch (NaoAutenticadoException erro) {
+            assertEquals(CodigosDeErro.NAO_AUTENTICADO, erro.getCodigo());
+        }
+    }
+
+    @Test
+    public void perfilForaDaListaDoContratoNaoVeOHistorico() {
+        try {
+            this.servico().listarHistorico("COORDENADOR", 1L);
+            fail("Um perfil que o sistema nao conhece nao podia ter visto o historico.");
+        } catch (AcessoNegadoException erro) {
+            assertEquals(CodigosDeErro.ACESSO_NEGADO, erro.getCodigo());
+        }
+    }
+
+    @Test
+    public void alunoSemNumeroNaoVeOHistoricoDaTurma() {
+        try {
+            this.servico().listarHistorico("ALUNO", null);
+            fail("Sem saber qual aluno pediu, o historico nao podia ter sido montado.");
+        } catch (NaoAutenticadoException erro) {
+            assertEquals(CodigosDeErro.NAO_AUTENTICADO, erro.getCodigo());
+        }
+    }
+
+    @Test
     public void previsaoDeRetiradaNoPassadoERecusada() {
         LocalDateTime ontem = LocalDateTime.now().minusDays(1);
         try {

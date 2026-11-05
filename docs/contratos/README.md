@@ -1,13 +1,12 @@
 Contratos técnicos: ArchFlow
 
-Revisão documental do **#1136 — H01.4**, ainda em validação. O contrato alvo não
-equivale à implementação publicada. Cabeçalho, unidades e metadados novos são
-propostas; a equipe ainda não decidiu autenticação e políticas por material.
-
-- [Alinhamento, evidências e pendências](../especificacao/H01.4-alinhamento.md)
-- [Autenticação e rotas CT01–CT09](../especificacao/autenticacao.md)
-- [Material, pedido e correspondência com o modal](../especificacao/materiais-e-pedidos.md)
-- [Requisitos para alinhar o banco, sem SQL](../especificacao/requisitos-banco.md)
+Revisão do **#1136 — H01.4**, conduzida pelo Luis. Campos e política do MVP
+foram definidos: medidas opcionais para todos os materiais. Ver o
+[dicionário das seis colunas](../especificacao/colunas-materiais-e-solicitacoes.md),
+[alinhamento](../especificacao/H01.4-alinhamento.md),
+[autenticação](../especificacao/autenticacao.md) e
+[requisitos de banco](../especificacao/requisitos-banco.md).
+Keycloak ainda depende de integração; contrato alvo não equivale à implantação.
 
 CT01–CT09 são HTTP. CT10–CT13 são interfaces internas com o banco, não endpoints.
 Os opcionais do pedido precisam aparecer tanto no CT03 quanto no CT12. A lista

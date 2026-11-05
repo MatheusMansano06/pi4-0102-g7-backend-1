@@ -26,6 +26,23 @@ Exemplo do corpo JSON:
 }
 ```
 
+A operação substitui o saldo atual pelo valor informado: saldo 10 com entrada 24
+resulta em 24, não em 34. Zero é válido. Campo ausente, `null`, fração, texto,
+booleano e valores fora do intervalo de um inteiro Java são recusados; o backend
+não arredonda nem converte texto em quantidade.
+
+### Estado da implementação
+
+**Entrega parcial do #1154:** a rota não é registrada na configuração padrão.
+O catálogo continua disponível. O controller de estoque é separado e ativado
+somente na suíte de testes pela propriedade `archflow.estoque.em-desenvolvimento=true`.
+Não definir essa propriedade nos ambientes compartilhados ou de apresentação.
+
+Os testes da operação ainda usam `X-Perfil: RESPONSAVEL`. Esse cabeçalho é
+informado pelo próprio cliente e **não autentica o usuário**. O grupo escolheu
+Keycloak; integrar a identidade e as permissões do H02.2 antes de liberar a rota.
+Ver [escopo e pendências da entrega parcial](../ESTOQUE-PARCIAL.md).
+
 ## Saída
 
 | Campo | Tipo | Obrigatório | Exemplo |
@@ -34,26 +51,21 @@ Exemplo do corpo JSON:
 | quantidadeDisponivel | inteiro | sim | 24 |
 | atualizadaEm | data e hora persistida (ISO 8601) | sim | 2026-10-13T12:05:00 |
 
+Contrato alvo: HTTP 200, devolvendo a data gravada junto com a quantidade.
+Na implementação parcial exercitada pelos testes, `atualizadaEm` ainda é calculada
+apenas na resposta. Isso **não atende** a persistência exigida no CT11/#1154.
+Alinhar a coluna com o SQL da equipe antes de implementar e liberar a operação.
+
 ## Erros
 
 | Quando | HTTP | O que volta |
 | :--- | :--- | :--- |
-| Usuário sem autenticação | 401 | Erro `NAO_AUTENTICADO` |
+| Usuário sem autenticação; provisoriamente, perfil ausente/vazio | 401 | Erro `NAO_AUTENTICADO` |
 | Perfil diferente de RESPONSAVEL | 403 | Erro `ACESSO_NEGADO` |
 | Material inexistente | 404 | Erro `MATERIAL_NAO_ENCONTRADO` |
-| Quantidade negativa ou inválida | 400 | Erro `QUANTIDADE_INVALIDA` |
+| Quantidade ausente, negativa ou inválida; corpo ilegível | 400 | Erro `QUANTIDADE_INVALIDA` |
 | Falha ao gravar | 500 | Erro `ERRO_INTERNO` |
 
-Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida segue a proposta comum de HTTP 401 / NAO_AUTENTICADO.
-
-## Regra de gravação
-
-O responsável substitui o saldo: 10 com entrada 24 resulta em 24. Zero é válido;
-ausência, null, fração, texto e quantidade negativa retornam QUANTIDADE_INVALIDA.
-CT11 grava quantidadeDisponivel e atualizadaEm juntos; CT05 devolve o horário
-persistido. Sucesso proposto: HTTP 200, somente após gravação confirmada.
-
-A PR #8 tem a rota/validações, mas gera horário apenas no DTO e usa X-Perfil.
-Isso não conclui a gravação da data nem a autenticação requeridas. Sua documentação
-e implementação devem ser atualizadas após esta revisão, não reduzindo o requisito.
-Campo, precisão/fuso e inicialização de datas legadas estão na [lista para o banco](../especificacao/requisitos-banco.md).
+Os erros mantêm o formato `{ "codigo": "...", "mensagem": "..." }` do ADR 0004.
+Banco PostgreSQL e autenticação real são dependências da demonstração integrada;
+os testes da rota substituem apenas o repositório e não comprovam essas integrações.

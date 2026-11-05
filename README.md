@@ -4,6 +4,16 @@ Backend do ArchFlow, sistema de solicitacao e controle de materiais do Atelie CE
 
 Projeto Integrador IV - PUC-Campinas - Turma 0102 - Grupo 7.
 
+A [criação de solicitação H04.1](docs/H04.1-CRIAR-SOLICITACAO.md) já foi integrada parcialmente. O [dicionário das seis colunas](docs/especificacao/colunas-materiais-e-solicitacoes.md) define medidas permitidas e opcionais para todos os materiais. Aplicar a atualização no banco existente e integrar a identidade Keycloak antes de demonstrar o fluxo real.
+
+O controle de estoque tem uma [entrega parcial](docs/ESTOQUE-PARCIAL.md): regras
+e testes preparados, com a rota de alteração desativada por padrão enquanto
+faltam autenticação Keycloak e persistência da data. O catálogo segue disponível.
+
+Para construir o banco a partir do backend atual, consultar o
+[guia consolidado para a Lara](docs/GUIA-BANCO-PARA-LARA.md): entidades,
+entregas da equipe, campos pendentes e sequência de validação.
+
 | | |
 | :--- | :--- |
 | Linguagem | Java 17 |

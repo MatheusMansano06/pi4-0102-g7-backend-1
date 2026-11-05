@@ -41,7 +41,7 @@
 | Campo adicional na consulta interna | Situação / regra |
 | --- | --- |
 | especificacao, quantidadeMinima, ativo | Já existem na entidade Material |
-| parametrosAceitos, parametrosObrigatorios | Metadados propostos, política e armazenamento a validar |
+| aceitaDimensao, exigeDimensao, aceitaDiametro, exigeDiametro | Boolean anuláveis lidos da entidade; regra do MVP TRUE/FALSE/TRUE/FALSE |
 | atualizadaEm | Persistir junto da atualização do saldo, não gerar só na resposta |
 
 statusEstoque é derivado do saldo e do mínimo, sem exigir coluna própria.
@@ -51,3 +51,12 @@ Este contrato é interno: a identidade/permissão já foi conferida na camada de
 não é um endpoint que recebe Authorization diretamente. Falha de gravação não
 pode ser apresentada como sucesso em CT05. Tipos físicos e regras de migração
 seguem para [alinhamento com o banco](../especificacao/requisitos-banco.md).
+
+## Mapeamento definido no #1136
+
+Luis confirmou medidas opcionais para todos. As quatro regras são colunas
+BOOLEAN anuláveis em materiais, com defaults TRUE/FALSE/TRUE/FALSE,
+respectivamente; nomes físicos no [dicionário](../especificacao/colunas-materiais-e-solicitacoes.md).
+NULL/incoerência ainda causa 503 no POST até corrigir a configuração.
+parametrosAceitos/parametrosObrigatorios são projeções de CT02, não outras
+colunas. Os valores no MVP são DIMENSAO/DIAMETRO aceitos, nenhum obrigatório.

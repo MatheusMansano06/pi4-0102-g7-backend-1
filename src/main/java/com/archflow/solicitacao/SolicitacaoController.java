@@ -32,6 +32,18 @@ public class SolicitacaoController {
         return this.solicitacaoService.listarFila(perfil, status);
     }
 
+    // CT08: GET /api/solicitacoes/historico
+    //
+    // Provisorio, pelo mesmo motivo do X-Perfil: o numero do aluno chega no
+    // cabecalho X-Usuario-Id enquanto o login nao existe. Quando existir, quem
+    // pediu sai da sessao e os dois cabecalhos deixam de existir.
+    @GetMapping("/historico")
+    public List<SolicitacaoHistoricoSaida> listarHistorico(
+            @RequestHeader(name = "X-Perfil", required = false) String perfil,
+            @RequestHeader(name = "X-Usuario-Id", required = false) Long usuarioId) {
+        return this.solicitacaoService.listarHistorico(perfil, usuarioId);
+    }
+
     // CT06: PATCH /api/solicitacoes/{solicitacaoId}/status
     @PatchMapping("/{solicitacaoId}/status")
     public SolicitacaoStatusSaida atualizarStatus(

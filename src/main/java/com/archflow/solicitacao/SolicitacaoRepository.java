@@ -10,4 +10,10 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     List<Solicitacao> findByStatusOrderByCriadaEmAsc(StatusSolicitacao status);
 
     Solicitacao findBySolicitacaoId(Long solicitacaoId);
+
+    // CT08: o historico comeca pelo pedido mais novo, porque e o que o aluno
+    // procura primeiro quando abre a tela.
+    List<Solicitacao> findByUsuarioIdOrderByCriadaEmDesc(Long usuarioId);
+
+    List<Solicitacao> findAllByOrderByCriadaEmDesc();
 }

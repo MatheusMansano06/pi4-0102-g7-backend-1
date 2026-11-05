@@ -27,8 +27,8 @@
 | descricao | texto | não | Chapa para maquete |
 | especificacao | texto | não | 12 mm · 600 × 400 mm |
 | statusEstoque | DISPONIVEL, BAIXO ou INDISPONIVEL | sim | DISPONIVEL |
-| parametrosAceitos | lista proposta de DIMENSAO e/ou DIAMETRO | a validar | ["DIMENSAO"] |
-| parametrosObrigatorios | subconjunto proposto de parametrosAceitos | a validar | ["DIMENSAO"] |
+| parametrosAceitos | lista derivada dos booleanos, alvo ainda não implementado | na projeção futura; null se configuração inválida | ["DIMENSAO", "DIAMETRO"] |
+| parametrosObrigatorios | lista derivada, vazia no MVP | na projeção futura; null se configuração inválida | [] |
 | quantidadeDisponivel | inteiro | sim, por material | 24 |
 
 ## Erros
@@ -43,11 +43,19 @@ Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/
 ## Forma da resposta e parâmetros
 
 O corpo é uma lista direta, como no controller atual; não é um objeto envolvendo
-materiais. Cada item possui os campos acima. Os metadados de parâmetros são uma
-proposta nova, ainda ausente no DTO; consultar [materiais e pedidos](../especificacao/materiais-e-pedidos.md).
+materiais. Os campos atuais de MaterialSaida não incluem os dois metadados. A sua projeção é uma
+definição do #1136, ainda a implementar no DTO; consultar [materiais e pedidos](../especificacao/materiais-e-pedidos.md).
 A busca implementada filtra nome; a busca também por especificação na tela é uma
 divergência a alinhar antes de prometer esse comportamento na API.
 
 Saldo zero produz INDISPONIVEL; saldo positivo até quantidadeMinima produz BAIXO;
 acima disso, DISPONIVEL. A interface adapta os nomes para rótulos/classes CSS.
 A exigência de autenticação desta ficha ainda não está implementada no GET atual.
+
+## Regra definida no MVP
+
+Dimensão e diâmetro são permitidos e opcionais para todos os materiais,
+confirmados pelo Luis. Os metadados derivam dos quatro BOOLEAN de CT11, sem
+arrays adicionais no banco. Ver o [dicionário](../especificacao/colunas-materiais-e-solicitacoes.md).
+Configuração NULL/incoerente deve ser sinalizada pelos metadados null, sem
+inferir regras de especificacao. Não prometer essa projeção na resposta atual.

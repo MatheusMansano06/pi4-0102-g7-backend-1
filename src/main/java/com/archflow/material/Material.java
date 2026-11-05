@@ -26,6 +26,15 @@ public class Material {
 
     private boolean ativo;
 
+    // Null significa que a equipe ainda não definiu a política deste material.
+    private Boolean aceitaDimensao;
+
+    private Boolean exigeDimensao;
+
+    private Boolean aceitaDiametro;
+
+    private Boolean exigeDiametro;
+
     public Material() {
     }
 
@@ -98,6 +107,38 @@ public class Material {
 
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public Boolean getAceitaDimensao() {
+        return this.aceitaDimensao;
+    }
+
+    public void setAceitaDimensao(Boolean aceitaDimensao) {
+        this.aceitaDimensao = aceitaDimensao;
+    }
+
+    public Boolean getExigeDimensao() {
+        return this.exigeDimensao;
+    }
+
+    public void setExigeDimensao(Boolean exigeDimensao) {
+        this.exigeDimensao = exigeDimensao;
+    }
+
+    public Boolean getAceitaDiametro() {
+        return this.aceitaDiametro;
+    }
+
+    public void setAceitaDiametro(Boolean aceitaDiametro) {
+        this.aceitaDiametro = aceitaDiametro;
+    }
+
+    public Boolean getExigeDiametro() {
+        return this.exigeDiametro;
+    }
+
+    public void setExigeDiametro(Boolean exigeDiametro) {
+        this.exigeDiametro = exigeDiametro;
     }
 
     // Sem nenhuma unidade em estoque o material nao pode ser pedido.
