@@ -1,5 +1,10 @@
 # Guia do banco — consolidação do backend ArchFlow
 
+> Atualização proposta no #1145: a branch H04.1 acrescenta o POST e seis campos
+> mapeados, ainda fora da main. Revisar [implementação e dependências](H04.1-CRIAR-SOLICITACAO.md)
+> e o [SQL de revisão](sql/H04.1-colunas-propostas.sql) antes de evoluir o esquema.
+> A fotografia da main descrita abaixo não inclui esses novos campos.
+
 **Para:** Lara, responsável pelo H01.2, e equipe de backend.
 **Conferência:** 03/11/2026, após o merge autorizado da PR #8.
 **Objetivo:** orientar os scripts do banco com base no código de todos os integrantes,

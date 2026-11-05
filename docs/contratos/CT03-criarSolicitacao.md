@@ -1,5 +1,10 @@
 # CT03: criarSolicitacao
 
+> Implementação proposta no #1145: ver [H04.1](../H04.1-CRIAR-SOLICITACAO.md).
+> A branch prepara POST/201 e persistência de medidas, mas depende de novas colunas,
+> regras por material e identidade Keycloak. A ficha abaixo deve ser conciliada
+> com a PR #10 antes de integrar; não comprova operação liberada na main.
+
 | Linha | Valor |
 | :--- | :--- |
 | Fronteira | HTTP |

@@ -39,6 +39,10 @@ public class Solicitacao {
 
     private String observacao;
 
+    private String dimensao;
+
+    private Double diametro;
+
     public Solicitacao() {
     }
 
@@ -48,7 +52,7 @@ public class Solicitacao {
         this.setQuantidade(quantidade);
         this.setObservacao(observacao);
         this.setStatus(StatusSolicitacao.PENDENTE);
-        this.criadaEm = LocalDateTime.now();
+        this.criadaEm = this.atualizadaEm;
     }
 
     public Long getSolicitacaoId() {
@@ -123,6 +127,22 @@ public class Solicitacao {
 
     public void setObservacao(String observacao) {
         this.observacao = observacao;
+    }
+
+    public String getDimensao() {
+        return this.dimensao;
+    }
+
+    public void setDimensao(String dimensao) {
+        this.dimensao = dimensao;
+    }
+
+    public Double getDiametro() {
+        return this.diametro;
+    }
+
+    public void setDiametro(Double diametro) {
+        this.diametro = diametro;
     }
 
     // CT06: a tabela de transicoes da secao 4 de docs/pendencias.md diz para
