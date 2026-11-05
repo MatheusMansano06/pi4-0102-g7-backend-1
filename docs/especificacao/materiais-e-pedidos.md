@@ -31,7 +31,8 @@ impedindo pedidos mesmo com a política preenchida.
 Pode enviar apenas materialId e quantidade, ou acrescentar uma/as duas medidas.
 O modal compõe largura/altura em conjunto; API preserva texto sem analisar esses
 números. HTTP 201 devolve medidas/observação salvas. Textos têm capacidade de
-255 caracteres; falta antecipar esse limite na validação Java de H04.1.
+255 pela contagem Java String.length(); H04.1 antecipa esse limite com
+400 DADOS_INVALIDOS antes de gravar, preservando textos permitidos sem corte/trim.
 Não prometer máximos de fabricação ou precisão decimal exata sem requisito.
 
 dataLimite continua fora do contrato e não é previsaoRetirada. Não decidir

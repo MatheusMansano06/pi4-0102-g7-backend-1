@@ -62,7 +62,9 @@ Data atualizada_em do estoque ainda não existe em Material; é outro recorte #1
 
 Não criar largura/altura adicionais neste recorte. Não alterar especificacao do
 material ao gravar medida do pedido. Double não significa decimal exato nem fixa
-casas decimais. A API ainda precisa antecipar o limite de texto do banco.
+casas decimais. A entrada da API antecipa o limite de dimensão/observação com
+String.length(): acima de 255 recebe 400 DADOS_INVALIDOS antes de gravar.
+O texto permitido não é cortado/aparado; a métrica Java está no dicionário.
 
 ## Pedidos estados e consultas
 
@@ -73,8 +75,8 @@ Keycloak validado, corpo válido recebe 401; X-Perfil não libera este POST.
 Estados: PENDENTE, EM_SEPARACAO, AGUARDANDO_COMPRA, PRONTO_PARA_RETIRADA,
 CONCLUIDO e CANCELADO. [CT06](contratos/CT06-atualizarStatus.md) registra as
 transições do código. Status é texto, nunca posição de enum. A fila sem filtro
-exclui só CONCLUIDO atualmente. Histórico da PR #13 já existe, com identidade
-provisória a substituir; não remover pedidos históricos.
+exclui só CONCLUIDO atualmente. Histórico da PR #13 já existe; a PR #16 substitui
+os cabeçalhos provisórios pela identidade do token. Não remover pedidos históricos.
 
 PATCH de status preserva previsão se ausente/null e recusa previsão passada.
 Não criar baixa automática ou notificações por trigger: não são efeitos definidos
@@ -86,10 +88,10 @@ com Keycloak é separado, sem FK presumida para tabela interna do provedor.
 | Item | Quem conduz / situação |
 | --- | --- |
 | Aplicar atualização no banco existente | Lara/H01.2 coordena o destino com o SQL/especificação entregues pelo Luis |
-| Keycloak e vínculo com usuarioId | Luis/H02.1 e Matheus/H02.2; provedor escolhido, integração pendente |
+| Keycloak e vínculo com usuarioId | PR #16/H02.2 integrada: token fornece usuarioId/perfil; #1141/Luis deve integrar e provar pela tela |
 | Data persistida do estoque | Luis/#1154; PATCH da PR #8 desativado por padrão e data ainda só no DTO |
 | Metadados no catálogo | Projetar booleanos conforme CT02; DTO ainda não os expõe |
-| Formulário #1147 | Frontend ea8620f já consulta catálogo na API; modal ainda não envia o pedido |
+| Formulário #1147 | Frontend 5f97581 já tem login visual; catálogo ainda sem Bearer e modal sem envio do pedido |
 | dataLimite | Fora de CT03/CT12; não confundir com previsaoRetirada ou relógio de criação |
 | Notificações | H09.1/Lara produz; #1161/Luis consulta; esquema próprio ainda a detalhar |
 

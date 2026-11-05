@@ -2,15 +2,16 @@
 
 Definição #1136 conciliada com o POST parcial integrado pela PR #14.
 [Campos e regras](../especificacao/colunas-materiais-e-solicitacoes.md) definidos
-pelo Luis; [integração de identidade](../H04.1-CRIAR-SOLICITACAO.md) ainda necessária.
+pelo Luis; [identidade no backend](../H04.1-CRIAR-SOLICITACAO.md) fornecida pela
+PR #16/H02.2. Envio da credencial pela tela ainda depende do #1141.
 
 | Linha | Valor |
 | --- | --- |
 | Fronteira | HTTP, frontend → Backend API |
 | Atende | E3 |
 | Chamada | POST /api/solicitacoes |
-| Acesso | ALUNO; identidade validada no servidor, a integrar com Keycloak/H02.2 |
-| Transporte alvo da credencial | Authorization: Bearer; não confundir header livre com contexto validado |
+| Acesso | ALUNO; identidade validada no servidor pelo filtro da PR #16/H02.2 |
+| Transporte da credencial | Authorization: Bearer; não confundir header livre com contexto validado |
 | Sucesso | HTTP 201 após gravação confirmada |
 
 ## Entrada
@@ -71,14 +72,15 @@ são definidos no servidor. dataLimite não é previsaoRetirada.
 | Identidade validada ausente | 401 | NAO_AUTENTICADO |
 | Identidade não ALUNO | 403 | ACESSO_NEGADO |
 | materialId/corpo/campo desconhecido inválido | 400 | DADOS_INVALIDOS |
+| dimensao ou observacao acima de 255 na contagem Java | 400 | DADOS_INVALIDOS |
 | Quantidade ausente, não inteira ou não positiva | 400 | QUANTIDADE_INVALIDA |
 | Material inexistente/inativo | 404 | MATERIAL_NAO_ENCONTRADO |
 | Medida inválida ou incompatível com política explicitamente configurada | 400 | PARAMETROS_INVALIDOS |
 | Política NULL/incoerente no material | 503 | CONFIGURACAO_PENDENTE |
 | Falha de gravação | 500 | ERRO_INTERNO |
 
-Formato: objeto com codigo e mensagem. Binding de corpo ilegível pode gerar 400
-antes do serviço; ordem de autenticação real será validada no filtro H02.2.
+Formato: objeto com codigo e mensagem. O filtro H02.2 recusa a ausência de token
+antes do controller; com identidade válida, binding de corpo ilegível gera 400.
 X-Perfil, X-Usuario-Id e nome de Principal genérico não autenticam este POST.
 
 ## Persistência e diferenças para a integração
@@ -87,7 +89,9 @@ CT12 grava pedido PENDENTE, horários inicialmente iguais, aluno validado e os
 opcionais; medidas são preservadas em mudanças de status/previsão. Não baixa ou
 reserva saldo e não cria notificações nesta operação.
 
-A API atual ainda não analisa os números no texto dimensao nem antecipa o limite
-de 255 caracteres; não declarar essas verificações implementadas. O formulário
-compõe largura/altura em mm na futura integração #1147. Keycloak ainda precisa
-produzir UsuarioAutenticado; corpo válido sem esse contexto recebe 401.
+A entrada valida dimensão e observação com String.length(): até 255 unidades
+UTF-16, sem contar bytes, cortar ou aparar o texto. Acima disso, recusa antes
+da persistência e identifica o campo na mensagem; null/ausência são permitidos.
+A API não analisa os números no texto dimensao. O formulário
+compõe largura/altura em mm na futura integração #1147. A PR #16 produz
+UsuarioAutenticado; sem Bearer válido o filtro recusa a chamada com 401.
