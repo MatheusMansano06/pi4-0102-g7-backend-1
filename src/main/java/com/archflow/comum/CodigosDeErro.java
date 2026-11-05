@@ -23,4 +23,5 @@ public class CodigosDeErro {
 
     // Falha inesperada
     public static final String ERRO_INTERNO = "ERRO_INTERNO";
+    public static final String CONFIGURACAO_PENDENTE = "CONFIGURACAO_PENDENTE";
 }

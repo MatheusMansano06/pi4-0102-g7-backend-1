@@ -16,6 +16,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class TratadorDeErros {
 
+    @ExceptionHandler(ConfiguracaoPendenteException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErroSaida tratarConfiguracaoPendente(ConfiguracaoPendenteException erro) {
+        return new ErroSaida(erro.getCodigo(), erro.getMessage());
+    }
+
     // 404: o recurso pedido nao existe.
     @ExceptionHandler(NaoEncontradoException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

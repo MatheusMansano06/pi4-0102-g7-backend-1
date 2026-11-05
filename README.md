@@ -4,6 +4,10 @@ Backend do ArchFlow, sistema de solicitacao e controle de materiais do Atelie CE
 
 Projeto Integrador IV - PUC-Campinas - Turma 0102 - Grupo 7.
 
+A [proposta de criação de solicitação H04.1](docs/H04.1-CRIAR-SOLICITACAO.md)
+implementa o POST com validações e testes. Requer alinhamento das colunas novas
+com o banco e do contexto de identidade com Keycloak antes de integrar esta branch.
+
 O controle de estoque tem uma [entrega parcial](docs/ESTOQUE-PARCIAL.md): regras
 e testes preparados, com a rota de alteração desativada por padrão enquanto
 faltam autenticação Keycloak e persistência da data. O catálogo segue disponível.
