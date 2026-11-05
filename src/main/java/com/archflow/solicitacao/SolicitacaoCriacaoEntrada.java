@@ -96,7 +96,15 @@ public class SolicitacaoCriacaoEntrada {
             throw new NegocioException(CodigosDeErro.DADOS_INVALIDOS,
                     "O campo " + campo + " deve ser texto.");
         }
-        return (String) valor;
+        return this.textoComTamanhoValido((String) valor, campo);
+    }
+
+    private String textoComTamanhoValido(String texto, String campo) {
+        if (texto.length() > 255) {
+            throw new NegocioException(CodigosDeErro.DADOS_INVALIDOS,
+                    "O campo " + campo + " deve conter no máximo 255 caracteres.");
+        }
+        return texto;
     }
 
     @JsonAnySetter

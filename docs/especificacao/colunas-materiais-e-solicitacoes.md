@@ -64,10 +64,12 @@ implicitamente. O exemplo antigo em cm é substituído pelo formato em mm da tel
 Essas verificações da dupla são tarefa da integração do formulário: a API atual
 recebe texto e não promete analisar os números contidos nele.
 
-**Diferença de implementação:** a API ainda não antecipa a rejeição dos textos
-acima de 255 caracteres; o banco impõe o tamanho. H04.1 deve acrescentar essa
-validação e erro 400 DADOS_INVALIDOS antes de ser declarado completo. Esta
-revisão documental/SQL não altera essa validação Java.
+**Validação de entrada no #1145:** dimensão e observação acima do limite são
+recusadas com HTTP 400 DADOS_INVALIDOS antes da gravação. Até 255, o texto é
+preservado integralmente, sem corte ou trim; ausente/null continua permitido.
+A contagem usa String.length(), conforme os exemplos da ApostilaProfAndre.pdf,
+página 81: unidades UTF-16, não bytes. Caracteres suplementares ocupam duas
+unidades nessa contagem, que é conservadora em relação à capacidade do VARCHAR.
 
 ## Política explícita dos materiais de exemplo
 

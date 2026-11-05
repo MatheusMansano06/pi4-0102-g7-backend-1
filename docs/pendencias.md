@@ -13,6 +13,8 @@ H01.2, sem ter de elaborar regras funcionais que faltavam na especificação.
   VARCHAR(255), diâmetro DOUBLE PRECISION, ambos anuláveis. Observação já existe.
 - CT03 retorna 201 e CT12 preserva os opcionais; não retirar medidas para acomodar
   entidades antigas. Código e seis colunas já entraram parcialmente na PR #14.
+- Entrada H04.1 valida dimensão/observação até 255 por String.length(), com erro
+  400 DADOS_INVALIDOS no excesso e sem corte/trim dos textos permitidos.
 
 ## Entrega física e integrações
 
@@ -20,7 +22,6 @@ H01.2, sem ter de elaborar regras funcionais que faltavam na especificação.
 | --- | --- |
 | Banco existente receber a configuração/colunas | H01.2/Lara coordena execução do [script definido](sql/H04.1-colunas-propostas.sql), com cópia de segurança e validate |
 | Keycloak/contexto de usuário | H02.1/Luis e H02.2/Matheus: validar identidade/perfis e vínculo com usuarioId |
-| Textos acima de 255 caracteres | H04.1/Luis: antecipar erro 400 antes do limite no banco |
 | Metadados aceitos/obrigatórios no catálogo | Derivar dos booleanos no DTO; contrato alvo definido, ainda sem implementação |
 | Formulário enviar pedido | #1147/Luis com H04.2/Mirele, após identidade e API/banco prontos |
 | Data limite do formulário | Definir significado em recorte próprio; CT03 ainda recusa dataLimite |

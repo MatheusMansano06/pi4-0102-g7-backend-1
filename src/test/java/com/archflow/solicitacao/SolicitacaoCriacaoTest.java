@@ -2,6 +2,7 @@ package com.archflow.solicitacao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -192,6 +193,46 @@ public class SolicitacaoCriacaoTest {
     }
 
     @Test
+    public void textosCom255CaracteresSaoPreservadosSemCorteOuTrim() throws Exception {
+        String texto = " " + this.textoDeTamanho(253) + " ";
+        this.api.perform(this.pedido("{\"materialId\":7,\"quantidade\":2,\"dimensao\":\""
+                + texto + "\",\"observacao\":\"" + texto + "\"}"))
+                .andExpect(status().isCreated());
+        ArgumentCaptor<Solicitacao> gravada = ArgumentCaptor.forClass(Solicitacao.class);
+        verify(this.solicitacoes).saveAndFlush(gravada.capture());
+        assertEquals(texto, gravada.getValue().getDimensao());
+        assertEquals(texto, gravada.getValue().getObservacao());
+    }
+
+    @Test
+    public void dimensaoCom256CaracteresRetornaErroSemGravar() throws Exception {
+        String texto = " " + this.textoDeTamanho(254) + " ";
+        this.api.perform(this.pedido("{\"materialId\":7,\"quantidade\":2,\"dimensao\":\"" + texto + "\"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.codigo").value("DADOS_INVALIDOS"))
+                .andExpect(jsonPath("$.mensagem").value("O campo dimensao deve conter no máximo 255 caracteres."));
+        this.semGravacao();
+    }
+
+    @Test
+    public void observacaoCom256CaracteresRetornaErroSemGravar() throws Exception {
+        this.api.perform(this.pedido("{\"materialId\":7,\"quantidade\":2,\"observacao\":\""
+                + this.textoDeTamanho(256) + "\"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.codigo").value("DADOS_INVALIDOS"))
+                .andExpect(jsonPath("$.mensagem").value("O campo observacao deve conter no máximo 255 caracteres."));
+        this.semGravacao();
+    }
+
+    @Test
+    public void textosNulosContinuamOpcionais() throws Exception {
+        this.api.perform(this.pedido("{\"materialId\":7,\"quantidade\":2,\"dimensao\":null,\"observacao\":null}"))
+                .andExpect(status().isCreated());
+        ArgumentCaptor<Solicitacao> gravada = ArgumentCaptor.forClass(Solicitacao.class);
+        verify(this.solicitacoes).saveAndFlush(gravada.capture());
+        assertNull(gravada.getValue().getDimensao());
+        assertNull(gravada.getValue().getObservacao());
+    }
+
+    @Test
     public void criaPendenteComAlunoDatasEParametrosSemAlterarEstoque() throws Exception {
         this.api.perform(this.pedido("{\"materialId\":7,\"quantidade\":2,\"dimensao\":\"300 x 200 mm\","
                 + "\"diametro\":4.5,\"observacao\":\"Preservar este texto\"}"))
@@ -225,6 +266,14 @@ public class SolicitacaoCriacaoTest {
         this.api.perform(this.pedido("{\"materialId\":7,\"quantidade\":2}"))
                 .andExpect(status().isInternalServerError()).andExpect(jsonPath("$.codigo").value("ERRO_INTERNO"))
                 .andExpect(jsonPath("$.mensagem").value("Erro interno no servidor."));
+    }
+
+    private String textoDeTamanho(int tamanho) {
+        String texto = "";
+        for (int indice = 0; indice < tamanho; indice++) {
+            texto = texto + "á";
+        }
+        return texto;
     }
 
     private MockHttpServletRequestBuilder pedido(String corpo) {

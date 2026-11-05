@@ -71,6 +71,7 @@ são definidos no servidor. dataLimite não é previsaoRetirada.
 | Identidade validada ausente | 401 | NAO_AUTENTICADO |
 | Identidade não ALUNO | 403 | ACESSO_NEGADO |
 | materialId/corpo/campo desconhecido inválido | 400 | DADOS_INVALIDOS |
+| dimensao ou observacao acima de 255 na contagem Java | 400 | DADOS_INVALIDOS |
 | Quantidade ausente, não inteira ou não positiva | 400 | QUANTIDADE_INVALIDA |
 | Material inexistente/inativo | 404 | MATERIAL_NAO_ENCONTRADO |
 | Medida inválida ou incompatível com política explicitamente configurada | 400 | PARAMETROS_INVALIDOS |
@@ -87,7 +88,9 @@ CT12 grava pedido PENDENTE, horários inicialmente iguais, aluno validado e os
 opcionais; medidas são preservadas em mudanças de status/previsão. Não baixa ou
 reserva saldo e não cria notificações nesta operação.
 
-A API atual ainda não analisa os números no texto dimensao nem antecipa o limite
-de 255 caracteres; não declarar essas verificações implementadas. O formulário
+A entrada valida dimensão e observação com String.length(): até 255 unidades
+UTF-16, sem contar bytes, cortar ou aparar o texto. Acima disso, recusa antes
+da persistência e identifica o campo na mensagem; null/ausência são permitidos.
+A API não analisa os números no texto dimensao. O formulário
 compõe largura/altura em mm na futura integração #1147. Keycloak ainda precisa
 produzir UsuarioAutenticado; corpo válido sem esse contexto recebe 401.

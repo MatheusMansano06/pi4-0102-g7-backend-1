@@ -62,7 +62,9 @@ Data atualizada_em do estoque ainda não existe em Material; é outro recorte #1
 
 Não criar largura/altura adicionais neste recorte. Não alterar especificacao do
 material ao gravar medida do pedido. Double não significa decimal exato nem fixa
-casas decimais. A API ainda precisa antecipar o limite de texto do banco.
+casas decimais. A entrada da API antecipa o limite de dimensão/observação com
+String.length(): acima de 255 recebe 400 DADOS_INVALIDOS antes de gravar.
+O texto permitido não é cortado/aparado; a métrica Java está no dicionário.
 
 ## Pedidos estados e consultas
 
