@@ -70,3 +70,6 @@ assinatura configurada, demonstrar login pela tela, catálogo com token, recusa
 sem token e fila recusada a um aluno. Conferir também que o histórico do aluno
 não inclui pedidos de outro usuário. A validação de tela não substitui as
 permissões do servidor. As provas pertencem ao #1141; este recorte é documental.
+
+Veja o [roteiro do #1141](../integracao/H02.4-PROVA-LOGIN.md) para repetir a
+validação da API em PostgreSQL descartável e, depois, os cenários pela tela.
