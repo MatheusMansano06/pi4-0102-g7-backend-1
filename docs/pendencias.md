@@ -27,7 +27,8 @@ H01.2, sem ter de elaborar regras funcionais que faltavam na especificação.
 | Formulário enviar pedido | #1147/Luis com H04.2/Mirele, após identidade e API/banco prontos |
 | Data limite do formulário | Definir significado em recorte próprio; CT03 ainda recusa dataLimite |
 | Estoque gravar a data com o saldo | #1154/Luis; rota da PR #8 segue desativada por padrão |
-| Usuários/notificações | Detalhar módulos próprios; não inventar senha local ou dados históricos |
+| Leitura de notificações | #1161 prepara CT07 com consulta simulada; ligar ao esquema H01.2 e provar o isolamento antes de habilitar |
+| Geração de notificações | H09.1 produz os avisos; a consulta não cria nem marca avisos como lidos |
 
 A PR #10 prepara as definições e scripts; aplicação no banco compartilhado e
 conclusão funcional dos cards não são consequências automáticas da documentação.

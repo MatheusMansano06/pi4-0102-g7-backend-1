@@ -39,3 +39,17 @@
 | Solicitação associada inexistente | Backend trata como referência inválida |
 | Falha ao registrar ou consultar | Falha de persistência tratada pelo Backend |
 
+## Consulta por destinatário (#1161)
+
+`ConsultaDeNotificacoes.listarDoUsuario(usuarioId, somenteNaoLidas)` é a
+interface interna usada pelo CT07. O usuarioId vem da identidade validada.
+A implementação de banco deve restringir a leitura ao destinatário em todos
+os casos e, com `somenteNaoLidas=true`, selecionar apenas registros com
+`lida=false`. Não incluir outros destinatários no resultado, inclusive para
+o perfil RESPONSAVEL.
+
+A consulta retorna os campos do CT07, sem expor usuarioId no JSON, e devolve
+uma lista vazia se não houver avisos correspondentes. Não modifica o estado
+dos avisos. O esquema físico e a implementação dessa leitura aguardam H01.2.
+O registro de avisos continua sendo responsabilidade de H09.1.
+

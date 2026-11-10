@@ -35,7 +35,7 @@ antes de chamar o controlador; cada operação aplica a sua permissão. O
 | CT04 | GET /api/solicitacoes/fila | RESPONSAVEL | Publicado |
 | CT05 | PATCH /api/materiais/{materialId}/estoque | RESPONSAVEL quando habilitada | Parcial; desativada por padrão |
 | CT06 | PATCH /api/solicitacoes/{solicitacaoId}/status | RESPONSAVEL | Publicado |
-| CT07 | GET /api/notificacoes | Usuário autenticado; somente seus avisos | Previsto |
+| CT07 | GET /api/notificacoes | Usuário autenticado; somente seus avisos | Parcial; desativada por padrão até ligar o CT13 ao banco |
 | CT08 | GET /api/solicitacoes/historico | ALUNO: próprios pedidos; RESPONSAVEL: todos | Publicado |
 | CT09 | GET /api/prazos | ALUNO; somente seus pedidos | Previsto |
 
