@@ -1,6 +1,7 @@
 # CT01: autenticar
 
-> Revisão #1136: contrato alvo em revisão; propostas e diferenças para o código estão em [H01.4](../especificacao/H01.4-alinhamento.md).
+> Implementado em 10/11/2026, conforme o [ADR 0008](../adr/0008-login-proprio-sem-keycloak.md):
+> login próprio no backend, sem Keycloak. A ficha abaixo é o que o código faz.
 
 | Linha | Valor |
 | :--- | :--- |
@@ -9,9 +10,7 @@
 | Quem responde | Backend API |
 | Atende | E1 |
 | Como chamar | `POST /api/auth/login` |
-| Autenticação | Login público, sem token prévio; Keycloak escolhido; fluxo e rota anteriores a revisar |
-
-> **Decisão posterior, 03/11/2026:** Keycloak escolhido pelo grupo ([ADR 0007](../adr/0007-adotar-keycloak.md)). A rota, as entradas, as saídas e os erros abaixo preservam a ficha anterior; precisam ser revisados conforme o fluxo de integração. Não implementar recebimento de senha ou emissão própria de token a partir desta ficha.
+| Autenticação | Login público, sem token prévio. É a única rota da API que não exige token |
 
 ## Entrada
 
@@ -27,7 +26,7 @@
 | usuarioId | inteiro | sim | 12 |
 | nome | texto | sim | Ana Silva |
 | perfil | um de: ALUNO, RESPONSAVEL | sim | ALUNO |
-| token | texto | sim | credencial emitida pela abordagem a validar |
+| token | texto | sim | JWT assinado pelo backend, válido por 8 horas |
 
 ## Erros
 
@@ -40,12 +39,14 @@
 
 Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida segue a proposta comum de HTTP 401 / NAO_AUTENTICADO.
 
-## Integração e limites da proposta
+## Como o token funciona
 
-Keycloak é o provedor confirmado. A proposta de CT10 fornecer senhaHash para
-validar senha no backend foi superada. Definir o vínculo da identidade autenticada
-com o usuarioId de domínio, os perfis e os dados retornados à interface.
+O token é assinado pelo próprio backend com a senha secreta de
+`ARCHFLOW_TOKEN_SEGREDO` (HS256) e vale 8 horas. Dentro dele vão o `usuarioId` e
+o `perfil`; senha nenhuma entra no token. A tela guarda o token e manda em todas
+as outras chamadas no cabeçalho `Authorization: Bearer <token>`, como descreve a
+[matriz de autenticação](../especificacao/autenticacao.md).
 
-O transporte Bearer, a validade, a renovação, o logout e o armazenamento continuam
-em revisão em [autenticação](../especificacao/autenticacao.md). A escolha do
-provedor não confirma o POST /api/auth/login nem o formato antigo de sucesso.
+A senha é conferida contra o hash BCrypt gravado na tabela `usuarios`
+([CT10](CT10-consultarUsuario.md)). E-mail inexistente e senha errada devolvem a
+mesma resposta de propósito, para não entregar quais e-mails têm conta.

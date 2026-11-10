@@ -4,11 +4,11 @@ Backend do ArchFlow, sistema de solicitacao e controle de materiais do Atelie CE
 
 Projeto Integrador IV - PUC-Campinas - Turma 0102 - Grupo 7.
 
-A [criação de solicitação H04.1](docs/H04.1-CRIAR-SOLICITACAO.md) já foi integrada parcialmente. O [dicionário das seis colunas](docs/especificacao/colunas-materiais-e-solicitacoes.md) define medidas permitidas e opcionais para todos os materiais. Aplicar a atualização no banco existente e integrar a identidade Keycloak antes de demonstrar o fluxo real.
+A [criação de solicitação H04.1](docs/H04.1-CRIAR-SOLICITACAO.md) já foi integrada parcialmente. O [dicionário das seis colunas](docs/especificacao/colunas-materiais-e-solicitacoes.md) define medidas permitidas e opcionais para todos os materiais. Aplicar a atualização no banco existente antes de demonstrar o fluxo real.
 
 O controle de estoque tem uma [entrega parcial](docs/ESTOQUE-PARCIAL.md): regras
 e testes preparados, com a rota de alteração desativada por padrão enquanto
-faltam autenticação Keycloak e persistência da data. O catálogo segue disponível.
+falta a persistência da data. O catálogo segue disponível.
 
 Para construir o banco a partir do backend atual, consultar o
 [guia consolidado para a Lara](docs/GUIA-BANCO-PARA-LARA.md): entidades,
@@ -60,13 +60,13 @@ Pronto. Fica disponivel em:
 | :--- | :--- |
 | Tela do sistema | http://localhost:5173 |
 | API | http://localhost:8080/api |
-| Login (Keycloak) | http://localhost:8081 |
 | Banco | localhost:5432 |
 
-O Keycloak guarda as contas e entrega o token que a tela usa para chamar a API: sem token a API
-responde 401. O realm, os papeis (`aluno` e `responsavel`) e o tema da tela de login vem do
-repositorio do front e sao importados quando o container sobe. O painel de administracao abre em
-http://localhost:8081, com o usuario e a senha do `.env`.
+A pessoa entra pela tela de login, que chama `POST /api/auth/login` com e-mail e senha. O backend
+confere a senha contra o hash gravado na tabela `usuarios` e devolve um token, que a tela manda em
+todas as outras chamadas (`Authorization: Bearer <token>`): sem token a API responde 401. Quem
+assina e confere esse token e o proprio backend, com a senha secreta de `ARCHFLOW_TOKEN_SEGREDO`
+no `.env`. Ver o [ADR 0008](docs/adr/0008-login-proprio-sem-keycloak.md).
 
 Para parar, `Ctrl+C`. Para parar e apagar os dados do banco, `docker compose down -v`.
 

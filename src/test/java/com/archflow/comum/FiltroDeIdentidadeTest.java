@@ -7,10 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -28,12 +24,8 @@ public class FiltroDeIdentidadeTest {
 
     private FiltroDeIdentidade filtro() {
         JwtDecoder decodificador = mock(JwtDecoder.class);
-        List<String> papeis = new ArrayList<String>();
-        papeis.add("aluno");
-        Map<String, Object> acessoAoRealm = new HashMap<String, Object>();
-        acessoAoRealm.put("roles", papeis);
         when(decodificador.decode("bom")).thenReturn(Jwt.withTokenValue("bom")
-                .header("alg", "RS256").claim("realm_access", acessoAoRealm)
+                .header("alg", "HS256").claim("perfil", "ALUNO")
                 .claim("usuarioId", "12").build());
         when(decodificador.decode("ruim")).thenThrow(new BadJwtException("assinatura"));
         return new FiltroDeIdentidade(new LeitorDeToken(decodificador), this.json);
@@ -95,5 +87,19 @@ public class FiltroDeIdentidadeTest {
         this.filtro().doFilter(pedido, resposta, corrente);
         assertEquals(200, resposta.getStatus());
         assertNotNull(corrente.getRequest(), "O OPTIONS devia ter seguido adiante.");
+    }
+
+    @Test
+    public void oLoginPassaSemToken() throws Exception {
+        MockHttpServletRequest pedido =
+                new MockHttpServletRequest("POST", "/api/auth/login");
+        pedido.addHeader("Origin", "http://localhost:5173");
+        MockHttpServletResponse resposta = new MockHttpServletResponse();
+        MockFilterChain corrente = new MockFilterChain();
+
+        this.filtro().doFilter(pedido, resposta, corrente);
+
+        assertEquals(200, resposta.getStatus());
+        assertNotNull(corrente.getRequest(), "O login tinha que ter chegado ao controlador.");
     }
 }

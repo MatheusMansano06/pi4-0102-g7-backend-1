@@ -1,30 +1,70 @@
 package com.archflow.comum;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.nimbusds.jose.proc.SecurityContext;
+import java.nio.charset.StandardCharsets;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 // Liga a conferencia de identidade nas rotas da API.
 //
-// O endereco das chaves do Keycloak vem do ambiente, porque muda de maquina
-// para maquina. As chaves sao buscadas na primeira chamada com token, e nao
-// quando o backend sobe: assim o backend continua subindo mesmo com o Keycloak
-// desligado, e so as rotas da API ficam indisponiveis.
+// O token e emitido e conferido pelo proprio backend, com uma senha secreta
+// que vem do ambiente: a mesma senha assina o token no login e confere a
+// assinatura nas chamadas seguintes. Quem trocar essa senha derruba os tokens
+// que ja estavam na mao das telas, e todo mundo precisa entrar de novo.
 @Configuration
 public class ConfiguracaoDeIdentidade {
 
     private static final String ROTAS_DA_API = "/api/*";
 
-    @Value("${archflow.keycloak.certificados}")
-    private String enderecoDasChavesDoKeycloak;
+    private static final String ALGORITMO_DA_ASSINATURA = "HmacSHA256";
+
+    // A assinatura HS256 exige pelo menos 32 letras de segredo.
+    private static final int TAMANHO_MINIMO_DO_SEGREDO = 32;
+
+    @Value("${archflow.token.segredo}")
+    private String segredoDoToken;
 
     @Bean
-    public JwtDecoder decodificadorDeToken() {
-        return NimbusJwtDecoder.withJwkSetUri(this.enderecoDasChavesDoKeycloak).build();
+    public SecretKey chaveDoToken() {
+        byte[] segredo = this.segredoDoToken.getBytes(StandardCharsets.UTF_8);
+        if (segredo.length < TAMANHO_MINIMO_DO_SEGREDO) {
+            throw new IllegalStateException("A variável ARCHFLOW_TOKEN_SEGREDO precisa de pelo menos "
+                    + TAMANHO_MINIMO_DO_SEGREDO + " caracteres.");
+        }
+        return new SecretKeySpec(segredo, ALGORITMO_DA_ASSINATURA);
+    }
+
+    @Bean
+    public JwtEncoder assinadorDeToken(SecretKey chaveDoToken) {
+        return new NimbusJwtEncoder(new ImmutableSecret<SecurityContext>(chaveDoToken));
+    }
+
+    @Bean
+    public JwtDecoder decodificadorDeToken(SecretKey chaveDoToken) {
+        return NimbusJwtDecoder.withSecretKey(chaveDoToken).build();
+    }
+
+    @Bean
+    public EmissorDeToken emissorDeToken(JwtEncoder assinadorDeToken) {
+        return new EmissorDeToken(assinadorDeToken);
+    }
+
+    // Guarda a senha do usuario embaralhada, do jeito que o CT10 pede.
+    @Bean
+    public PasswordEncoder conferenteDeSenha() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean

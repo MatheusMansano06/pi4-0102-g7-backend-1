@@ -1,31 +1,18 @@
 package com.archflow.comum;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 
-// Diz quem esta chamando a API, a partir do token que a tela recebeu do Keycloak.
+// Diz quem esta chamando a API, a partir do token que a tela recebeu no login.
 //
-// A assinatura e a validade do token sao conferidas com as chaves publicas do
-// proprio Keycloak: token inventado, alterado ou vencido nao passa daqui. O
-// perfil sai dos papeis do realm (aluno ou responsavel) e o numero do aluno sai
-// do campo usuarioId, que o Keycloak coloca no token.
+// O token e o que o proprio backend emitiu no CT01: a assinatura e a validade
+// sao conferidas com a mesma senha secreta usada para assinar, entao token
+// inventado, alterado ou vencido nao passa daqui. O numero do usuario e o
+// perfil saem de dentro do proprio token.
 public class LeitorDeToken {
 
     private static final String PREFIXO_BEARER = "Bearer ";
-
-    private static final String CAMPO_PAPEIS_DO_REALM = "realm_access";
-
-    private static final String CAMPO_PAPEIS = "roles";
-
-    private static final String CAMPO_USUARIO_ID = "usuarioId";
-
-    private static final String PAPEL_ALUNO = "aluno";
-
-    private static final String PAPEL_RESPONSAVEL = "responsavel";
 
     private final JwtDecoder decodificador;
 
@@ -52,7 +39,7 @@ public class LeitorDeToken {
         return token;
     }
 
-    // Token com assinatura errada, vencido ou de outro realm cai aqui.
+    // Token com assinatura errada ou vencido cai aqui.
     private Jwt abrir(String token) {
         try {
             return this.decodificador.decode(token);
@@ -62,70 +49,47 @@ public class LeitorDeToken {
         }
     }
 
-    // O responsavel vem antes do aluno: quem tem os dois papeis atende a fila.
+    // O perfil vem escrito no token pelo EmissorDeToken. Token sem perfil, ou
+    // com perfil que o sistema nao conhece, nao foi emitido por este backend.
     private PerfilUsuario lerPerfil(Jwt token) {
-        if (this.temPapel(token, PAPEL_RESPONSAVEL)) {
+        String perfil = token.getClaimAsString(EmissorDeToken.CAMPO_PERFIL);
+        if (PerfilUsuario.RESPONSAVEL.name().equals(perfil)) {
             return PerfilUsuario.RESPONSAVEL;
         }
-        if (this.temPapel(token, PAPEL_ALUNO)) {
+        if (PerfilUsuario.ALUNO.name().equals(perfil)) {
             return PerfilUsuario.ALUNO;
         }
-        throw new AcessoNegadoException(CodigosDeErro.ACESSO_NEGADO,
-                "A conta não tem perfil de aluno nem de responsável no ArchFlow.");
+        throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
+                "Token de acesso inválido ou expirado.");
     }
 
-    private boolean temPapel(Jwt token, String papel) {
-        List<?> papeis = this.lerPapeis(token);
-        int posicao = 0;
-        while (posicao < papeis.size()) {
-            if (papel.equals(papeis.get(posicao))) {
-                return true;
-            }
-            posicao = posicao + 1;
-        }
-        return false;
-    }
-
-    private List<?> lerPapeis(Jwt token) {
-        Map<String, Object> acessoAoRealm = token.getClaimAsMap(CAMPO_PAPEIS_DO_REALM);
-        if (acessoAoRealm == null) {
-            return new ArrayList<Object>();
-        }
-        Object papeis = acessoAoRealm.get(CAMPO_PAPEIS);
-        if (papeis instanceof List) {
-            return (List<?>) papeis;
-        }
-        return new ArrayList<Object>();
-    }
-
-    // O pedido e o historico do aluno sao gravados por numero de usuario. Sem
-    // esse numero no token o backend nao tem como saber de quem e o pedido, e
-    // isso e falta de configuracao do Keycloak, nao erro de quem chamou.
+    // O pedido e o historico do aluno sao gravados por numero de usuario, e
+    // esse numero entra no token na hora do login.
     private Long lerUsuarioId(Jwt token) {
-        Object valor = token.getClaim(CAMPO_USUARIO_ID);
+        Object valor = token.getClaim(EmissorDeToken.CAMPO_USUARIO_ID);
         if (valor instanceof Number) {
             return this.exigirNumeroDeUsuario(Long.valueOf(((Number) valor).longValue()));
         }
         if (valor instanceof String) {
             return this.converterUsuarioId((String) valor);
         }
-        throw new ConfiguracaoPendenteException(
-                "O Keycloak não está enviando o usuarioId no token. Configure o mapeamento no realm.");
+        throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
+                "Token de acesso inválido ou expirado.");
     }
 
     private Long converterUsuarioId(String valor) {
         try {
             return this.exigirNumeroDeUsuario(Long.valueOf(valor.trim()));
         } catch (NumberFormatException erro) {
-            throw new ConfiguracaoPendenteException(
-                    "O usuarioId enviado pelo Keycloak não é um número: \"" + valor + "\".");
+            throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
+                    "Token de acesso inválido ou expirado.");
         }
     }
 
     private Long exigirNumeroDeUsuario(Long usuarioId) {
         if (usuarioId.longValue() <= 0) {
-            throw new ConfiguracaoPendenteException(
-                    "O usuarioId enviado pelo Keycloak precisa ser maior que zero.");
+            throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
+                    "Token de acesso inválido ou expirado.");
         }
         return usuarioId;
     }

@@ -20,11 +20,13 @@ spring:
       hibernate:
         format_sql: true
 
-# Endereco das chaves publicas que o Keycloak usa para assinar o token. O
-# backend busca essas chaves para conferir se o token e de verdade.
+# Senha secreta com que o backend assina o token do login e confere a
+# assinatura nas chamadas seguintes. Precisa de pelo menos 32 caracteres.
+# O valor abaixo e so para rodar na propria maquina; no Docker e em producao
+# o valor certo vem da variavel de ambiente.
 archflow:
-  keycloak:
-    certificados: ${KEYCLOAK_CERTIFICADOS:http://localhost:8081/realms/Archflow/protocol/openid-connect/certs}
+  token:
+    segredo: ${ARCHFLOW_TOKEN_SEGREDO:troque-este-segredo-de-desenvolvimento-do-archflow}
 
 server:
   port: 8080
