@@ -41,14 +41,16 @@ Arquivo: [`ConfiguracaoDeCors.java`](../../src/main/java/com/archflow/comum/Conf
 Essa classe diz ao servidor: "aceite chamadas vindas da tela do ArchFlow". Ela
 lista o endereco da tela, e so ele. Qualquer outro endereco continua barrado.
 
-Para conferir que funciona, com o sistema no ar:
+Para conferir a permissão de CORS, reproduza a consulta prévia do navegador
+com o sistema no ar:
 
 ```bash
-curl -i -H "Origin: http://localhost:5173" http://localhost:8080/api/materiais
+curl -i -X OPTIONS -H "Origin: http://localhost:5173" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: Authorization" http://localhost:8080/api/materiais
 ```
 
 A resposta traz a linha `Access-Control-Allow-Origin: http://localhost:5173`.
 Trocando o endereco por outro qualquer, a resposta vira `403`.
+Essa consulta prévia não precisa de token; o GET em si precisa de Bearer.
 
 ### 2. Na tela: a chamada
 
@@ -71,21 +73,22 @@ acontece numa funcao unica dentro do `Catalog.jsx`:
 
 ## Como ver funcionando
 
+Antes de subir o ambiente, configure `ARCHFLOW_TOKEN_SEGREDO` no backend
+e confirme a tabela `usuarios` no banco de teste, com contas dos dois perfis.
+
 ```bash
 docker compose up
 ```
 
-Depois abra `http://localhost:5173/student/catalog`. Os materiais que aparecem
-sao os que estao gravados no banco. Para provar, mude a quantidade de um
-material direto no banco e recarregue a tela:
-
-```bash
-docker compose exec banco psql -U archflow -d archflow -c "UPDATE materiais SET quantidade_disponivel = 3 WHERE material_id = 1;"
-```
+Entre pela tela com a revisão da
+[PR #14 do frontend](https://github.com/anadiasxavier/pi4-0102-g7-frontend/pull/14)
+e abra `http://localhost:5173/student/catalog`. Confira se o GET autenticado
+retorna os materiais desse banco. Repita sem o token para confirmar HTTP 401.
 
 ## O que ainda nao esta ligado
 
-Apenas o catalogo busca dados de verdade. Fila, prazos, historico e
-notificacoes continuam com lista fixa no codigo da tela. O login tambem nao
-existe ainda: enquanto nao existe, o perfil e o numero do aluno viajam nos
-cabecalhos provisorios `X-Perfil` e `X-Usuario-Id`.
+O login da API está disponível desde a PR #19. A main do frontend ainda não
+envia as credenciais ao login nem o Bearer nas consultas do catálogo e estoque;
+a PR #14 do frontend liga o login e o catálogo. Fila, histórico e notificações
+ainda não consultam a API pela tela. Veja a
+[matriz de autenticação](../especificacao/autenticacao.md) para o estado das rotas.

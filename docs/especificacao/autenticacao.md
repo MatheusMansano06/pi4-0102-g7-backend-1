@@ -1,69 +1,72 @@
-# Autenticação, identidade e rotas — proposta #1136
+# Autenticação, identidade e rotas — #1136
 
-**Proposta em revisão**, vinculada ao [alinhamento H01.4](H01.4-alinhamento.md).
-A equipe escolheu Keycloak em 03/11/2026; ver [ADR 0007](../adr/0007-adotar-keycloak.md). O fluxo de integração e os demais detalhes abaixo ainda precisam de definição.
+O [ADR 0008](../adr/0008-login-proprio-sem-keycloak.md) é a decisão vigente.
+A PR #19 implementou o login próprio (#1138) e a validação da identidade (#1139).
+Esta matriz descreve o código e identifica as rotas ainda previstas.
 
-## Transporte proposto
+## Login e credencial
 
-O login CT01 não exige token prévio. Para CT02–CT09, o frontend enviará:
+O frontend envia `email` e `senha` no corpo de
+[`POST /api/auth/login`](../contratos/CT1-Autenticar.md), sem token prévio.
+O backend consulta a conta por e-mail no [CT10](../contratos/CT10-consultarUsuario.md),
+confere a senha com BCrypt e exige conta ativa. Sucesso: HTTP 200 com
+`usuarioId`, `nome`, `perfil` (ALUNO ou RESPONSAVEL) e `token`.
+O hash fica no banco e não aparece na resposta.
+
+O backend assina o JWT com HS256 e validade de oito horas. A chave de assinatura
+fica no ambiente do servidor (`ARCHFLOW_TOKEN_SEGREDO`). Nas chamadas protegidas,
+a tela envia o token recebido:
 
 ```http
 Authorization: Bearer <token>
 ```
 
-O token não vai na URL nem substitui parâmetros de domínio. Emissões, validade,
-renovação, armazenamento no navegador e logout dependem da abordagem escolhida.
-Não prescrever UUID, JWT ou tabela sessoes como decisões já aceitas.
+A identidade e o perfil vêm do token validado, não de `X-Perfil`,
+`X-Usuario-Id`, parâmetros ou corpo da requisição. O servidor valida a credencial
+antes de chamar o controlador; cada operação aplica a sua permissão. O
+`OPTIONS` usado pelo navegador para CORS passa sem token. Hoje o login é a
+única operação publicada em `/api/auth/`, prefixo dispensado pelo filtro.
 
-| CT | Método e rota | Acesso alvo |
-| --- | --- | --- |
-| CT01 | Fluxo de login a revisar com Keycloak | Sem token prévio; POST anterior não confirmado |
-| CT02 | GET /api/materiais | ALUNO ou RESPONSAVEL autenticado |
-| CT03 | POST /api/solicitacoes | ALUNO autenticado, dono do novo pedido |
-| CT04 | GET /api/solicitacoes/fila | RESPONSAVEL |
-| CT05 | PATCH /api/materiais/{materialId}/estoque | RESPONSAVEL |
-| CT06 | PATCH /api/solicitacoes/{solicitacaoId}/status | RESPONSAVEL |
-| CT07 | GET /api/notificacoes | Usuário autenticado; somente seus avisos |
-| CT08 | GET /api/solicitacoes/historico | Histórico permitido à identidade/perfil |
-| CT09 | GET /api/prazos | ALUNO autenticado; somente seus pedidos |
+| CT | Método e rota | Acesso | Estado |
+| --- | --- | --- | --- |
+| CT01 | POST /api/auth/login | Sem token prévio | Implementado na PR #19 |
+| CT02 | GET /api/materiais | ALUNO ou RESPONSAVEL | Publicado |
+| CT03 | POST /api/solicitacoes | ALUNO; pedido associado ao usuarioId do token | Publicado |
+| CT04 | GET /api/solicitacoes/fila | RESPONSAVEL | Publicado |
+| CT05 | PATCH /api/materiais/{materialId}/estoque | RESPONSAVEL quando habilitada | Parcial; desativada por padrão |
+| CT06 | PATCH /api/solicitacoes/{solicitacaoId}/status | RESPONSAVEL | Publicado |
+| CT07 | GET /api/notificacoes | Usuário autenticado; somente seus avisos | Previsto |
+| CT08 | GET /api/solicitacoes/historico | ALUNO: próprios pedidos; RESPONSAVEL: todos | Publicado |
+| CT09 | GET /api/prazos | ALUNO; somente seus pedidos | Previsto |
 
-O alcance global do histórico do responsável deve ser confirmado no CT08.
-CT10–CT13 são interfaces internas com o banco: não são rotas HTTP e não recebem
-um cabeçalho do navegador. O backend transmite a identidade já validada às
-operações internas quando necessário.
+CT10–CT13 descrevem operações internas do backend com o banco. Não são rotas
+HTTP e não recebem cabeçalhos da tela.
 
-## Respostas da proposta
+## Respostas
 
 | Situação | HTTP | codigo |
 | --- | --- | --- |
-| Credencial ausente, vazia, malformada, desconhecida ou expirada em rota protegida | 401 | NAO_AUTENTICADO |
-| Identidade válida, mas operação/perfil/registro não permitido | 403 | ACESSO_NEGADO |
-| E-mail ou senha incorretos no CT01 | 401 | CREDENCIAIS_INVALIDAS |
+| Token ausente, inválido ou expirado em rota protegida | 401 | NAO_AUTENTICADO |
+| Token válido, mas perfil sem permissão para a operação | 403 | ACESSO_NEGADO |
+| E-mail ou senha incorretos no login | 401 | CREDENCIAIS_INVALIDAS |
 | Dados obrigatórios de login ausentes/inválidos | 400 | DADOS_INVALIDOS |
-| Conta inativa no CT01 | 403 | USUARIO_INATIVO |
+| Conta inativa no login | 403 | USUARIO_INATIVO |
 | Falha inesperada | 500 | ERRO_INTERNO |
 
-Corpo de erro: `{"codigo":"NAO_AUTENTICADO","mensagem":"..."}`. Mensagem legível,
-sem senha, hash ou token. Os números seguem o padrão já usado no tratamento de
-erros do backend; as rotas que ainda não existem precisam implementá-lo.
+Formato: `{"codigo":"NAO_AUTENTICADO","mensagem":"..."}`. A tela pode exibir a
+mensagem de erro; senha, hash e token não devem aparecer em evidências ou logs.
 
-O usuarioId do pedido ou do filtro de avisos vem da identidade validada, não de
-um valor livre enviado pela tela. X-Perfil não autentica e deve sair quando H02.2
-for integrado. O redirecionamento da tela para /admin não substitui autorização
-da API.
+## O que validar no #1141
 
-## Provedor decidido; integração pendente
+O backend já emite e confere o token. A
+[PR #14 do frontend](https://github.com/anadiasxavier/pi4-0102-g7-frontend/pull/14)
+liga as telas ao CT01, guarda a resposta de sessão no navegador e envia o
+token no catálogo. Ela ainda está fora da main. A API não publica uma operação
+de renovação ou revogação; o tratamento de expiração e a ligação do logout
+na interface precisam ser exercitados na integração.
 
-Keycloak foi escolhido pelo grupo. O ADR 0003 de login local/token opaco foi
-substituído pelo ADR 0007. Não implementar a validação própria de senhas nem
-criar sessoes com base naquela proposta.
-
-CT01 e CT10 precisam ser ajustados ao fluxo de integração antes de #1138/H02.2.
-Não assumir que o React enviará a senha ao backend. Os erros de login acima são
-referência da ficha anterior: sua origem e seu mapeamento precisam de revisão.
-Configuração do provedor, perfis, vínculo com usuarioId, transporte, validade,
-renovação, armazenamento e logout continuam pendentes. Esta revisão é documental.
-
-Critérios de integração: login real de aluno e responsável; credencial enviada
-nas rotas protegidas; ausência/invalidade recusadas; acesso ao registro de outro
-usuário recusado. Mock, cabeçalho manual ou menu fixo não fecham #1141.
+Com a tabela `usuarios` de H01.2/#1134, contas dos dois perfis e a chave de
+assinatura configurada, demonstrar login pela tela, catálogo com token, recusa
+sem token e fila recusada a um aluno. Conferir também que o histórico do aluno
+não inclui pedidos de outro usuário. A validação de tela não substitui as
+permissões do servidor. As provas pertencem ao #1141; este recorte é documental.

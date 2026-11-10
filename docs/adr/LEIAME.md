@@ -11,7 +11,8 @@ custa. Serve para ninguem precisar perguntar depois "por que foi feito assim".
 | 0004 | Padrao de erros da API | aqui |
 | 0005 | Criar o banco por script SQL | aqui |
 | 0006 | Ambiente Docker com dois repositorios | aqui |
-| 0007 | Keycloak escolhido pelo grupo | [decisão](0007-adotar-keycloak.md) |
+| 0007 | Keycloak (decisão histórica, substituída) | [decisão](0007-adotar-keycloak.md) |
+| 0008 | Login próprio e JWT assinado pelo backend (vigente) | [decisão](0008-login-proprio-sem-keycloak.md) |
 
 O ADR 0002 foi apagado por engano do repositorio do frontend, no commit que criou o projeto
 React. Ele continua no historico do git e precisa ser restaurado.

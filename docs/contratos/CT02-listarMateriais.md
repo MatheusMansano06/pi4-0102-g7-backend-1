@@ -9,7 +9,7 @@
 | Quem responde | Backend API |
 | Atende | E2 e E5 |
 | Como chamar | `GET /api/materiais?busca={termo}` |
-| Autenticação proposta | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
+| Autenticação | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
 
 ## Entrada
 
@@ -38,7 +38,7 @@
 | Usuário sem autenticação | 401 | Erro `NAO_AUTENTICADO` |
 | Falha ao consultar o banco | 500 | Erro `ERRO_INTERNO` |
 
-Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida segue a proposta comum de HTTP 401 / NAO_AUTENTICADO.
+Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida recebe HTTP 401 / NAO_AUTENTICADO.
 
 ## Forma da resposta e parâmetros
 

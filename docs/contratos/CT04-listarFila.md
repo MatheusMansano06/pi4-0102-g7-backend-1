@@ -9,7 +9,7 @@
 | Quem responde | Backend API |
 | Atende | E4 |
 | Como chamar | `GET /api/solicitacoes/fila` |
-| Autenticação proposta | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
+| Autenticação | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
 
 ## Entrada
 
@@ -39,10 +39,10 @@
 | Perfil diferente de RESPONSAVEL | 403 | Erro `ACESSO_NEGADO` |
 | Falha ao consultar a fila | 500 | Erro `ERRO_INTERNO` |
 
-Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida segue a proposta comum de HTTP 401 / NAO_AUTENTICADO.
+Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida recebe HTTP 401 / NAO_AUTENTICADO.
 
 Sucesso: HTTP 200, com lista direta conforme o controller publicado. Status fora
 da enumeração retorna 400 / STATUS_INVALIDO. Sem filtro, o código atual exclui
 CONCLUIDO, mas ainda inclui CANCELADO; excluir ambos os terminais é proposta a
 confirmar com o responsável pela fila. Não apresentar a correção como implementada.
-O cabeçalho X-Perfil atual é provisório e não satisfaz a autenticação proposta.
+O perfil RESPONSAVEL é obtido do JWT emitido no CT01. X-Perfil não autentica.

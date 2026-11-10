@@ -9,7 +9,7 @@
 | Quem responde | Backend API |
 | Atende | E9 |
 | Como chamar | `GET /api/prazos` |
-| Autenticação proposta | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
+| Autenticação prevista para esta rota | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
 
 ## Entrada
 
@@ -34,7 +34,7 @@
 | Usuário sem autenticação | 401 | Erro `NAO_AUTENTICADO` |
 | Falha ao consultar prazos | 500 | Erro `ERRO_INTERNO` |
 
-Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida segue a proposta comum de HTTP 401 / NAO_AUTENTICADO.
+Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida recebe HTTP 401 / NAO_AUTENTICADO.
 
 Proposta de resposta: HTTP 200 com objeto { "solicitacoes": [] } quando vazio.
 Identificar o ALUNO pela credencial e consultar apenas seus pedidos no CT12;

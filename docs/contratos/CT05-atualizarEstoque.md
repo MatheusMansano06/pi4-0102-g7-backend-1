@@ -9,7 +9,7 @@
 | Quem responde | Backend API |
 | Atende | E5 |
 | Como chamar | `PATCH /api/materiais/{materialId}/estoque` |
-| Autenticação proposta | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
+| Autenticação | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
 
 ## Entrada
 
@@ -38,9 +38,9 @@ O catálogo continua disponível. O controller de estoque é separado e ativado
 somente na suíte de testes pela propriedade `archflow.estoque.em-desenvolvimento=true`.
 Não definir essa propriedade nos ambientes compartilhados ou de apresentação.
 
-Os testes da operação ainda usam `X-Perfil: RESPONSAVEL`. Esse cabeçalho é
-informado pelo próprio cliente e **não autentica o usuário**. O grupo escolheu
-Keycloak; integrar a identidade e as permissões do H02.2 antes de liberar a rota.
+Quando habilitada, a operação exige RESPONSAVEL identificado pelo JWT do
+CT01. X-Perfil não autentica. Os testes isolados usam identidade de teste;
+a prova integrada ainda depende de banco e da persistência da data.
 Ver [escopo e pendências da entrega parcial](../ESTOQUE-PARCIAL.md).
 
 ## Saída
@@ -60,12 +60,12 @@ Alinhar a coluna com o SQL da equipe antes de implementar e liberar a operação
 
 | Quando | HTTP | O que volta |
 | :--- | :--- | :--- |
-| Usuário sem autenticação; provisoriamente, perfil ausente/vazio | 401 | Erro `NAO_AUTENTICADO` |
+| Token ausente, inválido ou expirado | 401 | Erro `NAO_AUTENTICADO` |
 | Perfil diferente de RESPONSAVEL | 403 | Erro `ACESSO_NEGADO` |
 | Material inexistente | 404 | Erro `MATERIAL_NAO_ENCONTRADO` |
 | Quantidade ausente, negativa ou inválida; corpo ilegível | 400 | Erro `QUANTIDADE_INVALIDA` |
 | Falha ao gravar | 500 | Erro `ERRO_INTERNO` |
 
 Os erros mantêm o formato `{ "codigo": "...", "mensagem": "..." }` do ADR 0004.
-Banco PostgreSQL e autenticação real são dependências da demonstração integrada;
-os testes da rota substituem apenas o repositório e não comprovam essas integrações.
+Banco PostgreSQL e credenciais reais são dependências da demonstração integrada;
+os testes isolados da rota não comprovam essas integrações.
