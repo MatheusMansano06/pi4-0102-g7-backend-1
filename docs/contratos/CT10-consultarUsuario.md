@@ -1,6 +1,11 @@
 # CT10: consultarUsuario
 
-> Revisão necessária após a escolha do [Keycloak](../adr/0007-adotar-keycloak.md). A ficha abaixo preserva o modelo anterior de login local; senhaHash e consulta por e-mail não são requisitos aprovados da integração. Definir vínculo entre identidade autenticada e usuarioId de domínio; ausência desse vínculo não significa automaticamente senha inválida.
+> Vale a partir de 10/11/2026, com o [ADR 0008](../adr/0008-login-proprio-sem-keycloak.md):
+> o login é próprio, então a consulta por e-mail e o `senhaHash` voltam a ser o que o código usa.
+>
+> A tabela `usuarios` precisa das colunas `usuario_id`, `nome`, `email`, `senha_hash`,
+> `perfil` (ALUNO ou RESPONSAVEL) e `ativo`. O `senha_hash` guarda um hash BCrypt;
+> senha em texto puro, nunca.
 
 | Linha | Valor |
 | :--- | :--- |

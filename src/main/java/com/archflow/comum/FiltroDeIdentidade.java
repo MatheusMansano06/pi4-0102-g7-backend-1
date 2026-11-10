@@ -24,6 +24,10 @@ public class FiltroDeIdentidade implements Filter {
 
     private static final String METODO_DE_PRE_VOO = "OPTIONS";
 
+    // O login e a porta de entrada: exigir token nele deixaria a pessoa
+    // presa do lado de fora, porque o token so existe depois de entrar.
+    private static final String ROTA_DE_LOGIN = "/api/auth/";
+
     private final LeitorDeToken leitor;
 
     private final ObjectMapper conversorDeJson;
@@ -45,10 +49,19 @@ public class FiltroDeIdentidade implements Filter {
             corrente.doFilter(pedido, resposta);
             return;
         }
+        if (this.eRotaPublica(pedidoHttp)) {
+            corrente.doFilter(pedido, resposta);
+            return;
+        }
         if (!this.identificar(pedidoHttp, respostaHttp)) {
             return;
         }
         corrente.doFilter(pedido, resposta);
+    }
+
+    private boolean eRotaPublica(HttpServletRequest pedido) {
+        String caminho = pedido.getRequestURI();
+        return caminho != null && caminho.startsWith(ROTA_DE_LOGIN);
     }
 
     private boolean identificar(HttpServletRequest pedido, HttpServletResponse resposta)
