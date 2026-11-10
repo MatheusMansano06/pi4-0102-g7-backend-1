@@ -27,6 +27,9 @@
 | quantidade | inteiro | sim, por solicitação | 2 |
 | status | texto | sim, por solicitação | PENDENTE |
 | criadaEm | data e hora (ISO 8601) | sim, por solicitação | 2026-10-13T12:00:00 |
+| dimensao | texto | não, vai vazio quando o pedido não tem | 30x40 cm |
+| diametro | número decimal | não, vai vazio quando o pedido não tem | 8.5 |
+| observacao | texto | não, vai vazio quando o pedido não tem | Uso em maquete |
 
 ## Erros
 
