@@ -39,6 +39,7 @@ Fontes: [Material](../src/main/java/com/archflow/material/Material.java) e
 | nome, descricao, especificacao | VARCHAR(255); descrição fixa, não política por interpretação do nome |
 | quantidade_disponivel, quantidade_minima | INTEGER NOT NULL; Java recusa negativo |
 | ativo | BOOLEAN NOT NULL; inativo não aparece no catálogo nem aceita pedido |
+| atualizada_em | TIMESTAMP WITHOUT TIME ZONE, anulável, sem default; preenchido pelo CT05 ao alterar saldo (#1154) |
 | aceita_dimensao, aceita_diametro | BOOLEAN anulável DEFAULT TRUE |
 | exige_dimensao, exige_diametro | BOOLEAN anulável DEFAULT FALSE |
 
@@ -46,7 +47,9 @@ statusEstoque é calculado: zero INDISPONIVEL; positivo até o mínimo BAIXO;
 acima do mínimo DISPONIVEL. Não precisa de coluna. parametrosAceitos e
 parametrosObrigatorios serão projeções dos booleanos, não novas colunas.
 NULL nas regras ainda identifica configuração incompleta, recusada no POST.
-Data atualizada_em do estoque ainda não existe em Material; é outro recorte #1154.
+O [script de estoque](sql/H07.1-data-do-estoque.sql) adiciona a coluna ao
+banco existente. A aplicação deve ser coordenada com H01.2 antes da subida
+do backend atualizado; desativar o PATCH não elimina a validação da coluna.
 
 | solicitacoes | Tipo / regra |
 | --- | --- |
@@ -91,7 +94,7 @@ antes de decidir uma chave estrangeira ou migrar dados.
 | Aplicar atualização no banco existente | Lara/H01.2 coordena o destino com o SQL/especificação entregues pelo Luis |
 | Tabela usuarios | H01.2/#1134: criar a tabela exigida pelo CT10 e prover contas de teste dos dois perfis |
 | Login integrado | PR #19 fornece o token com usuarioId/perfil; #1141/Luis deve provar pela tela |
-| Data persistida do estoque | Luis/#1154; PATCH da PR #8 desativado por padrão e data ainda só no DTO |
+| Data persistida do estoque | Luis/#1154 preparou gravação e SQL; H01.2 coordena migração, PATCH permanece desativado |
 | Metadados no catálogo | Projetar booleanos conforme CT02; DTO ainda não os expõe |
 | Formulário #1147 | Modal ainda sem envio; PR #14 do frontend adiciona Bearer ao catálogo, fora da main |
 | dataLimite | Fora de CT03/CT12; não confundir com previsaoRetirada ou relógio de criação |

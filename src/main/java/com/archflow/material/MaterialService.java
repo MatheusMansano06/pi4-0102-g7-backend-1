@@ -7,9 +7,11 @@ import com.archflow.comum.NaoEncontradoException;
 import com.archflow.comum.NegocioException;
 import com.archflow.comum.PerfilUsuario;
 import com.archflow.comum.UsuarioAutenticado;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MaterialService {
@@ -31,17 +33,17 @@ public class MaterialService {
     }
 
     // CT05: a quantidade recebida substitui o saldo, sem somar movimentações.
+    @Transactional
     public MaterialEstoqueSaida atualizarEstoque(UsuarioAutenticado identidade, Long materialId,
             MaterialEstoqueEntrada entrada) {
         // 1) A identidade conferida no token restringe a operação ao responsável.
         this.exigirResponsavel(identidade);
         // 2) Campo ausente não pode virar zero nem quantidade negativa chegar ao banco.
         this.exigirQuantidadeValida(entrada);
-        // 3) O material deve existir antes de alterar seu saldo.
+        // 3) Saldo e data são gravados juntos, com a hora do servidor em segundos.
         Material material = this.buscar(materialId);
-        material.setQuantidadeDisponivel(entrada.getQuantidadeDisponivel());
-        // 4) A resposta só é preparada depois de o repositório aceitar a gravação.
-        return new MaterialEstoqueSaida(this.materialRepository.save(material));
+        material.atualizarEstoque(entrada.getQuantidadeDisponivel(), LocalDateTime.now().withNano(0));
+        return new MaterialEstoqueSaida(this.materialRepository.saveAndFlush(material));
     }
 
     private void exigirResponsavel(UsuarioAutenticado identidade) {
