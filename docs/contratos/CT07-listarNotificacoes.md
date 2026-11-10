@@ -53,3 +53,26 @@ nos testes, que fornecem identidade interna e consulta simuladas. Não habilitar
 a propriedade em um ambiente compartilhado: ainda falta implementar a consulta
 com o esquema de H01.2, provar o isolamento no PostgreSQL e exercitar avisos
 gerados por H09.1. A configuração padrão não registra a rota.
+
+## Prova local da consulta
+
+`ConsultaNotificacoesBancoTest` liga o serviço a uma consulta de referência,
+apenas no código de teste. A tabela temporária tem dois destinatários, cada
+um com um aviso lido e um não lido. Os cenários conferem o isolamento dos dois
+perfis, o filtro, a lista vazia, os campos do aviso e que ler a lista não marca
+avisos como lidos.
+
+1. Criar um banco PostgreSQL local descartável com nome no formato
+   `archflow_ct07_teste_<sufixo>` (sufixo com minúsculas, números ou sublinhado).
+   Ele pode estar vazio: o teste cria só a tabela temporária da sua conexão.
+2. No processo do teste, definir `ARCHFLOW_CT07_TESTE_URL` no formato
+   `jdbc:postgresql://127.0.0.1:<porta>/<banco>`, junto com
+   `ARCHFLOW_CT07_TESTE_USUARIO` e `ARCHFLOW_CT07_TESTE_SENHA` do banco local.
+3. Executar `mvn -Dtest=ConsultaNotificacoesBancoTest test` e conferir quatro
+   cenários executados, sem ignorados. Sem a URL local no formato dedicado,
+   os testes ficam desabilitados.
+
+A prova não inicia a aplicação, não habilita o endpoint e não escreve em
+tabelas permanentes. A conexão desfaz a transação e descarta a tabela ao
+final de cada cenário. A tabela e a consulta de referência não substituem
+o esquema nem a consulta real de H01.2.

@@ -53,3 +53,7 @@ uma lista vazia se não houver avisos correspondentes. Não modifica o estado
 dos avisos. O esquema físico e a implementação dessa leitura aguardam H01.2.
 O registro de avisos continua sendo responsabilidade de H09.1.
 
+A [prova local do CT07](CT07-listarNotificacoes.md#prova-local-da-consulta)
+usa nomes físicos exclusivos de uma tabela temporária para exercitar o
+filtro no PostgreSQL. Esses nomes não definem a migração oficial.
+
