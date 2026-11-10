@@ -6,7 +6,8 @@ foram definidos: medidas opcionais para todos os materiais. Ver o
 [alinhamento](../especificacao/H01.4-alinhamento.md),
 [autenticação](../especificacao/autenticacao.md) e
 [requisitos de banco](../especificacao/requisitos-banco.md).
-Keycloak ainda depende de integração; contrato alvo não equivale à implantação.
+O login próprio do ADR 0008 já está no backend (CT01/CT10). O teste de ponta
+a ponta da tela, API e banco continua no #1141.
 
 CT01–CT09 são HTTP. CT10–CT13 são interfaces internas com o banco, não endpoints.
 Os opcionais do pedido precisam aparecer tanto no CT03 quanto no CT12. A lista

@@ -69,34 +69,36 @@ O texto permitido não é cortado/aparado; a métrica Java está no dicionário.
 ## Pedidos estados e consultas
 
 POST /api/solicitacoes retorna 201 após gravação, com PENDENTE, aluno e horários
-do servidor. Medidas/observação são preservadas em atualizações. Sem contexto
-Keycloak validado, corpo válido recebe 401; X-Perfil não libera este POST.
+do servidor. Medidas/observação são preservadas em atualizações. Sem token
+válido do CT01, a chamada recebe 401; X-Perfil não autentica.
 
 Estados: PENDENTE, EM_SEPARACAO, AGUARDANDO_COMPRA, PRONTO_PARA_RETIRADA,
 CONCLUIDO e CANCELADO. [CT06](contratos/CT06-atualizarStatus.md) registra as
 transições do código. Status é texto, nunca posição de enum. A fila sem filtro
-exclui só CONCLUIDO atualmente. Histórico da PR #13 já existe; a PR #16 substitui
-os cabeçalhos provisórios pela identidade do token. Não remover pedidos históricos.
+exclui só CONCLUIDO atualmente. Histórico da PR #13 já existe e usa a identidade
+do JWT próprio da PR #19. Não remover pedidos históricos.
 
 PATCH de status preserva previsão se ausente/null e recusa previsão passada.
 Não criar baixa automática ou notificações por trigger: não são efeitos definidos
-por esta revisão. usuarioId ainda é número, sem relação JPA com Usuario; vínculo
-com Keycloak é separado, sem FK presumida para tabela interna do provedor.
+por esta revisão. usuarioId vem do token emitido após consultar `usuarios`.
+A solicitação ainda guarda o número sem relação JPA; conferir IDs existentes
+antes de decidir uma chave estrangeira ou migrar dados.
 
 ## O que resta por módulo
 
 | Item | Quem conduz / situação |
 | --- | --- |
 | Aplicar atualização no banco existente | Lara/H01.2 coordena o destino com o SQL/especificação entregues pelo Luis |
-| Keycloak e vínculo com usuarioId | PR #16/H02.2 integrada: token fornece usuarioId/perfil; #1141/Luis deve integrar e provar pela tela |
+| Tabela usuarios | H01.2/#1134: criar a tabela exigida pelo CT10 e prover contas de teste dos dois perfis |
+| Login integrado | PR #19 fornece o token com usuarioId/perfil; #1141/Luis deve provar pela tela |
 | Data persistida do estoque | Luis/#1154; PATCH da PR #8 desativado por padrão e data ainda só no DTO |
 | Metadados no catálogo | Projetar booleanos conforme CT02; DTO ainda não os expõe |
-| Formulário #1147 | Frontend 5f97581 já tem login visual; catálogo ainda sem Bearer e modal sem envio do pedido |
+| Formulário #1147 | Modal ainda sem envio; PR #14 do frontend adiciona Bearer ao catálogo, fora da main |
 | dataLimite | Fora de CT03/CT12; não confundir com previsaoRetirada ou relógio de criação |
 | Notificações | H09.1/Lara produz; #1161/Luis consulta; esquema próprio ainda a detalhar |
 
-Não criar senha_hash/sessoes da hipótese antiga: Keycloak foi escolhido pelo
-grupo. Não preencher dados de usuário, horários históricos ou regras por material
+O ADR 0008 exige `senha_hash` BCrypt em `usuarios`, sem tabela de sessões.
+Não preencher dados de usuário, horários históricos ou regras por material
 por suposição. A configuração uniforme de medidas decorre da confirmação do Luis.
 
 ## Verificação

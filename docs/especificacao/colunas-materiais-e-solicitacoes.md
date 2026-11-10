@@ -139,5 +139,5 @@ erro no MVP. Não criar identidade fictícia para demonstrar essa regra.
   Trocar um arquivo de inicialização não migra volume existente. Não apagar volume.
 
 O SQL é entregue para revisão e aplicação coordenada; não foi executado no banco
-compartilhado. Keycloak, dataLimite e envio do formulário são dependências
+compartilhado. Integração do login, dataLimite e envio do formulário são dependências
 separadas; a definição das seis colunas não permanece delegada à Lara.

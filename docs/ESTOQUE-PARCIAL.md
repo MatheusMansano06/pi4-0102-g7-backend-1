@@ -24,16 +24,16 @@ O SQL, o mapeamento JPA de Material e ddl-auto: validate permanecem sem alteraç
    tratamento dos materiais existentes, sem inventar uma data histórica.
 2. Gravar quantidade e data juntas; a resposta deve usar a data persistida.
    O horário calculado apenas no DTO atual ainda não cumpre CT05/CT11.
-3. Integrar a identidade Keycloak e exigir RESPONSAVEL, substituindo o X-Perfil
-   provisório. Decidir essa ligação com o H02.2 do Matheus.
+3. Exercitar a autorização do RESPONSAVEL com JWT emitido pelo CT01. A
+   identidade já é validada no backend conforme a PR #19.
 4. Validar no PostgreSQL oficial que saldo e data permanecem após nova consulta
    e que falhas não produzem gravação parcial.
 5. Testar ausência/invalidade de credencial e recusa ao ALUNO, além do sucesso
    do RESPONSAVEL. Só então revisar a remoção do bloqueio em outra alteração.
 
 Não ativar a propriedade de desenvolvimento em ambientes compartilhados ou de
-apresentação para contornar essas pendências. Esta entrega não instala Keycloak,
-não cria o banco e não retoma a etapa Docker da PR #9, cancelada pelo usuário.
+apresentação para contornar essas pendências. Esta entrega não cria o banco
+e não retoma a etapa Docker da PR #9, cancelada pelo usuário.
 
 ## Revisão e rastreabilidade
 

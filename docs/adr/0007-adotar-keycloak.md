@@ -1,5 +1,8 @@
 # ADR 0007 — Adotar Keycloak para autenticação
 
+> Decisão histórica, substituída em 10/11/2026 pelo
+> [ADR 0008 — Login próprio no backend](0008-login-proprio-sem-keycloak.md).
+
 **Status: aceito quanto à escolha do provedor.** Em 03/11/2026, Luis informou,
 após consultar o grupo: “vamos seguir com a autenticação do usuário com o Keycloack”.
 Esta decisão substitui a proposta de autenticação própria do ADR 0003.

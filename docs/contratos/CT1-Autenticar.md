@@ -37,7 +37,7 @@
 | Conta inativa | 403 | Erro `USUARIO_INATIVO` |
 | Falha inesperada | 500 | Erro `ERRO_INTERNO` |
 
-Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida segue a proposta comum de HTTP 401 / NAO_AUTENTICADO.
+Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida recebe HTTP 401 / NAO_AUTENTICADO.
 
 ## Como o token funciona
 

@@ -6,7 +6,7 @@ H01.2, sem ter de elaborar regras funcionais que faltavam na especificação.
 
 ## Definições já tomadas
 
-- Keycloak é o provedor escolhido pelo grupo; ADR 0007 substitui a hipótese própria.
+- Login próprio da PR #19 é a decisão vigente; ADR 0008 substitui ADR 0007.
 - Comunicação de desenvolvimento é chamada direta + CORS, integrada na PR #15.
 - Luis confirmou dimensão/diâmetro permitidos e opcionais para todos os materiais.
 - As quatro regras usam BOOLEAN, defaults TRUE/FALSE/TRUE/FALSE; dimensão do pedido
@@ -21,7 +21,8 @@ H01.2, sem ter de elaborar regras funcionais que faltavam na especificação.
 | Pendência | Quem conduz / próximo trabalho |
 | --- | --- |
 | Banco existente receber a configuração/colunas | H01.2/Lara coordena execução do [script definido](sql/H04.1-colunas-propostas.sql), com cópia de segurança e validate |
-| Integração do login | PR #16/H02.2 fornece contexto validado; #1141/Luis deve ajustar porta 8081, enviar Bearer e provar pela tela; revisar escopo legado #1138/CT01/CT10 |
+| Banco de usuários | H01.2/#1134: disponibilizar a tabela usuarios do CT10; banco criado apenas pelos scripts atuais não atende ao validate |
+| Integração do login | PR #19 entrega login e identidade; #1141/Luis aproveita a PR #14 do frontend para provar aluno e responsável com banco e assinatura configurados |
 | Metadados aceitos/obrigatórios no catálogo | Derivar dos booleanos no DTO; contrato alvo definido, ainda sem implementação |
 | Formulário enviar pedido | #1147/Luis com H04.2/Mirele, após identidade e API/banco prontos |
 | Data limite do formulário | Definir significado em recorte próprio; CT03 ainda recusa dataLimite |

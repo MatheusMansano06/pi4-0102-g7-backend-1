@@ -2,15 +2,15 @@
 
 Definição #1136 conciliada com o POST parcial integrado pela PR #14.
 [Campos e regras](../especificacao/colunas-materiais-e-solicitacoes.md) definidos
-pelo Luis; [identidade no backend](../H04.1-CRIAR-SOLICITACAO.md) fornecida pela
-PR #16/H02.2. Envio da credencial pela tela ainda depende do #1141.
+pelo Luis; [identidade no backend](../H04.1-CRIAR-SOLICITACAO.md) obtida do JWT
+emitido no CT01, conforme a PR #19. A prova pela tela depende do #1141/#1147.
 
 | Linha | Valor |
 | --- | --- |
 | Fronteira | HTTP, frontend → Backend API |
 | Atende | E3 |
 | Chamada | POST /api/solicitacoes |
-| Acesso | ALUNO; identidade validada no servidor pelo filtro da PR #16/H02.2 |
+| Acesso | ALUNO; identidade obtida do token validado no servidor |
 | Transporte da credencial | Authorization: Bearer; não confundir header livre com contexto validado |
 | Sucesso | HTTP 201 após gravação confirmada |
 
@@ -93,5 +93,5 @@ A entrada valida dimensão e observação com String.length(): até 255 unidades
 UTF-16, sem contar bytes, cortar ou aparar o texto. Acima disso, recusa antes
 da persistência e identifica o campo na mensagem; null/ausência são permitidos.
 A API não analisa os números no texto dimensao. O formulário
-compõe largura/altura em mm na futura integração #1147. A PR #16 produz
-UsuarioAutenticado; sem Bearer válido o filtro recusa a chamada com 401.
+compõe largura/altura em mm na futura integração #1147. O filtro produz
+UsuarioAutenticado com o token do CT01; sem Bearer válido a chamada recebe 401.

@@ -9,7 +9,7 @@
 | Quem responde | Backend API |
 | Atende | E6 |
 | Como chamar | `PATCH /api/solicitacoes/{solicitacaoId}/status` |
-| Autenticação proposta | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
+| Autenticação | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
 
 ## Entrada
 
@@ -39,7 +39,7 @@
 | Previsão de retirada no passado | 400 | Erro `PREVISAO_INVALIDA` |
 | Falha ao gravar status ou notificação | 500 | Erro `ERRO_INTERNO` |
 
-Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida segue a proposta comum de HTTP 401 / NAO_AUTENTICADO.
+Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida recebe HTTP 401 / NAO_AUTENTICADO.
 
 ## Transições e estado da implementação
 
@@ -53,6 +53,6 @@ Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/
 | CANCELADO | nenhum |
 
 Sucesso: HTTP 200. A data da alteração é gravada via CT12. A previsão é opcional;
-na implementação atual, ausência/null conserva a previsão já existente. A
-conferência de identidade real e a criação de notificação CT13 ainda estão
-pendentes, embora status/transições já existam. X-Perfil não autentica.
+na implementação atual, ausência/null conserva a previsão já existente. O
+perfil RESPONSAVEL vem do token. A criação de notificação CT13 continua
+pendente, embora status/transições já existam.

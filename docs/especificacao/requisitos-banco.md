@@ -5,7 +5,7 @@ aplicação no destino. O [dicionário](colunas-materiais-e-solicitacoes.md) def
 as seis colunas. Não há pendência de a Lara escolher regras: o Luis confirmou
 as duas medidas opcionais para todos os materiais do MVP.
 
-Base: main 6181761, com banco, histórico, POST parcial e integração do catálogo.
+Base atual: main e0e81ac, com a autenticação própria da PR #19.
 O Java continua em ddl-auto: validate.
 
 | Conjunto | Definição / situação |
@@ -14,7 +14,7 @@ O Java continua em ddl-auto: validate.
 | solicitacoes | dimensao VARCHAR(255), diametro DOUBLE PRECISION, anuláveis; observacao VARCHAR(255) já existente. Identidade, PENDENTE e datas do servidor. |
 | parametrosAceitos / parametrosObrigatorios | Projeções dos booleanos, sem colunas/arrays adicionais. Ainda ausentes no DTO do catálogo. |
 | Data do estoque | Persistência de atualizadaEm é outro recorte #1154; não inferir horário passado. |
-| usuarios / Keycloak | Vínculo com usuarioId e origem dos perfis dependem de H02.1/H02.2; não criar senha_hash/sessoes da proposta própria superada. |
+| usuarios | CT10/ADR 0008: usuario_id gerado, nome, email, senha_hash BCrypt, perfil ALUNO ou RESPONSAVEL e ativo booleano. A entidade existe; os scripts versionados ainda não criam a tabela. Implementação e aplicação: Lara/#1134. |
 | notificacoes | Detalhamento CT13/H09.1 é da Lara; consulta #1161 é do Luis. Não entregues aqui. |
 
 ## Banco existente
@@ -26,7 +26,14 @@ O Java continua em ddl-auto: validate.
    e datas. Repetição preserva o resultado. Tipos incompatíveis preexistentes
    exigem correção específica; IF NOT EXISTS não os converte.
 4. Conferir e iniciar com validate. Arquivo novo não migra um volume inicializado.
-5. Testar em ambiente dedicado. Pedido real ainda depende de identidade Keycloak.
+5. Para o backend atual iniciar com validate, conferir também a migração
+   de usuarios; o script das seis colunas não cria essa tabela.
+6. Testar em ambiente dedicado com contas ativas de aluno e responsável.
+   Conciliar seus IDs com os pedidos de exemplo sem reatribuir dados existentes
+   por suposição. Configurar a assinatura do JWT no backend.
+
+CT10 lê o hash para conferir a senha no backend. A ficha CT01 não o expõe à
+tela. O ADR 0008 não requer tabela de sessões.
 
 Não executar DROP/recriar volume. A aplicação no banco compartilhado continua
 coordenada com H01.2; esta entrega prepara o script, sem executá-lo nesse banco.

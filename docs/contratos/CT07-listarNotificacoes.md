@@ -9,7 +9,7 @@
 | Quem responde | Backend API |
 | Atende | E7 |
 | Como chamar | `GET /api/notificacoes` |
-| Autenticação proposta | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
+| Autenticação prevista para esta rota | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
 
 ## Entrada
 
@@ -36,7 +36,7 @@
 | Usuário sem autenticação | 401 | Erro `NAO_AUTENTICADO` |
 | Falha ao consultar notificações | 500 | Erro `ERRO_INTERNO` |
 
-Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida segue a proposta comum de HTTP 401 / NAO_AUTENTICADO.
+Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida recebe HTTP 401 / NAO_AUTENTICADO.
 
 Proposta de resposta: HTTP 200 com objeto { "notificacoes": [] } quando vazio;
 cada item contém os campos da ficha. O filtro somenteNaoLidas tem padrão false.
