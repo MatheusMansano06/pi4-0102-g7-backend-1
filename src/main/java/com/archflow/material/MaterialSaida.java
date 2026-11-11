@@ -1,7 +1,6 @@
 package com.archflow.material;
 
-// O que o CT02 devolve por material. Nao devolvemos a entidade para que o
-// JSON nao carregue campo nenhum que o contrato nao previu.
+// O que o CT02 devolve por material.
 public class MaterialSaida {
 
     private Long materialId;

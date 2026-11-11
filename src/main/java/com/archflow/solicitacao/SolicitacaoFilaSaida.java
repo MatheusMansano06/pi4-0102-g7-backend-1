@@ -2,10 +2,8 @@ package com.archflow.solicitacao;
 
 import java.time.LocalDateTime;
 
-// O que o CT04 devolve por pedido da fila. O material sai como o nome dele,
-// porque a tela da fila mostra texto, e nao a ficha inteira do material.
-// Dimensao, diametro e observacao vem junto porque a triagem decide por eles:
-// sem a medida pedida, o responsavel teria de abrir pedido por pedido.
+// O que o CT04 devolve por pedido da fila. O responsavel decide a triagem
+// pela dimensao, pelo diametro e pela observacao, entao os tres vao junto.
 public class SolicitacaoFilaSaida {
 
     private Long solicitacaoId;

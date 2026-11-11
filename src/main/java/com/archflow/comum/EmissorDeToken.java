@@ -9,11 +9,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
 // Emite o token que a tela guarda depois do login (CT01).
-//
-// O token e assinado com uma senha secreta que so o backend conhece, entao
-// ninguem consegue fabricar um token por fora nem trocar o perfil dentro dele.
-// Dentro vao o numero do usuario e o perfil, que e o que o LeitorDeToken le
-// em cada chamada seguinte. Senha nenhuma entra no token.
 public class EmissorDeToken {
 
     public static final String CAMPO_USUARIO_ID = "usuarioId";

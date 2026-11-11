@@ -3,9 +3,6 @@ package com.archflow.comum;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockFilterChain;
@@ -16,19 +13,26 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 // Confere que a recusa acontece antes da operacao: sem token valido, a
-// chamada nao chega ao controlador, e a tela recebe o mesmo formato de erro
-// do resto da API.
+// chamada nao chega ao controlador.
 public class FiltroDeIdentidadeTest {
 
     private final ObjectMapper json = new ObjectMapper();
 
+    // Dublê do decodificador: so o token "bom" passa.
+    private static class DecodificadorDeMentira implements JwtDecoder {
+
+        @Override
+        public Jwt decode(String valor) {
+            if (!"bom".equals(valor)) {
+                throw new BadJwtException("assinatura");
+            }
+            return Jwt.withTokenValue("bom").header("alg", "HS256")
+                    .claim("perfil", "ALUNO").claim("usuarioId", "12").build();
+        }
+    }
+
     private FiltroDeIdentidade filtro() {
-        JwtDecoder decodificador = mock(JwtDecoder.class);
-        when(decodificador.decode("bom")).thenReturn(Jwt.withTokenValue("bom")
-                .header("alg", "HS256").claim("perfil", "ALUNO")
-                .claim("usuarioId", "12").build());
-        when(decodificador.decode("ruim")).thenThrow(new BadJwtException("assinatura"));
-        return new FiltroDeIdentidade(new LeitorDeToken(decodificador), this.json);
+        return new FiltroDeIdentidade(new LeitorDeToken(new DecodificadorDeMentira()), this.json);
     }
 
     private MockHttpServletRequest pedido(String metodo, String token) {

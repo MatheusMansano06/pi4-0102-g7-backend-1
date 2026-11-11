@@ -145,9 +145,8 @@ public class Solicitacao {
         this.diametro = diametro;
     }
 
-    // CT06: a tabela de transicoes da secao 4 de docs/pendencias.md diz para
-    // onde o pedido pode ir a partir de onde ele esta. As setas que voltam
-    // existem para o responsavel corrigir engano.
+    // CT06: para onde o pedido pode ir a partir de onde ele esta. As setas
+    // que voltam existem para o responsavel corrigir engano.
     public boolean podeIrPara(StatusSolicitacao novoStatus) {
         return this.estaNaLista(novoStatus, this.destinosPermitidos());
     }
@@ -165,8 +164,7 @@ public class Solicitacao {
         return this.destinosDepoisDaSeparacao();
     }
 
-    // Pedido CONCLUIDO ou CANCELADO esta fechado: nao tem para onde ir, e por
-    // isso a lista dele volta vazia.
+    // Pedido CONCLUIDO ou CANCELADO esta fechado: a lista dele volta vazia.
     private StatusSolicitacao[] destinosDepoisDaSeparacao() {
         if (this.status == StatusSolicitacao.AGUARDANDO_COMPRA) {
             return new StatusSolicitacao[] { StatusSolicitacao.EM_SEPARACAO,

@@ -32,15 +32,12 @@ public class MaterialService {
         return catalogo;
     }
 
-    // CT05: a quantidade recebida substitui o saldo, sem somar movimentações.
+    // CT05: a quantidade recebida substitui o saldo.
     @Transactional
     public MaterialEstoqueSaida atualizarEstoque(UsuarioAutenticado identidade, Long materialId,
             MaterialEstoqueEntrada entrada) {
-        // 1) A identidade conferida no token restringe a operação ao responsável.
         this.exigirResponsavel(identidade);
-        // 2) Campo ausente não pode virar zero nem quantidade negativa chegar ao banco.
         this.exigirQuantidadeValida(entrada);
-        // 3) Saldo e data são gravados juntos, com a hora do servidor em segundos.
         Material material = this.buscar(materialId);
         material.atualizarEstoque(entrada.getQuantidadeDisponivel(), LocalDateTime.now().withNano(0));
         return new MaterialEstoqueSaida(this.materialRepository.saveAndFlush(material));
@@ -74,7 +71,7 @@ public class MaterialService {
         return material;
     }
 
-    // Busca vazia nao e erro: significa o catalogo inteiro.
+    // Busca vazia e o catalogo inteiro.
     private List<Material> procurar(String busca) {
         if (busca == null || busca.trim().isEmpty()) {
             return this.materialRepository.findByAtivoTrueOrderByNomeAsc();

@@ -1,7 +1,6 @@
 package com.archflow.comum;
 
-// O corpo que toda resposta de erro da API devolve, conforme o ADR 0004:
-//   { "codigo": "QUANTIDADE_INVALIDA", "mensagem": "A quantidade deve ser maior que zero." }
+// O corpo de toda resposta de erro da API, conforme o ADR 0004.
 public class ErroSaida {
 
     private String codigo;

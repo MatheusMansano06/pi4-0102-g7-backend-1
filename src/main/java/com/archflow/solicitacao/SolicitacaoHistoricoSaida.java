@@ -2,9 +2,7 @@ package com.archflow.solicitacao;
 
 import java.time.LocalDateTime;
 
-// O que o CT08 devolve por pedido do historico. Sai tambem a data da ultima
-// mudanca, porque no historico o que interessa e quando o pedido terminou,
-// e nao so quando ele comecou.
+// O que o CT08 devolve por pedido do historico, com a data da ultima mudanca.
 public class SolicitacaoHistoricoSaida {
 
     private Long solicitacaoId;

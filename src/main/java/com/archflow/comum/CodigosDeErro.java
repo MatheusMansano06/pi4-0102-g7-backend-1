@@ -1,7 +1,6 @@
 package com.archflow.comum;
 
 // Os codigos de erro que os contratos CT01 a CT13 definem.
-// Ficam aqui em um lugar so para ninguem escrever o texto errado por engano.
 public class CodigosDeErro {
 
     // Autenticacao e permissao
