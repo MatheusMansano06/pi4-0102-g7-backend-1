@@ -32,6 +32,12 @@ public class Usuario {
 
     private boolean ativo;
 
+    // Dados que so o aluno tem. O responsavel guarda matricula e cargo, que o
+    // cadastro pela tela nao cria: a conta de responsavel nasce pelo script.
+    private String ra;
+
+    private String curso;
+
     public Usuario() {
     }
 
@@ -40,6 +46,18 @@ public class Usuario {
         this.setEmail(email);
         this.setSenhaHash(senhaHash);
         this.setPerfil(perfil);
+        this.ativo = true;
+    }
+
+    // Conta de aluno criada pela tela de cadastro (CT14). O banco exige RA e
+    // curso preenchidos quando o perfil e ALUNO.
+    public Usuario(String nome, String email, String senhaHash, String ra, String curso) {
+        this.setNome(nome);
+        this.setEmail(email);
+        this.setSenhaHash(senhaHash);
+        this.setPerfil(PerfilUsuario.ALUNO);
+        this.setRa(ra);
+        this.setCurso(curso);
         this.ativo = true;
     }
 
@@ -89,6 +107,28 @@ public class Usuario {
             throw new IllegalArgumentException("O usuário precisa de um perfil.");
         }
         this.perfil = perfil;
+    }
+
+    public String getRa() {
+        return this.ra;
+    }
+
+    public void setRa(String ra) {
+        if (ra == null || ra.trim().isEmpty()) {
+            throw new IllegalArgumentException("O aluno precisa de um RA.");
+        }
+        this.ra = ra.trim();
+    }
+
+    public String getCurso() {
+        return this.curso;
+    }
+
+    public void setCurso(String curso) {
+        if (curso == null || curso.trim().isEmpty()) {
+            throw new IllegalArgumentException("O aluno precisa de um curso.");
+        }
+        this.curso = curso.trim();
     }
 
     public boolean isAtivo() {
