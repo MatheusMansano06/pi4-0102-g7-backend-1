@@ -7,6 +7,17 @@
 > `perfil` (ALUNO ou RESPONSAVEL) e `ativo`. O `senha_hash` guarda um hash BCrypt;
 > senha em texto puro, nunca.
 
+Em 11/11, a PR #24 passou a criar `usuarios` em 01-tabelas.sql. Além dos
+campos lidos pela entidade, o banco exige RA e curso para ALUNO; para
+RESPONSAVEL exige matrícula funcional e cargo, com campos do outro perfil nulos.
+Esses campos extras não são uma nova saída do CT01/CT10 nem estão mapeados na
+entidade Usuario. Fixtures e provisionamento precisam respeitar as restrições.
+Os hashes DEMO_SEM_LOGIN dos exemplos não são BCrypt válidos para autenticar.
+
+O índice de unicidade usa LOWER(email); a consulta atual findByEmail compara
+o e-mail informado após trim. Não prometer consulta sem distinção de caixa
+somente pela existência do índice.
+
 | Linha | Valor |
 | :--- | :--- |
 | Fronteira | Backend ↔ Banco de dados (interno; não é HTTP) |

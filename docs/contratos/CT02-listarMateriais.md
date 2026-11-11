@@ -50,7 +50,8 @@ divergência a alinhar antes de prometer esse comportamento na API.
 
 Saldo zero produz INDISPONIVEL; saldo positivo até quantidadeMinima produz BAIXO;
 acima disso, DISPONIVEL. A interface adapta os nomes para rótulos/classes CSS.
-A exigência de autenticação desta ficha ainda não está implementada no GET atual.
+O GET atual exige Bearer, validado pelo filtro antes do controller. Na main do
+frontend, a chamada ainda não envia esse token; a PR frontend #14 acrescenta o envio.
 
 ## Regra definida no MVP
 
