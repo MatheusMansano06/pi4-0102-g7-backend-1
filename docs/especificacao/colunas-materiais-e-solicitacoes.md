@@ -71,7 +71,12 @@ A contagem usa String.length(), conforme os exemplos da ApostilaProfAndre.pdf,
 página 81: unidades UTF-16, não bytes. Caracteres suplementares ocupam duas
 unidades nessa contagem, que é conservadora em relação à capacidade do VARCHAR.
 
-## Política explícita dos materiais de exemplo
+## Política confirmada e exemplos históricos da PR #10
+
+A tabela abaixo registra a configuração entregue na PR #10. A PR #24 trocou
+os materiais e os exemplos de regras; isso não redefine a decisão funcional.
+Todos os materiais do MVP continuam com as duas medidas permitidas e opcionais.
+As divergências atuais da carga estão nos [requisitos do banco](requisitos-banco.md).
 
 | Material | aceita_dimensao | exige_dimensao | aceita_diametro | exige_diametro |
 | --- | --- | --- | --- | --- |
@@ -126,8 +131,8 @@ erro no MVP. Não criar identidade fictícia para demonstrar essa regra.
 ## Criação e atualização do banco
 
 - Instalação nova: [01-tabelas.sql](../../banco/01-tabelas.sql) contém os campos
-  e defaults; [02-dados-exemplo.sql](../../banco/02-dados-exemplo.sql) explicita
-  a mesma política nas seis linhas de material.
+  e defaults. [02-dados-exemplo.sql](../../banco/02-dados-exemplo.sql), após PR #24,
+  precisa ser conciliado com a mesma política, nomes de colunas e estados válidos.
 - Banco existente: [script de atualização](../sql/H04.1-colunas-propostas.sql)
   adiciona campos ausentes, estabelece os quatro defaults e configura as regras
   de todos os materiais. O nome histórico foi mantido para preservar links.
