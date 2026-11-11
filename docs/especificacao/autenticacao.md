@@ -65,8 +65,13 @@ token no catálogo. Ela ainda está fora da main. A API não publica uma operaç
 de renovação ou revogação; o tratamento de expiração e a ligação do logout
 na interface precisam ser exercitados na integração.
 
-Com a tabela `usuarios` de H01.2/#1134, contas dos dois perfis e a chave de
+A PR #24 já cria a tabela `usuarios` com restrições de dados por perfil; seus
+exemplos ainda precisam de conciliação e não fornecem os dois logins funcionais.
+Com migração conferida no destino, contas válidas dos dois perfis e a chave de
 assinatura configurada, demonstrar login pela tela, catálogo com token, recusa
 sem token e fila recusada a um aluno. Conferir também que o histórico do aluno
 não inclui pedidos de outro usuário. A validação de tela não substitui as
 permissões do servidor. As provas pertencem ao #1141; este recorte é documental.
+
+Veja o [roteiro do #1141](../integracao/H02.4-PROVA-LOGIN.md) para repetir a
+validação da API em PostgreSQL descartável e, depois, os cenários pela tela.
