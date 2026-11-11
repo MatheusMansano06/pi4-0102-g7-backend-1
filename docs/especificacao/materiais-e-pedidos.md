@@ -40,7 +40,7 @@ baixa/reserva ou recusa por saldo insuficiente nesta revisão de campos.
 
 ## Estoque
 
-CT05 substitui o saldo; zero é válido. CT11 deve gravar saldo e atualizadaEm
-juntos. PR #8 já integrada mantém rota desativada por padrão e data calculada
-só no DTO. A data persistida do estoque é recorte #1154, não uma das seis colunas.
-Não inventar data histórica para materiais legados.
+CT05 substitui o saldo; zero é válido. O complemento #1154 grava saldo e
+atualizadaEm juntos. A rota continua desativada por padrão. A data fica em
+materiais.atualizada_em, separada das seis colunas de medidas. Materiais legados
+ficam com NULL até uma atualização de estoque registrada.

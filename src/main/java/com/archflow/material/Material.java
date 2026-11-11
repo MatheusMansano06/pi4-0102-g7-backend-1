@@ -1,10 +1,12 @@
 package com.archflow.material;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "materiais")
@@ -25,6 +27,10 @@ public class Material {
     private int quantidadeMinima;
 
     private boolean ativo;
+
+    // Materiais sem alteração de estoque registrada ainda não têm horário.
+    @Column(name = "atualizada_em")
+    private LocalDateTime atualizadaEm;
 
     // Null significa que a equipe ainda não definiu a política deste material.
     private Boolean aceitaDimensao;
@@ -90,6 +96,10 @@ public class Material {
         this.quantidadeDisponivel = quantidadeDisponivel;
     }
 
+    public LocalDateTime getAtualizadaEm() {
+        return this.atualizadaEm;
+    }
+
     public int getQuantidadeMinima() {
         return this.quantidadeMinima;
     }
@@ -139,6 +149,14 @@ public class Material {
 
     public void setExigeDiametro(Boolean exigeDiametro) {
         this.exigeDiametro = exigeDiametro;
+    }
+
+    public void atualizarEstoque(int quantidadeDisponivel, LocalDateTime horario) {
+        if (horario == null) {
+            throw new IllegalArgumentException("A data da atualização do estoque é obrigatória.");
+        }
+        this.setQuantidadeDisponivel(quantidadeDisponivel);
+        this.atualizadaEm = horario;
     }
 
     // Sem nenhuma unidade em estoque o material nao pode ser pedido.

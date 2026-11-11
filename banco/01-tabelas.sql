@@ -6,6 +6,7 @@ CREATE TABLE materiais (
     quantidade_disponivel INTEGER NOT NULL,
     quantidade_minima INTEGER NOT NULL,
     ativo BOOLEAN NOT NULL,
+    atualizada_em TIMESTAMP WITHOUT TIME ZONE,
     -- Regra do MVP confirmada pelo Luis no #1136: ambas permitidas e opcionais.
     -- NULL explicito continua representando configuracao incompleta, recusada pela API.
     aceita_dimensao BOOLEAN DEFAULT TRUE,

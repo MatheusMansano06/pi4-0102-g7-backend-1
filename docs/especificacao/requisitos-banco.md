@@ -13,7 +13,7 @@ O Java continua em ddl-auto: validate.
 | materiais | Campos básicos existentes; quatro BOOLEAN anuláveis, com defaults TRUE/FALSE/TRUE/FALSE e configuração explícita dos exemplos nesta revisão. |
 | solicitacoes | dimensao VARCHAR(255), diametro DOUBLE PRECISION, anuláveis; observacao VARCHAR(255) já existente. Identidade, PENDENTE e datas do servidor. |
 | parametrosAceitos / parametrosObrigatorios | Projeções dos booleanos, sem colunas/arrays adicionais. Ainda ausentes no DTO do catálogo. |
-| Data do estoque | Persistência de atualizadaEm é outro recorte #1154; não inferir horário passado. |
+| Data do estoque | #1154 mapeia materiais.atualizada_em (TIMESTAMP WITHOUT TIME ZONE, anulável, sem default). Em banco existente, revisar/aplicar com H01.2 antes de iniciar a versão, mesmo com o PATCH desativado. |
 | usuarios | CT10/ADR 0008: usuario_id gerado, nome, email, senha_hash BCrypt, perfil ALUNO ou RESPONSAVEL e ativo booleano. A entidade existe; os scripts versionados ainda não criam a tabela. Implementação e aplicação: Lara/#1134. |
 | notificacoes | Detalhamento CT13/H09.1 é da Lara; consulta #1161 é do Luis. Não entregues aqui. |
 

@@ -26,7 +26,7 @@ H01.2, sem ter de elaborar regras funcionais que faltavam na especificação.
 | Metadados aceitos/obrigatórios no catálogo | Derivar dos booleanos no DTO; contrato alvo definido, ainda sem implementação |
 | Formulário enviar pedido | #1147/Luis com H04.2/Mirele, após identidade e API/banco prontos |
 | Data limite do formulário | Definir significado em recorte próprio; CT03 ainda recusa dataLimite |
-| Estoque gravar a data com o saldo | #1154/Luis; rota da PR #8 segue desativada por padrão |
+| Validação da data de estoque | #1154/Luis: gravação preparada; alinhar/aplicar a coluna com H01.2 e provar releitura com JWT antes de habilitar a rota |
 | Usuários/notificações | Detalhar módulos próprios; não inventar senha local ou dados históricos |
 
 A PR #10 prepara as definições e scripts; aplicação no banco compartilhado e

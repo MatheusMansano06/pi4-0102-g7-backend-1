@@ -20,14 +20,11 @@ que so confere se as classes batem com as tabelas. Ver `docs/adr/0005`.
 
 ## Mexeu no script depois do banco ja ter subido?
 
-Os arquivos so rodam na primeira vez. Para o banco ser criado de novo do zero:
-
-```bash
-docker compose down -v
-docker compose up
-```
-
-O `-v` apaga o volume com os dados. Tudo que estava gravado se perde.
+Os scripts de inicialização só rodam na primeira vez. Em um banco existente,
+combine a migração com H01.2 e preserve o volume. Para o #1154, o
+[script de atualização de estoque](../docs/sql/H07.1-data-do-estoque.sql)
+adiciona `materiais.atualizada_em` sem alterar o saldo. A coluna precisa
+existir antes de iniciar a nova versão com `ddl-auto: validate`.
 
 ## O que ainda precisa existir
 
