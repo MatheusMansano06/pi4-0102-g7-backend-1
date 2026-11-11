@@ -11,10 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 // Quem usa o ArchFlow, conforme o CT10: aluno ou responsavel.
-//
-// A senha nunca e guardada como a pessoa digitou. O que fica no banco e o
-// hash, que e um embaralhamento que so serve para conferir se a senha bate:
-// nem o banco nem quem olha a tabela consegue voltar dele para a senha.
+// A senha fica no banco so como hash, nunca como a pessoa digitou.
 @Entity
 @Table(name = "usuarios")
 public class Usuario {

@@ -2,7 +2,7 @@ package com.archflow.material;
 
 import java.time.LocalDateTime;
 
-// O horário informa a conclusão desta operação; não cria uma coluna no banco.
+// A resposta usa o horário armazenado junto com o novo saldo.
 public class MaterialEstoqueSaida {
 
     private Long materialId;
@@ -14,7 +14,7 @@ public class MaterialEstoqueSaida {
     public MaterialEstoqueSaida(Material material) {
         this.materialId = material.getMaterialId();
         this.quantidadeDisponivel = material.getQuantidadeDisponivel();
-        this.atualizadaEm = LocalDateTime.now();
+        this.atualizadaEm = material.getAtualizadaEm();
     }
 
     public Long getMaterialId() {

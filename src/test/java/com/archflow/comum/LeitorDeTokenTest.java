@@ -2,26 +2,35 @@ package com.archflow.comum;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 // Confere o H02.2: o que o backend aceita como identidade e o que ele recusa.
-//
-// O decodificador entra substituido de proposito. Conferir a assinatura de
-// verdade ja e trabalho da biblioteca; o que se testa aqui e a decisao tomada
-// depois da conferencia: perfil, numero do aluno e cada recusa da ficha.
 public class LeitorDeTokenTest {
 
+    // Dublê do decodificador: recusa "token-ruim" e devolve o token pronto
+    // nos outros casos, sem conferir assinatura de verdade.
+    private static class DecodificadorDeMentira implements JwtDecoder {
+
+        private final Jwt token;
+
+        public DecodificadorDeMentira(Jwt token) {
+            this.token = token;
+        }
+
+        @Override
+        public Jwt decode(String valor) {
+            if ("token-ruim".equals(valor)) {
+                throw new BadJwtException("assinatura");
+            }
+            return this.token;
+        }
+    }
+
     private LeitorDeToken leitor(Jwt token) {
-        JwtDecoder decodificador = mock(JwtDecoder.class);
-        when(decodificador.decode("token-bom")).thenReturn(token);
-        when(decodificador.decode("token-ruim")).thenThrow(new BadJwtException("assinatura"));
-        return new LeitorDeToken(decodificador);
+        return new LeitorDeToken(new DecodificadorDeMentira(token));
     }
 
     private Jwt token(String usuarioId, String perfil) {

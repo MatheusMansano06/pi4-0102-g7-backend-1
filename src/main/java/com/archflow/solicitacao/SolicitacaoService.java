@@ -23,11 +23,8 @@ public class SolicitacaoService {
 
     // CT04: a fila e so do responsavel, em ordem de chegada.
     public List<SolicitacaoFilaSaida> listarFila(UsuarioAutenticado identidade, String status) {
-        // 1) Quem nao e o responsavel nao passa daqui.
         this.exigirResponsavel(identidade);
-        // 2) Sem status no pedido da tela, a fila volta sem os pedidos concluidos.
         List<Solicitacao> encontradas = this.procurar(status);
-        // 3) A tela recebe so os campos do contrato, nunca a entidade.
         List<SolicitacaoFilaSaida> fila = new ArrayList<SolicitacaoFilaSaida>();
         for (Solicitacao solicitacao : encontradas) {
             fila.add(new SolicitacaoFilaSaida(solicitacao));
@@ -35,20 +32,14 @@ public class SolicitacaoService {
         return fila;
     }
 
-    // CT06: so o responsavel muda o status, e so pelos caminhos que a tabela
-    // de transicoes permite.
+    // CT06: so o responsavel muda o status, pelos caminhos permitidos.
     public SolicitacaoStatusSaida atualizarStatus(UsuarioAutenticado identidade, Long solicitacaoId,
             SolicitacaoStatusEntrada entrada) {
-        // 1) Quem nao e o responsavel nao passa daqui.
         this.exigirResponsavel(identidade);
-        // 2) O status pedido tem que ser um dos nomes do contrato.
         StatusSolicitacao novoStatus = this.converterStatus(entrada.getStatus());
-        // 3) Previsao no passado nao serve para avisar o aluno.
         this.exigirPrevisaoNoFuturo(entrada.getPrevisaoRetirada());
-        // 4) O pedido tem que existir e aceitar esse caminho.
         Solicitacao solicitacao = this.buscar(solicitacaoId);
         this.exigirTransicaoPermitida(solicitacao, novoStatus);
-        // 5) A entidade marca a hora da mudanca sozinha quando o status troca.
         solicitacao.setStatus(novoStatus);
         this.guardarPrevisao(solicitacao, entrada.getPrevisaoRetirada());
         return new SolicitacaoStatusSaida(this.solicitacaoRepository.save(solicitacao));
@@ -56,12 +47,9 @@ public class SolicitacaoService {
 
     // CT08: o aluno ve so os pedidos dele; o responsavel ve os de todos.
     public List<SolicitacaoHistoricoSaida> listarHistorico(UsuarioAutenticado identidade) {
-        // 1) Quem nao se identificou nao tem historico para ver.
         this.exigirIdentificado(identidade);
-        // 2) O aluno so leva os pedidos dele; o numero vem do token.
         List<Solicitacao> encontradas = this.procurarHistorico(identidade.getPerfil(),
                 identidade.getUsuarioId());
-        // 3) A tela recebe so os campos do contrato, nunca a entidade.
         List<SolicitacaoHistoricoSaida> historico = new ArrayList<SolicitacaoHistoricoSaida>();
         for (Solicitacao solicitacao : encontradas) {
             historico.add(new SolicitacaoHistoricoSaida(solicitacao));
@@ -69,8 +57,7 @@ public class SolicitacaoService {
         return historico;
     }
 
-    // O aluno so leva os pedidos dele. Deixar passar sem numero devolveria o
-    // historico da turma inteira para quem nao pode ver.
+    // O aluno so leva os pedidos dele, pelo numero que veio no token.
     private List<Solicitacao> procurarHistorico(PerfilUsuario perfil, Long usuarioId) {
         if (PerfilUsuario.RESPONSAVEL.equals(perfil)) {
             return this.solicitacaoRepository.findAllByOrderByCriadaEmDesc();
@@ -98,8 +85,7 @@ public class SolicitacaoService {
         return solicitacao;
     }
 
-    // A mensagem diz de onde para onde o pedido ia, porque o responsavel ve a
-    // fila inteira e precisa saber qual pedido recusou a mudanca.
+    // A mensagem diz de onde para onde o pedido ia.
     private void exigirTransicaoPermitida(Solicitacao solicitacao, StatusSolicitacao novoStatus) {
         if (solicitacao.podeIrPara(novoStatus)) {
             return;
@@ -119,8 +105,7 @@ public class SolicitacaoService {
         }
     }
 
-    // Pedido que chega sem previsao mantem a que ja tinha, para a mudanca de
-    // status nao apagar a data que o aluno ja viu no painel de prazos.
+    // Pedido sem previsao mantem a que ja tinha.
     private void guardarPrevisao(Solicitacao solicitacao, LocalDateTime previsaoRetirada) {
         if (previsaoRetirada == null) {
             return;
@@ -128,8 +113,7 @@ public class SolicitacaoService {
         solicitacao.setPrevisaoRetirada(previsaoRetirada);
     }
 
-    // Sem identidade ninguem se identificou. O aluno se identificou, mas a
-    // fila dos outros nao e da conta dele.
+    // A fila e so do responsavel.
     private void exigirResponsavel(UsuarioAutenticado identidade) {
         if (identidade == null) {
             throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
@@ -141,8 +125,7 @@ public class SolicitacaoService {
         }
     }
 
-    // Status em branco nao e erro: significa a fila do que ainda falta atender,
-    // por isso o pedido concluido fica de fora enquanto ninguem pedir por ele.
+    // Status em branco e a fila do que falta atender, sem os concluidos.
     private List<Solicitacao> procurar(String status) {
         if (status == null || status.trim().isEmpty()) {
             return this.solicitacaoRepository.findByStatusNotOrderByCriadaEmAsc(StatusSolicitacao.CONCLUIDO);
@@ -150,8 +133,7 @@ public class SolicitacaoService {
         return this.solicitacaoRepository.findByStatusOrderByCriadaEmAsc(this.converterStatus(status));
     }
 
-    // O contrato aceita so os status da lista. Qualquer outro texto e recusado,
-    // em vez de devolver fila vazia e fazer o responsavel achar que nao ha pedido.
+    // Texto fora da lista do contrato e recusado, nao vira fila vazia.
     private StatusSolicitacao converterStatus(String status) {
         try {
             return StatusSolicitacao.valueOf(status.trim().toUpperCase());

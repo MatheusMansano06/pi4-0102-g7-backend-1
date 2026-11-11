@@ -11,8 +11,7 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
 
     Solicitacao findBySolicitacaoId(Long solicitacaoId);
 
-    // CT08: o historico comeca pelo pedido mais novo, porque e o que o aluno
-    // procura primeiro quando abre a tela.
+    // CT08: o historico comeca pelo pedido mais novo.
     List<Solicitacao> findByUsuarioIdOrderByCriadaEmDesc(Long usuarioId);
 
     List<Solicitacao> findAllByOrderByCriadaEmDesc();

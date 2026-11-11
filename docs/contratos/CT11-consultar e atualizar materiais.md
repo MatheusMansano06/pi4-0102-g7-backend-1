@@ -42,15 +42,16 @@
 | --- | --- |
 | especificacao, quantidadeMinima, ativo | Já existem na entidade Material |
 | aceitaDimensao, exigeDimensao, aceitaDiametro, exigeDiametro | Boolean anuláveis lidos da entidade; regra do MVP TRUE/FALSE/TRUE/FALSE |
-| atualizadaEm | Persistir junto da atualização do saldo, não gerar só na resposta |
+| atualizadaEm | `materiais.atualizada_em`, TIMESTAMP WITHOUT TIME ZONE; NULL antes de uma alteração de estoque registrada |
 
 statusEstoque é derivado do saldo e do mínimo, sem exigir coluna própria.
 Os parâmetros aceitos/obrigatórios são consultados para validar a criação do pedido;
 não serão inferidos da descrição. Veja [materiais e pedidos](../especificacao/materiais-e-pedidos.md).
 Este contrato é interno: a identidade/permissão já foi conferida na camada de API;
-não é um endpoint que recebe Authorization diretamente. Falha de gravação não
-pode ser apresentada como sucesso em CT05. Tipos físicos e regras de migração
-seguem para [alinhamento com o banco](../especificacao/requisitos-banco.md).
+não é um endpoint que recebe Authorization diretamente. CT05 grava saldo e data
+na mesma transação e só responde sucesso depois da gravação. Para bancos já
+criados, revisar com H01.2 a [atualização da coluna](../sql/H07.1-data-do-estoque.sql)
+antes de iniciar a versão nova com `ddl-auto: validate`.
 
 ## Mapeamento definido no #1136
 

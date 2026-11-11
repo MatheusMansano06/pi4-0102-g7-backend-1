@@ -8,11 +8,9 @@ import com.archflow.comum.NegocioException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-// A operacao autenticar do CT01 (H02.1): confere e-mail e senha e, dando
-// certo, devolve o perfil e o token que a tela usa nas chamadas seguintes.
-//
-// E-mail que nao existe e senha errada dao a mesma resposta de proposito:
-// dizer qual dos dois errou ajudaria quem esta tentando adivinhar conta.
+// A operacao autenticar do CT01 (H02.1): confere e-mail e senha e devolve o
+// perfil e o token. E-mail que nao existe e senha errada dao a mesma resposta,
+// para nao dizer quais e-mails tem conta.
 @Service
 public class AutenticacaoService {
 
@@ -50,16 +48,12 @@ public class AutenticacaoService {
         return valor == null || valor.trim().isEmpty();
     }
 
-    // A conferencia da senha roda mesmo quando o e-mail nao existe, com um
-    // hash de mentira, para que errar o e-mail demore o mesmo que errar a
-    // senha: a diferenca de tempo entregaria quais e-mails tem conta.
     private void exigirSenhaCorreta(Usuario usuario, String senha) {
-        String hashGuardado = "$2a$10$0000000000000000000000000000000000000000000000000000";
-        if (usuario != null) {
-            hashGuardado = usuario.getSenhaHash();
+        if (usuario == null) {
+            throw new NaoAutenticadoException(CodigosDeErro.CREDENCIAIS_INVALIDAS,
+                    "E-mail ou senha incorretos.");
         }
-        boolean senhaBate = this.conferenteDeSenha.matches(senha, hashGuardado);
-        if (usuario == null || !senhaBate) {
+        if (!this.conferenteDeSenha.matches(senha, usuario.getSenhaHash())) {
             throw new NaoAutenticadoException(CodigosDeErro.CREDENCIAIS_INVALIDAS,
                     "E-mail ou senha incorretos.");
         }

@@ -7,8 +7,9 @@ Projeto Integrador IV - PUC-Campinas - Turma 0102 - Grupo 7.
 A [criação de solicitação H04.1](docs/H04.1-CRIAR-SOLICITACAO.md) já foi integrada parcialmente. O [dicionário das seis colunas](docs/especificacao/colunas-materiais-e-solicitacoes.md) define medidas permitidas e opcionais para todos os materiais. Aplicar a atualização no banco existente antes de demonstrar o fluxo real.
 
 O controle de estoque tem uma [entrega parcial](docs/ESTOQUE-PARCIAL.md): regras
-e testes preparados, com a rota de alteração desativada por padrão enquanto
-falta a persistência da data. O catálogo segue disponível.
+e testes preparados, com saldo/data persistidos desde a PR #23. A rota de
+alteração continua desativada por padrão até validar o ambiente e a integração
+da tela. O catálogo segue disponível para chamadas autenticadas.
 
 Para construir o banco a partir do backend atual, consultar o
 [guia consolidado para a Lara](docs/GUIA-BANCO-PARA-LARA.md): entidades,
@@ -50,6 +51,13 @@ cp .env.example .env
 
 **3.** Suba tudo:
 
+Antes da primeira instalação, conferir as [pendências dos scripts de exemplo](docs/especificacao/requisitos-banco.md).
+A PR #24 já criou `usuarios`, mas seu arquivo `02-dados-exemplo.sql` ainda usa
+colunas e status incompatíveis com o esquema/Java e não fornece contas com hashes
+BCrypt válidos para login. A sequência abaixo depende de conciliar esses exemplos;
+ela não comprova que a instalação atual esteja pronta. Em banco existente,
+combinar a migração com H01.2, preservando o volume.
+
 ```bash
 docker compose up
 ```
@@ -68,6 +76,10 @@ todas as outras chamadas (`Authorization: Bearer <token>`): sem token a API resp
 assina e confere esse token e o proprio backend, com a senha secreta de `ARCHFLOW_TOKEN_SEGREDO`
 no `.env`. Ver o [ADR 0008](docs/adr/0008-login-proprio-sem-keycloak.md).
 
+Esse é o fluxo esperado: a main do frontend ainda tem formulários sem chamada
+de login. A PR frontend #14 liga login e catálogo; a #15 depende dela para ligar
+os históricos. Conferir as integrações antes da demonstração.
+
 Para parar, `Ctrl+C`. Para parar e apagar os dados do banco, `docker compose down -v`.
 
 ## Versao de apresentacao
@@ -80,8 +92,12 @@ docker compose -f docker-compose.prod.yml up --build
 ```
 
 O `Dockerfile` e o `nginx.conf` ja estao commitados na raiz do repositorio do frontend. Nesta
-versao o nginx repassa `/api` para o backend por dentro do Docker, entao a tela fica so em
-http://localhost e nao existe CORS.
+versao o nginx repassa `/api` para o backend por dentro do Docker. Para usar esse
+encaminhamento, ainda é necessário conciliar o endereço da API no frontend,
+que hoje é absoluto em localhost:8080; o CORS atual só autoriza a porta 5173.
+O Compose de apresentação também precisa encaminhar ARCHFLOW_TOKEN_SEGREDO,
+como o de desenvolvimento. Conferir os imports com caixa divergente de welcome
+antes do build Linux; a compilação Windows não elimina essa pendência.
 
 ## Organizacao das pastas
 

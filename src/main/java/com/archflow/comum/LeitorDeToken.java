@@ -5,11 +5,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 
 // Diz quem esta chamando a API, a partir do token que a tela recebeu no login.
-//
-// O token e o que o proprio backend emitiu no CT01: a assinatura e a validade
-// sao conferidas com a mesma senha secreta usada para assinar, entao token
-// inventado, alterado ou vencido nao passa daqui. O numero do usuario e o
-// perfil saem de dentro do proprio token.
 public class LeitorDeToken {
 
     private static final String PREFIXO_BEARER = "Bearer ";
@@ -49,8 +44,7 @@ public class LeitorDeToken {
         }
     }
 
-    // O perfil vem escrito no token pelo EmissorDeToken. Token sem perfil, ou
-    // com perfil que o sistema nao conhece, nao foi emitido por este backend.
+    // Token sem perfil, ou com perfil desconhecido, nao vale.
     private PerfilUsuario lerPerfil(Jwt token) {
         String perfil = token.getClaimAsString(EmissorDeToken.CAMPO_PERFIL);
         if (PerfilUsuario.RESPONSAVEL.name().equals(perfil)) {
@@ -63,8 +57,6 @@ public class LeitorDeToken {
                 "Token de acesso inválido ou expirado.");
     }
 
-    // O pedido e o historico do aluno sao gravados por numero de usuario, e
-    // esse numero entra no token na hora do login.
     private Long lerUsuarioId(Jwt token) {
         Object valor = token.getClaim(EmissorDeToken.CAMPO_USUARIO_ID);
         if (valor instanceof Number) {
