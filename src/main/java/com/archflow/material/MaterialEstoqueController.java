@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 // Entrega parcial: não registra a rota na configuração padrão da aplicação.
-// A propriedade é ativada somente pelos testes enquanto faltam Keycloak e banco.
+// A propriedade é ativada somente nos testes até validar a migração e o fluxo.
 @RestController
 @RequestMapping("/api/materiais")
 @ConditionalOnProperty(name = "archflow.estoque.em-desenvolvimento", havingValue = "true")

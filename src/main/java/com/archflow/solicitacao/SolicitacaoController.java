@@ -22,9 +22,6 @@ public class SolicitacaoController {
     }
 
     // CT04: GET /api/solicitacoes/fila?status={status}
-    //
-    // A identidade vem do token conferido pelo FiltroDeIdentidade, nunca de um
-    // valor que a tela possa escrever.
     @GetMapping("/fila")
     public List<SolicitacaoFilaSaida> listarFila(
             @RequestAttribute(name = "usuarioAutenticado", required = false) UsuarioAutenticado identidade,

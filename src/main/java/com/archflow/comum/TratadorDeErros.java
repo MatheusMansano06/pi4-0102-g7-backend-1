@@ -5,14 +5,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-// Captura as excecoes lancadas nas outras camadas e transforma cada uma na
-// resposta HTTP certa, conforme a tabela do ADR 0004.
-//
-// Sem esta classe, qualquer regra de negocio violada sairia como HTTP 500
-// ("o servidor quebrou") e a mensagem nem chegaria ao frontend.
-//
-// O Spring escolhe sempre o metodo mais especifico. Por isso o de
-// NegocioException, que e o pai de todos, fica por ultimo.
+// Transforma cada excecao das outras camadas na resposta HTTP do ADR 0004.
 @RestControllerAdvice
 public class TratadorDeErros {
 
@@ -57,8 +50,7 @@ public class TratadorDeErros {
         return new ErroSaida(erro.getCodigo(), erro.getMessage());
     }
 
-    // 500: falha que nao esperavamos. A mensagem original nao vai para o
-    // cliente de proposito, para nao vazar detalhe interno do sistema.
+    // 500: falha inesperada. A mensagem original nao vai para o cliente.
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErroSaida tratarFalhaInesperada(Exception erro) {

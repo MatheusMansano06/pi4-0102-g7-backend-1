@@ -18,11 +18,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 // Liga a conferencia de identidade nas rotas da API.
-//
-// O token e emitido e conferido pelo proprio backend, com uma senha secreta
-// que vem do ambiente: a mesma senha assina o token no login e confere a
-// assinatura nas chamadas seguintes. Quem trocar essa senha derruba os tokens
-// que ja estavam na mao das telas, e todo mundo precisa entrar de novo.
 @Configuration
 public class ConfiguracaoDeIdentidade {
 
@@ -30,7 +25,6 @@ public class ConfiguracaoDeIdentidade {
 
     private static final String ALGORITMO_DA_ASSINATURA = "HmacSHA256";
 
-    // A assinatura HS256 exige pelo menos 32 letras de segredo.
     private static final int TAMANHO_MINIMO_DO_SEGREDO = 32;
 
     @Value("${archflow.token.segredo}")
@@ -61,7 +55,6 @@ public class ConfiguracaoDeIdentidade {
         return new EmissorDeToken(assinadorDeToken);
     }
 
-    // Guarda a senha do usuario embaralhada, do jeito que o CT10 pede.
     @Bean
     public PasswordEncoder conferenteDeSenha() {
         return new BCryptPasswordEncoder();

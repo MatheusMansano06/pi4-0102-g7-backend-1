@@ -2,8 +2,7 @@ package com.archflow.usuario;
 
 import com.archflow.comum.PerfilUsuario;
 
-// O que o CT01 devolve quando o login da certo. A senha nunca volta, e o
-// hash guardado no banco tambem nao: o que a tela recebe e o token.
+// O que o CT01 devolve quando o login da certo. Senha e hash nunca voltam.
 public class AutenticacaoSaida {
 
     private final Long usuarioId;

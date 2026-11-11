@@ -1,6 +1,7 @@
 # CT05: atualizarEstoque
 
-> Revisão #1136: contrato alvo em revisão; propostas e diferenças para o código estão em [H01.4](../especificacao/H01.4-alinhamento.md).
+> Complemento #1154: o saldo e a data são gravados na mesma transação. A
+> rota segue desativada por padrão até a validação integrada.
 
 | Linha | Valor |
 | :--- | :--- |
@@ -40,7 +41,7 @@ Não definir essa propriedade nos ambientes compartilhados ou de apresentação.
 
 Quando habilitada, a operação exige RESPONSAVEL identificado pelo JWT do
 CT01. X-Perfil não autentica. Os testes isolados usam identidade de teste;
-a prova integrada ainda depende de banco e da persistência da data.
+a prova integrada exige PostgreSQL com o esquema atualizado.
 Ver [escopo e pendências da entrega parcial](../ESTOQUE-PARCIAL.md).
 
 ## Saída
@@ -51,10 +52,10 @@ Ver [escopo e pendências da entrega parcial](../ESTOQUE-PARCIAL.md).
 | quantidadeDisponivel | inteiro | sim | 24 |
 | atualizadaEm | data e hora persistida (ISO 8601) | sim | 2026-10-13T12:05:00 |
 
-Contrato alvo: HTTP 200, devolvendo a data gravada junto com a quantidade.
-Na implementação parcial exercitada pelos testes, `atualizadaEm` ainda é calculada
-apenas na resposta. Isso **não atende** a persistência exigida no CT11/#1154.
-Alinhar a coluna com o SQL da equipe antes de implementar e liberar a operação.
+Sucesso: HTTP 200 com a data gravada junto com a quantidade. O backend
+registra seu horário local com precisão de segundos, sem deslocamento de fuso
+no JSON. O horário não é recebido da tela. A coluna de materiais pode ficar
+NULL até a primeira alteração de estoque; o PATCH bem-sucedido devolve a data.
 
 ## Erros
 
