@@ -5,18 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.archflow.comum.EmissorDeToken;
 import com.archflow.comum.PerfilUsuario;
-import com.archflow.comum.UsuarioAutenticado;
 import com.archflow.material.Material;
 import com.archflow.material.MaterialRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -26,20 +28,24 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
-// PostgreSQL real, mas identidade e políticas são fixtures de teste, não Keycloak.
-// Não cria tabelas nem apaga registros. Cada teste desfaz sua transação no final.
+// PostgreSQL, filtro e assinatura JWT reais, com usuários exclusivos de teste.
+// As tabelas vêm do SQL oficial; cada teste desfaz seus registros por rollback.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-@EnabledIfEnvironmentVariable(named = "ARCHFLOW_CT03_TESTE_URL", matches = ".+")
+@EnabledIfEnvironmentVariable(named = "ARCHFLOW_CT03_TESTE_URL",
+        matches = "jdbc:postgresql://(localhost|127[.]0[.]0[.]1):[0-9]+/archflow_ct03_teste_[a-z0-9_]+")
 @TestPropertySource(properties = {
         "spring.datasource.url=${ARCHFLOW_CT03_TESTE_URL}",
         "spring.datasource.username=${ARCHFLOW_CT03_TESTE_USUARIO}",
-        "spring.datasource.password=${ARCHFLOW_CT03_TESTE_SENHA}"
+        "spring.datasource.password=${ARCHFLOW_CT03_TESTE_SENHA}",
+        "archflow.token.segredo=${ARCHFLOW_CT03_TESTE_SEGREDO}"
 })
 public class SolicitacaoCriacaoBancoTest {
 
@@ -53,7 +59,10 @@ public class SolicitacaoCriacaoBancoTest {
     private SolicitacaoRepository solicitacoes;
 
     @Autowired
-    private SolicitacaoService status;
+    private EmissorDeToken emissor;
+
+    @Autowired
+    private PasswordEncoder conferenteDeSenha;
 
     @Autowired
     private EntityManager entidades;
@@ -69,9 +78,30 @@ public class SolicitacaoCriacaoBancoTest {
 
     private Material material;
 
+    private Long alunoId;
+
+    private String tokenDoAluno;
+
+    private String tokenDoOutroAluno;
+
+    private String tokenDoResponsavel;
+
     @BeforeEach
     public void preparar() {
         assertTrue(this.bancoUrl.contains("/archflow_ct03_teste_"), "Use somente o banco dedicado do CT03.");
+        String hash = this.conferenteDeSenha.encode("senha-exclusiva-da-fixture-ct03");
+        this.alunoId = this.criarAluno("ct03-aluno-a@example.test", "CT03-A", hash);
+        Long outroAlunoId = this.criarAluno("ct03-aluno-b@example.test", "CT03-B", hash);
+        Long responsavelId = this.sql.queryForObject(
+                "INSERT INTO usuarios (nome, email, senha_hash, perfil, matricula_funcional, cargo) "
+                        + "VALUES (?, ?, ?, 'RESPONSAVEL', ?, ?) RETURNING usuario_id", Long.class,
+                "Fixture CT03 responsável", "ct03-responsavel@example.test", hash, "CT03-R", "Teste");
+        this.tokenDoAluno = this.emissor.emitirPara(this.alunoId, PerfilUsuario.ALUNO,
+                "ct03-aluno-a@example.test");
+        this.tokenDoOutroAluno = this.emissor.emitirPara(outroAlunoId, PerfilUsuario.ALUNO,
+                "ct03-aluno-b@example.test");
+        this.tokenDoResponsavel = this.emissor.emitirPara(responsavelId, PerfilUsuario.RESPONSAVEL,
+                "ct03-responsavel@example.test");
         this.material = new Material("Fixture CT03", "Sem dados reais", "Material de teste", 10, 2);
         this.material.setAceitaDimensao(true);
         this.material.setExigeDimensao(false);
@@ -86,7 +116,7 @@ public class SolicitacaoCriacaoBancoTest {
         this.entidades.flush();
         this.entidades.clear();
         Solicitacao gravada = this.solicitacoes.findBySolicitacaoId(pedidoId);
-        assertEquals(12L, gravada.getUsuarioId());
+        assertEquals(this.alunoId, gravada.getUsuarioId());
         assertEquals(2, gravada.getQuantidade());
         assertEquals(StatusSolicitacao.PENDENTE, gravada.getStatus());
         assertEquals("300 x 200 mm", gravada.getDimensao());
@@ -106,7 +136,10 @@ public class SolicitacaoCriacaoBancoTest {
         SolicitacaoStatusEntrada entrada = new SolicitacaoStatusEntrada();
         entrada.setStatus("EM_SEPARACAO");
         entrada.setPrevisaoRetirada(LocalDateTime.now().plusDays(2));
-        this.status.atualizarStatus(this.responsavel(), pedidoId, entrada);
+        this.api.perform(patch("/api/solicitacoes/{solicitacaoId}/status", pedidoId)
+                .header("Authorization", "Bearer " + this.tokenDoResponsavel)
+                .contentType(MediaType.APPLICATION_JSON).content(this.json.writeValueAsBytes(entrada)))
+                .andExpect(status().isOk());
         this.entidades.flush();
         this.entidades.clear();
         Solicitacao gravada = this.solicitacoes.findBySolicitacaoId(pedidoId);
@@ -114,7 +147,7 @@ public class SolicitacaoCriacaoBancoTest {
         assertEquals("300 x 200 mm", gravada.getDimensao());
         assertEquals(4.5, gravada.getDiametro());
         assertEquals("Preservar observação", gravada.getObservacao());
-        assertEquals(12L, gravada.getUsuarioId());
+        assertEquals(this.alunoId, gravada.getUsuarioId());
     }
 
     @Test
@@ -123,7 +156,7 @@ public class SolicitacaoCriacaoBancoTest {
                 "INSERT INTO materiais (nome, quantidade_disponivel, quantidade_minima, ativo) "
                         + "VALUES ('Fixture defaults MVP', 10, 2, TRUE) RETURNING material_id", Long.class);
         String resposta = this.api.perform(post("/api/solicitacoes")
-                .requestAttr("usuarioAutenticado", new UsuarioAutenticado(12L, PerfilUsuario.ALUNO))
+                .header("Authorization", "Bearer " + this.tokenDoAluno)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"materialId\":" + materialId + ",\"quantidade\":2}"))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.status").value("PENDENTE"))
@@ -132,7 +165,7 @@ public class SolicitacaoCriacaoBancoTest {
         this.entidades.flush();
         this.entidades.clear();
         Solicitacao gravada = this.solicitacoes.findBySolicitacaoId(pedidoId);
-        assertEquals(12L, gravada.getUsuarioId());
+        assertEquals(this.alunoId, gravada.getUsuarioId());
         assertNull(gravada.getDimensao());
         assertNull(gravada.getDiametro());
         assertEquals(10, gravada.getMaterial().getQuantidadeDisponivel());
@@ -144,7 +177,7 @@ public class SolicitacaoCriacaoBancoTest {
         this.materiais.saveAndFlush(this.material);
         long antes = this.solicitacoes.count();
         this.api.perform(post("/api/solicitacoes")
-                .requestAttr("usuarioAutenticado", new UsuarioAutenticado(12L, PerfilUsuario.ALUNO))
+                .header("Authorization", "Bearer " + this.tokenDoAluno)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"materialId\":" + this.material.getMaterialId() + ",\"quantidade\":2}"))
                 .andExpect(status().isServiceUnavailable())
@@ -157,32 +190,67 @@ public class SolicitacaoCriacaoBancoTest {
         Long pedidoId = this.criarPedido();
         this.entidades.flush();
         this.entidades.clear();
-        List<SolicitacaoHistoricoSaida> historico = this.status.listarHistorico(this.aluno(12L));
+        JsonNode historico = this.consultarHistorico(this.tokenDoAluno);
         boolean encontrado = false;
-        for (SolicitacaoHistoricoSaida pedido : historico) {
-            if (pedido.getSolicitacaoId().equals(pedidoId)) {
+        for (JsonNode pedido : historico) {
+            if (pedido.path("solicitacaoId").longValue() == pedidoId.longValue()) {
                 encontrado = true;
-                assertEquals(StatusSolicitacao.PENDENTE, pedido.getStatus());
+                assertEquals("PENDENTE", pedido.path("status").asText());
             }
         }
         assertTrue(encontrado, "O pedido criado deve aparecer no histórico do seu aluno.");
-        for (SolicitacaoHistoricoSaida pedido : this.status.listarHistorico(this.aluno(13L))) {
-            assertFalse(pedido.getSolicitacaoId().equals(pedidoId),
+        for (JsonNode pedido : this.consultarHistorico(this.tokenDoOutroAluno)) {
+            assertFalse(pedido.path("solicitacaoId").longValue() == pedidoId.longValue(),
                     "O pedido não pode aparecer no histórico de outro aluno.");
         }
     }
 
-    private UsuarioAutenticado aluno(long numero) {
-        return new UsuarioAutenticado(Long.valueOf(numero), PerfilUsuario.ALUNO);
+    @Test
+    public void semTokenOuComTokenInvalidoNaoGravaMesmoComCabecalhosLivres() throws Exception {
+        long antes = this.solicitacoes.count();
+        this.api.perform(this.pedidoSemMedidas()
+                .header("X-Perfil", "ALUNO").header("X-Usuario-Id", this.alunoId))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.codigo").value("NAO_AUTENTICADO"));
+        this.api.perform(this.pedidoSemMedidas().header("Authorization", "Bearer token-invalido"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.codigo").value("NAO_AUTENTICADO"));
+        assertEquals(antes, this.solicitacoes.count());
     }
 
-    private UsuarioAutenticado responsavel() {
-        return new UsuarioAutenticado(9L, PerfilUsuario.RESPONSAVEL);
+    @Test
+    public void responsavelAutenticadoNaoCriaPedidoNemAlteraSaldo() throws Exception {
+        long antes = this.solicitacoes.count();
+        this.api.perform(this.pedidoSemMedidas()
+                .header("Authorization", "Bearer " + this.tokenDoResponsavel))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("ACESSO_NEGADO"));
+        assertEquals(antes, this.solicitacoes.count());
+        assertEquals(10, this.materiais.findByMaterialId(this.material.getMaterialId()).getQuantidadeDisponivel());
+    }
+
+    private Long criarAluno(String email, String ra, String hash) {
+        return this.sql.queryForObject(
+                "INSERT INTO usuarios (nome, email, senha_hash, perfil, ra, curso) "
+                        + "VALUES (?, ?, ?, 'ALUNO', ?, ?) RETURNING usuario_id", Long.class,
+                "Fixture CT03 aluno", email, hash, ra, "Curso de teste");
+    }
+
+    private JsonNode consultarHistorico(String token) throws Exception {
+        byte[] resposta = this.api.perform(get("/api/solicitacoes/historico")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+        return this.json.readTree(resposta);
+    }
+
+    private MockHttpServletRequestBuilder pedidoSemMedidas() {
+        return post("/api/solicitacoes").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"materialId\":" + this.material.getMaterialId() + ",\"quantidade\":2}");
     }
 
     private Long criarPedido() throws Exception {
         String resposta = this.api.perform(post("/api/solicitacoes")
-                .requestAttr("usuarioAutenticado", new UsuarioAutenticado(12L, PerfilUsuario.ALUNO))
+                .header("Authorization", "Bearer " + this.tokenDoAluno)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"materialId\":" + this.material.getMaterialId()
                         + ",\"quantidade\":2,\"dimensao\":\"300 x 200 mm\",\"diametro\":4.5,"
