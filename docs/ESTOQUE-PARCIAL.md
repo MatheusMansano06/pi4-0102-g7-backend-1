@@ -30,9 +30,10 @@ própria.
    Para testar migração, usar uma cópia do esquema anterior e aplicar o
    [ALTER](sql/H07.1-data-do-estoque.sql), verificando que o saldo anterior
    permanece e a data começa como NULL.
-2. O contexto completo do backend também exige a tabela `usuarios`. Usar
-   o esquema de H01.2 ou, somente nesse banco descartável, a
-   [tabela de teste do #1141](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/blob/818878b88abb6d189a7c7744707f18a7c8fdd026/src/test/resources/ct01/usuarios-teste.sql).
+2. O contexto completo do backend também exige a tabela `usuarios`. Ela já é
+   criada pelo 01-tabelas.sql desde a PR #24. Não aplicar a antiga fixture do
+   #1141: era um esquema auxiliar e foi removida da prova atual. Na cópia
+   migrada, usar o esquema compatível de H01.2, preservando as referências.
    Nenhuma conta real é necessária: o teste emite credenciais para identidades
    de teste e usa o filtro da aplicação.
 3. Definir `ARCHFLOW_CT05_TESTE_URL` com uma URL JDBC de loopback no banco
