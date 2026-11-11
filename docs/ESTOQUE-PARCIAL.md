@@ -44,3 +44,20 @@ A prova habilita `archflow.estoque.em-desenvolvimento` apenas no teste.
 Confere o novo saldo e a data em outra consulta após a resposta do PATCH,
 e preservação de ambos quando faltam credencial ou permissão, ou a quantidade
 é inválida. Não habilitar a rota em ambiente compartilhado até validar o fluxo.
+
+## Evidência da validação da PR
+
+A prova foi executada com PostgreSQL 16.15 local no Ubuntu, isolado do banco da
+equipe. Os dois cenários de MaterialEstoqueBancoTest passaram em instalação
+nova e em uma cópia do esquema anterior com a migração aplicada: quatro
+execuções aprovadas, sem cenários ignorados.
+
+O ALTER foi executado duas vezes na cópia. Os seis materiais e cinco pedidos
+de exemplo foram preservados, com a nova data inicialmente NULL e sem default.
+A resposta do PATCH e a releitura após a transação confirmaram saldo e data
+iguais. As recusas mantiveram os valores anteriores. Os dois bancos de teste
+foram removidos e a instância isolada encerrada.
+
+O Compose do projeto usa PostgreSQL 15 e não foi executado nesta prova. A
+migração do ambiente da equipe continua pendente: aplicar a coluna antes de
+iniciar a nova versão, mesmo com a rota desativada.
