@@ -57,3 +57,9 @@ A [prova local do CT07](CT07-listarNotificacoes.md#prova-local-da-consulta)
 usa nomes físicos exclusivos de uma tabela temporária para exercitar o
 filtro no PostgreSQL. Esses nomes não definem a migração oficial.
 
+Em 11/11/2026, o recorte foi atualizado para a main 3af147b e a prova isolada
+passou a ser executada no PostgreSQL local. A leitura de referência e sua
+tabela continuam somente em src/test; a interface de produção segue sem
+adaptador até H01.2 publicar o esquema. Isso não implementa gravação de avisos,
+triggers, alteração de leitura, SQL compartilhado ou frontend.
+

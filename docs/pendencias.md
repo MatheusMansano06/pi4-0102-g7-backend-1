@@ -30,7 +30,7 @@ não comprova carga de exemplos, migração no destino ou integração de telas.
 | Metadados aceitos/obrigatórios no catálogo | Derivar dos booleanos no DTO; contrato alvo definido, ainda sem implementação |
 | Formulário enviar pedido | #1147/Luis com H04.2/Mirele, após identidade e API/banco prontos |
 | Data limite do formulário | Definir significado em recorte próprio; CT03 ainda recusa dataLimite |
-| Leitura de notificações | #1161 prepara CT07 com consulta simulada; ligar ao esquema H01.2 e provar o isolamento antes de habilitar |
+| Leitura de notificações | #1161/PR #22: CT07 e consulta temporária de referência; branch conciliada com main 3af147b. Falta adaptador no esquema H01.2 e prova do endpoint real antes de habilitar |
 | Geração de notificações | H09.1 produz os avisos; a consulta não cria nem marca avisos como lidos |
 | Validação da data de estoque | #1154/Luis: PR #23 integrada, releitura com JWT/PostgreSQL provada; verificar migração e integração no destino antes de habilitar a rota |
 | Prova PostgreSQL do pedido | [PR #25](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/25) corrige os cinco testes antigos para JWT e acrescenta recusas; 95 testes aprovados, incluindo nove PostgreSQL, em ambiente isolado |

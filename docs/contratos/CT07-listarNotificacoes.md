@@ -1,7 +1,8 @@
 # CT07: listarNotificacoes
 
-> Entrega inicial #1161: contrato HTTP e serviço testados com consulta simulada.
-> A rota continua desativada por padrão até ligar a leitura ao banco.
+> Entrega parcial #1161: contrato HTTP/serviço testados com consulta simulada;
+> consulta de referência validada em tabela temporária PostgreSQL. A rota
+> continua desativada por padrão até ligar a leitura ao esquema oficial.
 
 | Linha | Valor |
 | :--- | :--- |
@@ -51,7 +52,7 @@ não escolhem outro destinatário. Ordenação e paginação não são definidas
 Neste recorte, `archflow.notificacoes.em-desenvolvimento` fica ligada apenas
 nos testes, que fornecem identidade interna e consulta simuladas. Não habilitar
 a propriedade em um ambiente compartilhado: ainda falta implementar a consulta
-com o esquema de H01.2, provar o isolamento no PostgreSQL e exercitar avisos
+com o esquema de H01.2, provar o isolamento nesse esquema e exercitar avisos
 gerados por H09.1. A configuração padrão não registra a rota.
 
 ## Prova local da consulta
@@ -76,3 +77,32 @@ A prova não inicia a aplicação, não habilita o endpoint e não escreve em
 tabelas permanentes. A conexão desfaz a transação e descarta a tabela ao
 final de cada cenário. A tabela e a consulta de referência não substituem
 o esquema nem a consulta real de H01.2.
+
+## Resultado da validação de 11/11/2026
+
+Branch atualizada com main 3af147b, incluindo o login próprio validado, o novo
+DDL de usuários e a persistência de estoque. O conflito em docs/pendencias.md
+foi conciliado, mantendo essas entregas e separando consulta/produção de avisos.
+
+Os quatro cenários ConsultaNotificacoesBancoTest usam PostgreSQL 16.15 local
+isolado. Conferem os avisos de cada destinatário, o filtro de não lidas sem
+mudança de estado, lista vazia para outro usuário e os campos/referência nula.
+O usuário e o perfil dessa prova são fixtures internas; ela não passa pelo
+filtro JWT nem pelo endpoint. Os sete testes WebMvc separados usam consulta
+simulada; o teste de configuração confere que a rota permanece desativada.
+
+Suíte completa: **116 testes aprovados, zero falhas e zero ignorados**.
+Inclui os quatro CT07 e os 18 testes PostgreSQL de login/pedido/estoque da
+base. Na execução padrão sem essas variáveis, 22 cenários de PostgreSQL ficam
+desabilitados; o verde da CI padrão não substitui esta prova local.
+
+Ao terminar, CT07 não deixou tabela permanente nem avisos_ct07_teste em
+nenhum esquema temporário do seu banco. Os outros bancos não continham
+usuários/materiais/pedidos de fixture restantes. Os quatro bancos descartáveis
+foram removidos e a instância isolada encerrada. O Compose declara PostgreSQL
+15 e não foi executado nessa prova com PostgreSQL 16.15.
+
+Esta prova é independente de tabela permanente de notificações e de H09.1.
+Ela não permite habilitar a propriedade no ambiente compartilhado. Falta
+implementar ConsultaDeNotificacoes sobre o esquema oficial, provar o endpoint
+com identidade real e esse adaptador, e integrar avisos gerados por H09.1.
