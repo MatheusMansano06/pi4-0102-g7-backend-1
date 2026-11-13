@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -205,6 +206,20 @@ public class SolicitacaoCriacaoBancoTest {
         }
     }
 
+    // H05.3: a fila e o historico do responsavel dizem de quem e cada pedido.
+    // O nome vem da tabela usuarios pela mesma coluna usuario_id que ja gravava
+    // o dono, entao a prova so vale lendo de novo do PostgreSQL.
+    @Test
+    public void filaEHistoricoDoResponsavelTrazemONomeDoAlunoDono() throws Exception {
+        Long pedidoId = this.criarPedido();
+        this.entidades.flush();
+        this.entidades.clear();
+
+        assertEquals("Fixture CT03 aluno", this.alunoDoPedido(this.consultarFila(), pedidoId));
+        assertEquals("Fixture CT03 aluno",
+                this.alunoDoPedido(this.consultarHistorico(this.tokenDoResponsavel), pedidoId));
+    }
+
     @Test
     public void semTokenOuComTokenInvalidoNaoGravaMesmoComCabecalhosLivres() throws Exception {
         long antes = this.solicitacoes.count();
@@ -234,6 +249,24 @@ public class SolicitacaoCriacaoBancoTest {
                 "INSERT INTO usuarios (nome, email, senha_hash, perfil, ra, curso) "
                         + "VALUES (?, ?, ?, 'ALUNO', ?, ?) RETURNING usuario_id", Long.class,
                 "Fixture CT03 aluno", email, hash, ra, "Curso de teste");
+    }
+
+    private JsonNode consultarFila() throws Exception {
+        byte[] resposta = this.api.perform(get("/api/solicitacoes/fila")
+                .header("Authorization", "Bearer " + this.tokenDoResponsavel))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+        return this.json.readTree(resposta);
+    }
+
+    // Acha o pedido na lista e devolve o nome do aluno que veio nele.
+    private String alunoDoPedido(JsonNode lista, Long pedidoId) {
+        for (JsonNode pedido : lista) {
+            if (pedido.path("solicitacaoId").longValue() == pedidoId.longValue()) {
+                return pedido.path("aluno").asText(null);
+            }
+        }
+        fail("O pedido " + pedidoId + " devia estar na lista.");
+        return null;
     }
 
     private JsonNode consultarHistorico(String token) throws Exception {
