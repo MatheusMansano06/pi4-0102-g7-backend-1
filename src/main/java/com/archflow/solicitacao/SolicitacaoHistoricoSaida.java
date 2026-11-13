@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 // deixa ordenar por ela. Pedido sem medida volta com o campo nulo.
 // O nome do aluno entra agora que a tabela usuarios existe (H01.2): e o que o
 // responsavel usa para saber de quem e cada pedido da lista dele.
+// A previsao de retirada vai junto porque o painel de prazos do aluno mostra,
+// por pedido, o status e a data marcada. Pedido sem data volta com o campo nulo.
 public class SolicitacaoHistoricoSaida {
 
     private Long solicitacaoId;
@@ -25,6 +27,8 @@ public class SolicitacaoHistoricoSaida {
 
     private String dimensao;
 
+    private LocalDateTime previsaoRetirada;
+
     public SolicitacaoHistoricoSaida(Solicitacao solicitacao) {
         this.solicitacaoId = solicitacao.getSolicitacaoId();
         this.aluno = nomeDoAluno(solicitacao);
@@ -34,6 +38,7 @@ public class SolicitacaoHistoricoSaida {
         this.criadaEm = solicitacao.getCriadaEm();
         this.atualizadaEm = solicitacao.getAtualizadaEm();
         this.dimensao = solicitacao.getDimensao();
+        this.previsaoRetirada = solicitacao.getPrevisaoRetirada();
     }
 
     // Pedido montado so na memoria nao tem o aluno carregado. Nesse caso o
@@ -75,5 +80,9 @@ public class SolicitacaoHistoricoSaida {
 
     public String getDimensao() {
         return this.dimensao;
+    }
+
+    public LocalDateTime getPrevisaoRetirada() {
+        return this.previsaoRetirada;
     }
 }

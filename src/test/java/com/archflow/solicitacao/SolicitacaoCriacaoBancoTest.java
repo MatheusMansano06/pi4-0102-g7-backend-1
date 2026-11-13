@@ -239,6 +239,26 @@ public class SolicitacaoCriacaoBancoTest {
         assertEquals(previsao, LocalDateTime.parse(pedido.path("previsaoRetirada").asText()));
     }
 
+    // H08.3: o painel de prazos do aluno mostra a previsao de cada pedido, e o
+    // aluno le os pedidos dele pelo CT08. A data que o responsavel marcou
+    // precisa chegar la.
+    @Test
+    public void historicoDoAlunoTrazAPrevisaoMarcadaPeloResponsavel() throws Exception {
+        Long pedidoId = this.criarPedido();
+        this.entidades.flush();
+        this.entidades.clear();
+        assertTrue(this.pedidoDaLista(this.consultarHistorico(this.tokenDoAluno), pedidoId)
+                .path("previsaoRetirada").isNull(), "Pedido novo nao tem previsao marcada.");
+
+        LocalDateTime previsao = LocalDateTime.now().plusDays(3).withNano(0);
+        this.marcarEmSeparacao(pedidoId, previsao);
+        this.entidades.flush();
+        this.entidades.clear();
+
+        JsonNode pedido = this.pedidoDaLista(this.consultarHistorico(this.tokenDoAluno), pedidoId);
+        assertEquals(previsao, LocalDateTime.parse(pedido.path("previsaoRetirada").asText()));
+    }
+
     // H10.3: a tela do historico do responsavel tem coluna de dimensao e deixa
     // ordenar por ela, entao o CT08 precisa devolver a medida do pedido.
     @Test
