@@ -220,6 +220,25 @@ public class SolicitacaoCriacaoBancoTest {
                 this.alunoDoPedido(this.consultarHistorico(this.tokenDoResponsavel), pedidoId));
     }
 
+    // H05.3: a tela da fila tem coluna de prazo. Pedido novo nasce sem previsao,
+    // e a previsao gravada pelo responsavel no CT12 precisa aparecer na fila.
+    @Test
+    public void filaTrazAPrevisaoDeRetiradaGravadaPeloResponsavel() throws Exception {
+        Long pedidoId = this.criarPedido();
+        this.entidades.flush();
+        this.entidades.clear();
+        assertTrue(this.pedidoDaLista(this.consultarFila(), pedidoId)
+                .path("previsaoRetirada").isNull(), "Pedido novo nao tem previsao marcada.");
+
+        LocalDateTime previsao = LocalDateTime.now().plusDays(2).withNano(0);
+        this.marcarEmSeparacao(pedidoId, previsao);
+        this.entidades.flush();
+        this.entidades.clear();
+
+        JsonNode pedido = this.pedidoDaLista(this.consultarFila(), pedidoId);
+        assertEquals(previsao, LocalDateTime.parse(pedido.path("previsaoRetirada").asText()));
+    }
+
     // H10.3: a tela do historico do responsavel tem coluna de dimensao e deixa
     // ordenar por ela, entao o CT08 precisa devolver a medida do pedido.
     @Test
@@ -261,6 +280,17 @@ public class SolicitacaoCriacaoBancoTest {
                 "INSERT INTO usuarios (nome, email, senha_hash, perfil, ra, curso) "
                         + "VALUES (?, ?, ?, 'ALUNO', ?, ?) RETURNING usuario_id", Long.class,
                 "Fixture CT03 aluno", email, hash, ra, "Curso de teste");
+    }
+
+    // Leva o pedido para EM_SEPARACAO ja com a previsao, como o CT12 faz.
+    private void marcarEmSeparacao(Long pedidoId, LocalDateTime previsao) throws Exception {
+        SolicitacaoStatusEntrada entrada = new SolicitacaoStatusEntrada();
+        entrada.setStatus("EM_SEPARACAO");
+        entrada.setPrevisaoRetirada(previsao);
+        this.api.perform(patch("/api/solicitacoes/{solicitacaoId}/status", pedidoId)
+                .header("Authorization", "Bearer " + this.tokenDoResponsavel)
+                .contentType(MediaType.APPLICATION_JSON).content(this.json.writeValueAsBytes(entrada)))
+                .andExpect(status().isOk());
     }
 
     private JsonNode consultarFila() throws Exception {
