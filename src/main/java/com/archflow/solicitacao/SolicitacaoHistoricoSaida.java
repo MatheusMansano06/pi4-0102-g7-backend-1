@@ -3,9 +3,13 @@ package com.archflow.solicitacao;
 import java.time.LocalDateTime;
 
 // O que o CT08 devolve por pedido do historico, com a data da ultima mudanca.
+// O nome do aluno entra agora que a tabela usuarios existe (H01.2): e o que o
+// responsavel usa para saber de quem e cada pedido da lista dele.
 public class SolicitacaoHistoricoSaida {
 
     private Long solicitacaoId;
+
+    private String aluno;
 
     private String material;
 
@@ -19,6 +23,7 @@ public class SolicitacaoHistoricoSaida {
 
     public SolicitacaoHistoricoSaida(Solicitacao solicitacao) {
         this.solicitacaoId = solicitacao.getSolicitacaoId();
+        this.aluno = nomeDoAluno(solicitacao);
         this.material = solicitacao.getMaterial().getNome();
         this.quantidade = solicitacao.getQuantidade();
         this.status = solicitacao.getStatus();
@@ -26,8 +31,21 @@ public class SolicitacaoHistoricoSaida {
         this.atualizadaEm = solicitacao.getAtualizadaEm();
     }
 
+    // Pedido montado so na memoria nao tem o aluno carregado. Nesse caso o
+    // campo vai nulo em vez de quebrar o historico inteiro.
+    private static String nomeDoAluno(Solicitacao solicitacao) {
+        if (solicitacao.getAluno() == null) {
+            return null;
+        }
+        return solicitacao.getAluno().getNome();
+    }
+
     public Long getSolicitacaoId() {
         return this.solicitacaoId;
+    }
+
+    public String getAluno() {
+        return this.aluno;
     }
 
     public String getMaterial() {
