@@ -3,6 +3,8 @@ package com.archflow.solicitacao;
 import java.time.LocalDateTime;
 
 // O que o CT08 devolve por pedido do historico, com a data da ultima mudanca.
+// A dimensao entra porque a tela do historico do responsavel tem a coluna e
+// deixa ordenar por ela. Pedido sem medida volta com o campo nulo.
 // O nome do aluno entra agora que a tabela usuarios existe (H01.2): e o que o
 // responsavel usa para saber de quem e cada pedido da lista dele.
 public class SolicitacaoHistoricoSaida {
@@ -21,6 +23,8 @@ public class SolicitacaoHistoricoSaida {
 
     private LocalDateTime atualizadaEm;
 
+    private String dimensao;
+
     public SolicitacaoHistoricoSaida(Solicitacao solicitacao) {
         this.solicitacaoId = solicitacao.getSolicitacaoId();
         this.aluno = nomeDoAluno(solicitacao);
@@ -29,6 +33,7 @@ public class SolicitacaoHistoricoSaida {
         this.status = solicitacao.getStatus();
         this.criadaEm = solicitacao.getCriadaEm();
         this.atualizadaEm = solicitacao.getAtualizadaEm();
+        this.dimensao = solicitacao.getDimensao();
     }
 
     // Pedido montado so na memoria nao tem o aluno carregado. Nesse caso o
@@ -66,5 +71,9 @@ public class SolicitacaoHistoricoSaida {
 
     public LocalDateTime getAtualizadaEm() {
         return this.atualizadaEm;
+    }
+
+    public String getDimensao() {
+        return this.dimensao;
     }
 }
