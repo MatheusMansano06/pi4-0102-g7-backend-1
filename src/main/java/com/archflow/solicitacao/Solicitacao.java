@@ -2,6 +2,7 @@ package com.archflow.solicitacao;
 
 import com.archflow.material.Material;
 import com.archflow.usuario.Usuario;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,6 +22,10 @@ public class Solicitacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long solicitacaoId;
 
+    // O nome da coluna vai escrito aqui de proposito. Sem isso o Hibernate ve
+    // dois nomes logicos diferentes para a mesma coluna usuario_id, um por este
+    // campo e outro pelo @JoinColumn do aluno abaixo, e recusa subir.
+    @Column(name = "usuario_id")
     private Long usuarioId;
 
     // O mesmo usuario_id, agora lido como o aluno inteiro, para a fila e o
