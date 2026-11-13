@@ -77,6 +77,9 @@ public class CadastroAlunoBancoTest {
         assertEquals(HttpStatus.CREATED, criado.getStatusCode());
         assertEquals("ALUNO", criado.getBody().get("perfil").asText());
         assertTrue(criado.getBody().get("usuarioId").asLong() > 0);
+        // Quem acabou de se cadastrar ja cai logado na tela, entao a resposta
+        // do CT14 precisa trazer o curso igual a do login.
+        assertEquals("Sistemas de Informacao", criado.getBody().get("curso").asText());
 
         this.conferirContaGravada();
 

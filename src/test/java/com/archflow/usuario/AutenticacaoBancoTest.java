@@ -207,12 +207,23 @@ public class AutenticacaoBancoTest {
         assertNotNull(sessao);
         assertEquals(this.contaDeTeste.getUsuarioId().longValue(), sessao.path("usuarioId").asLong());
         assertEquals(this.contaDeTeste.getNome(), sessao.path("nome").asText());
+        this.conferirCurso(sessao, perfil);
         assertEquals(perfil.name(), sessao.path("perfil").asText());
         assertFalse(sessao.has("senha"));
         assertFalse(sessao.has("senhaHash"));
         assertTrue(sessao.path("token").isTextual());
         assertFalse(sessao.path("token").asText().isEmpty());
         return sessao.path("token").asText();
+    }
+
+    // A barra de cima mostra o curso embaixo do nome do aluno. Conta de
+    // responsavel nao tem curso no banco, entao o campo volta nulo.
+    private void conferirCurso(JsonNode sessao, PerfilUsuario perfil) {
+        if (perfil == PerfilUsuario.ALUNO) {
+            assertEquals("Curso de teste", sessao.path("curso").asText());
+            return;
+        }
+        assertTrue(sessao.path("curso").isNull());
     }
 
     private ResponseEntity<JsonNode> consultar(String rota, String token) {
