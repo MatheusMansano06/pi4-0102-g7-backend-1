@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 // O que o CT04 devolve por pedido da fila. O responsavel decide a triagem
 // pela dimensao, pelo diametro e pela observacao, entao os tres vao junto.
 // O nome do aluno entra agora que a tabela usuarios existe (H01.2).
+// A previsao de retirada vai junto porque a tela da fila tem coluna de prazo.
+// Pedido sem data marcada volta com o campo nulo: nem todo pedido tem previsao.
 public class SolicitacaoFilaSaida {
 
     private Long solicitacaoId;
@@ -19,6 +21,8 @@ public class SolicitacaoFilaSaida {
 
     private LocalDateTime criadaEm;
 
+    private LocalDateTime previsaoRetirada;
+
     private String dimensao;
 
     private Double diametro;
@@ -32,6 +36,7 @@ public class SolicitacaoFilaSaida {
         this.quantidade = solicitacao.getQuantidade();
         this.status = solicitacao.getStatus();
         this.criadaEm = solicitacao.getCriadaEm();
+        this.previsaoRetirada = solicitacao.getPrevisaoRetirada();
         this.dimensao = solicitacao.getDimensao();
         this.diametro = solicitacao.getDiametro();
         this.observacao = solicitacao.getObservacao();
@@ -68,6 +73,10 @@ public class SolicitacaoFilaSaida {
 
     public LocalDateTime getCriadaEm() {
         return this.criadaEm;
+    }
+
+    public LocalDateTime getPrevisaoRetirada() {
+        return this.previsaoRetirada;
     }
 
     public String getDimensao() {
