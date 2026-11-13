@@ -220,6 +220,18 @@ public class SolicitacaoCriacaoBancoTest {
                 this.alunoDoPedido(this.consultarHistorico(this.tokenDoResponsavel), pedidoId));
     }
 
+    // H10.3: a tela do historico do responsavel tem coluna de dimensao e deixa
+    // ordenar por ela, entao o CT08 precisa devolver a medida do pedido.
+    @Test
+    public void historicoTrazADimensaoDoPedido() throws Exception {
+        Long pedidoId = this.criarPedido();
+        this.entidades.flush();
+        this.entidades.clear();
+
+        JsonNode pedido = this.pedidoDaLista(this.consultarHistorico(this.tokenDoAluno), pedidoId);
+        assertEquals("300 x 200 mm", pedido.path("dimensao").asText());
+    }
+
     @Test
     public void semTokenOuComTokenInvalidoNaoGravaMesmoComCabecalhosLivres() throws Exception {
         long antes = this.solicitacoes.count();
@@ -260,9 +272,13 @@ public class SolicitacaoCriacaoBancoTest {
 
     // Acha o pedido na lista e devolve o nome do aluno que veio nele.
     private String alunoDoPedido(JsonNode lista, Long pedidoId) {
+        return this.pedidoDaLista(lista, pedidoId).path("aluno").asText(null);
+    }
+
+    private JsonNode pedidoDaLista(JsonNode lista, Long pedidoId) {
         for (JsonNode pedido : lista) {
             if (pedido.path("solicitacaoId").longValue() == pedidoId.longValue()) {
-                return pedido.path("aluno").asText(null);
+                return pedido;
             }
         }
         fail("O pedido " + pedidoId + " devia estar na lista.");
