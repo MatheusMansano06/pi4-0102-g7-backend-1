@@ -39,3 +39,27 @@
 | Solicitação associada inexistente | Backend trata como referência inválida |
 | Falha ao registrar ou consultar | Falha de persistência tratada pelo Backend |
 
+## Consulta por destinatário (#1161)
+
+`ConsultaDeNotificacoes.listarDoUsuario(usuarioId, somenteNaoLidas)` é a
+interface interna usada pelo CT07. O usuarioId vem da identidade validada.
+A implementação de banco deve restringir a leitura ao destinatário em todos
+os casos e, com `somenteNaoLidas=true`, selecionar apenas registros com
+`lida=false`. Não incluir outros destinatários no resultado, inclusive para
+o perfil RESPONSAVEL.
+
+A consulta retorna os campos do CT07, sem expor usuarioId no JSON, e devolve
+uma lista vazia se não houver avisos correspondentes. Não modifica o estado
+dos avisos. O esquema físico e a implementação dessa leitura aguardam H01.2.
+O registro de avisos continua sendo responsabilidade de H09.1.
+
+A [prova local do CT07](CT07-listarNotificacoes.md#prova-local-da-consulta)
+usa nomes físicos exclusivos de uma tabela temporária para exercitar o
+filtro no PostgreSQL. Esses nomes não definem a migração oficial.
+
+Em 11/11/2026, o recorte foi atualizado para a main 3af147b e a prova isolada
+passou a ser executada no PostgreSQL local. A leitura de referência e sua
+tabela continuam somente em src/test; a interface de produção segue sem
+adaptador até H01.2 publicar o esquema. Isso não implementa gravação de avisos,
+triggers, alteração de leitura, SQL compartilhado ou frontend.
+
