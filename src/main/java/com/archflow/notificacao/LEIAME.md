@@ -13,3 +13,8 @@ ConsultaDeNotificacoesTemporaria existe apenas em src/test. Usa uma tabela
 temporária de sessão, consulta parametrizada e rollback para validar o filtro.
 Os nomes físicos dessa fixture não são uma proposta de migração da equipe.
 Ver o [roteiro do CT07](../../../../../../docs/contratos/CT07-listarNotificacoes.md).
+
+Na retomada de 15/11/2026, a PR22 incorporou main27f6e1c e acrescentou
+NotificacaoTokenTest: filtro e JWT reais com consulta simulada, sem prova do
+adaptador/banco ou produção H09.1. Ver
+[resultado e dependências](../../../../../../docs/integracao/H09.2-retomada-jwt.md).

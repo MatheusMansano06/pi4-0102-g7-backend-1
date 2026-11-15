@@ -50,7 +50,8 @@ ALUNO e RESPONSAVEL recebem somente seus próprios avisos. Parâmetros da URL
 não escolhem outro destinatário. Ordenação e paginação não são definidas aqui.
 
 Neste recorte, `archflow.notificacoes.em-desenvolvimento` fica ligada apenas
-nos testes, que fornecem identidade interna e consulta simuladas. Não habilitar
+nos testes. Há cenários com identidade interna e uma prova MockMvc com JWT
+assinado/validado pelo filtro real; a consulta desta prova é simulada. Não habilitar
 a propriedade em um ambiente compartilhado: ainda falta implementar a consulta
 com o esquema de H01.2, provar o isolamento nesse esquema e exercitar avisos
 gerados por H09.1. A configuração padrão não registra a rota.
@@ -79,6 +80,9 @@ final de cada cenário. A tabela e a consulta de referência não substituem
 o esquema nem a consulta real de H01.2.
 
 ## Resultado da validação de 11/11/2026
+
+Registro histórico da execução abaixo; para a retomada de 15/11, ver
+[prova de autenticação e dependências atuais](../integracao/H09.2-retomada-jwt.md).
 
 Branch atualizada com main 3af147b, incluindo o login próprio validado, o novo
 DDL de usuários e a persistência de estoque. O conflito em docs/pendencias.md
