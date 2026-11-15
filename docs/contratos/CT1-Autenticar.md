@@ -10,7 +10,7 @@
 | Quem responde | Backend API |
 | Atende | E1 |
 | Como chamar | `POST /api/auth/login` |
-| Autenticação | Login público, sem token prévio. É a única rota da API que não exige token |
+| Autenticação | Login público, sem token prévio; cadastro de aluno CT14 também é público |
 
 ## Entrada
 
@@ -25,6 +25,7 @@
 | :--- | :--- | :--- | :--- |
 | usuarioId | inteiro | sim | 12 |
 | nome | texto | sim | Ana Silva |
+| curso | texto ou null | presente; null para RESPONSAVEL | Arquitetura |
 | perfil | um de: ALUNO, RESPONSAVEL | sim | ALUNO |
 | token | texto | sim | JWT assinado pelo backend, válido por 8 horas |
 
@@ -44,7 +45,7 @@ Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/
 O token é assinado pelo próprio backend com a senha secreta de
 `ARCHFLOW_TOKEN_SEGREDO` (HS256) e vale 8 horas. Dentro dele vão o `usuarioId` e
 o `perfil`; senha nenhuma entra no token. A tela guarda o token e manda em todas
-as outras chamadas no cabeçalho `Authorization: Bearer <token>`, como descreve a
+as chamadas protegidas no cabeçalho `Authorization: Bearer <token>`, como descreve a
 [matriz de autenticação](../especificacao/autenticacao.md).
 
 A senha é conferida contra o hash BCrypt gravado na tabela `usuarios`

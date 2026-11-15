@@ -7,7 +7,8 @@ foram definidos: medidas opcionais para todos os materiais. Ver o
 [autenticação](../especificacao/autenticacao.md) e
 [requisitos de banco](../especificacao/requisitos-banco.md).
 O login próprio do ADR 0008 já está no backend (CT01/CT10). O teste de ponta
-a ponta da tela, API e banco continua no #1141.
+a ponta da tela, API e banco foi concluído no #1141/frontend24; pedido e estoque
+nas frontend25/26. Ver [revisão vigente](../especificacao/revisao-integracoes-2026-11-14.md).
 
 CT01–CT09 e CT14 são HTTP. CT10–CT13 são interfaces internas com o banco, não endpoints.
 Os opcionais do pedido precisam aparecer tanto no CT03 quanto no CT12. A lista

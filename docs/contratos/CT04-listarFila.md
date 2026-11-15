@@ -23,13 +23,15 @@
 | :--- | :--- | :--- | :--- |
 | corpo JSON | lista direta de SolicitacaoFila | sim | [] ou lista em criadaEm crescente |
 | solicitacaoId | inteiro | sim, por solicitação | 101 |
+| aluno | texto ou null | presente; nome da relação carregada | Ana Silva |
 | material | texto com o nome do material | sim, por solicitação | Madeira |
 | quantidade | inteiro | sim, por solicitação | 2 |
 | status | texto | sim, por solicitação | PENDENTE |
 | criadaEm | data e hora (ISO 8601) | sim, por solicitação | 2026-10-13T12:00:00 |
-| dimensao | texto | não, vai vazio quando o pedido não tem | 30x40 cm |
-| diametro | número decimal | não, vai vazio quando o pedido não tem | 8.5 |
-| observacao | texto | não, vai vazio quando o pedido não tem | Uso em maquete |
+| previsaoRetirada | data/hora ISO 8601 ou null | presente; null sem previsão | 2026-10-15T14:00:00 |
+| dimensao | texto ou null | presente; null sem medida | 300 x 200 mm |
+| diametro | número decimal ou null | presente; null sem medida | 8.5 |
+| observacao | texto ou null | presente; null sem observação | Uso em maquete |
 
 ## Erros
 
