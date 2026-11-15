@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 public class SolicitacaoServiceTest {
 
     private SolicitacaoService servico() {
-        return new SolicitacaoService(null);
+        return new SolicitacaoService(null, null);
     }
 
     // A identidade chega pronta do token conferido no FiltroDeIdentidade: aqui
