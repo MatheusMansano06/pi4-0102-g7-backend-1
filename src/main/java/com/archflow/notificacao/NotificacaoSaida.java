@@ -2,47 +2,45 @@ package com.archflow.notificacao;
 
 import java.time.LocalDateTime;
 
-// Projeção do CT07: o destinatário é usado na consulta, não aparece na saída.
 public class NotificacaoSaida {
 
-    private final Long notificacaoId;
-    private final String tipo;
-    private final String mensagem;
-    private final LocalDateTime criadaEm;
-    private final boolean lida;
-    private final Long solicitacaoId;
+    private Long notificacaoId;
+    private Long solicitacaoId;
+    private String tipo;
+    private String mensagem;
+    private LocalDateTime criadaEm;
+    private boolean lida;
 
-    public NotificacaoSaida(Long notificacaoId, String tipo, String mensagem,
-            LocalDateTime criadaEm, boolean lida, Long solicitacaoId) {
-        this.notificacaoId = notificacaoId;
-        this.tipo = tipo;
-        this.mensagem = mensagem;
-        this.criadaEm = criadaEm;
-        this.lida = lida;
-        this.solicitacaoId = solicitacaoId;
+    public NotificacaoSaida(Notificacao notificacao) {
+        this.notificacaoId = notificacao.getNotificacaoId();
+        this.solicitacaoId = notificacao.getSolicitacaoId();
+        this.tipo = notificacao.getTipo();
+        this.mensagem = notificacao.getMensagem();
+        this.criadaEm = notificacao.getCriadoEm();
+        this.lida = notificacao.isLida();
     }
 
     public Long getNotificacaoId() {
-        return this.notificacaoId;
-    }
-
-    public String getTipo() {
-        return this.tipo;
-    }
-
-    public String getMensagem() {
-        return this.mensagem;
-    }
-
-    public LocalDateTime getCriadaEm() {
-        return this.criadaEm;
-    }
-
-    public boolean isLida() {
-        return this.lida;
+        return notificacaoId;
     }
 
     public Long getSolicitacaoId() {
-        return this.solicitacaoId;
+        return solicitacaoId;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public String getMensagem() {
+        return mensagem;
+    }
+
+    public LocalDateTime getCriadaEm() {
+        return criadaEm;
+    }
+
+    public boolean isLida() {
+        return lida;
     }
 }
