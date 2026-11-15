@@ -36,6 +36,13 @@ public class SolicitacaoController {
         return this.solicitacaoService.listarHistorico(identidade);
     }
 
+        // H06.1: GET /api/solicitacoes/prazos
+    @GetMapping("/prazos")
+    public List<SolicitacaoHistoricoSaida> listarPrazos(
+            @RequestAttribute(name = "usuarioAutenticado", required = false) UsuarioAutenticado identidade) {
+        return this.solicitacaoService.listarHistorico(identidade);
+    }
+
     // CT06: PATCH /api/solicitacoes/{solicitacaoId}/status
     @PatchMapping("/{solicitacaoId}/status")
     public SolicitacaoStatusSaida atualizarStatus(
