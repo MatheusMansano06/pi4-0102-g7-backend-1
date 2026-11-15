@@ -4,9 +4,10 @@ Revisão #1136 conduzida pelo Luis. Definição das seis colunas entregue no
 [dicionário](especificacao/colunas-materiais-e-solicitacoes.md); Lara implementa
 H01.2, sem ter de elaborar regras funcionais que faltavam na especificação.
 
-Conferência de 11/11/2026, main bd733aa: usuários já estão no DDL pela PR #24;
-saldo/data do estoque já foram integrados pela #23. A publicação dessas partes
-não comprova carga de exemplos, migração no destino ou integração de telas.
+Conferência vigente de 15/11/2026: backend85d3296/frontendaf5c775. Login,
+pedido e estoque pela tela integrados nas frontend24/25/26, com provas isoladas.
+A PR28 corrigiu a carga de exemplos. Migração/habilitação no destino e avisos
+continuam pendentes. [Revisão documental](especificacao/revisao-integracoes-2026-11-14.md).
 
 ## Definições já tomadas
 
@@ -25,17 +26,18 @@ não comprova carga de exemplos, migração no destino ou integração de telas.
 | Pendência | Quem conduz / próximo trabalho |
 | --- | --- |
 | Banco existente receber a configuração/colunas | H01.2/Lara coordena execução do [script definido](sql/H04.1-colunas-propostas.sql), com cópia de segurança e validate |
-| Banco de usuários e exemplos | DDL entregue na #24; H01.2/#1134 precisa conciliar carga com esquema, perfis, hashes BCrypt e IDs. [Divergências exatas](especificacao/requisitos-banco.md); falta comprovar migração no destino |
-| Integração do login | PR #19 entrega login e identidade; #1141/Luis aproveita a PR #14 do frontend para provar aluno e responsável com banco e assinatura configurados |
+| Banco de usuários e exemplos | DDL na #24 e carga corrigida na #28; falta aplicação no destino e responsável de demonstração, sem reatribuir dados existentes |
+| Integração do login | Concluída no #1141/frontend24, com dois perfis e banco isolado; preservar provas |
 | Metadados aceitos/obrigatórios no catálogo | Derivar dos booleanos no DTO; contrato alvo definido, ainda sem implementação |
-| Formulário enviar pedido | #1147/Luis com H04.2/Mirele, após identidade e API/banco prontos |
+| Formulário enviar pedido | Concluído no #1147/frontend25: PENDENTE/aluno/data/opcionais comprovados |
 | Data limite do formulário | Definir significado em recorte próprio; CT03 ainda recusa dataLimite |
 | Leitura de notificações | #1161/PR #22: CT07 e consulta temporária de referência; branch conciliada com main 3af147b. Falta adaptador no esquema H01.2 e prova do endpoint real antes de habilitar |
 | Geração de notificações | H09.1 produz os avisos; a consulta não cria nem marca avisos como lidos |
 | Validação da data de estoque | #1154/Luis: PR #23 integrada, releitura com JWT/PostgreSQL provada; verificar migração e integração no destino antes de habilitar a rota |
 | Prova PostgreSQL do pedido | [PR #25](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/25) corrige os cinco testes antigos para JWT e acrescenta recusas; 95 testes aprovados, incluindo nove PostgreSQL, em ambiente isolado |
-| Login e histórico na tela | PRs frontend #14/#15 abertas; #15 baseada na branch #14. Integrar login antes do histórico, mantendo os escopos de cada colega |
-| Ambiente de apresentação | Conciliar URL absoluta da API com proxy Nginx/CORS, encaminhamento do segredo no Compose e imports de welcome com caixa diferente dos arquivos Git |
+| Login/histórico/prazos na tela | Integrações publicadas; E8/E9 usam CT08. CT09 separado é proposta, não chamada atual |
+| Estoque na tela | Concluído no #1156/frontend26, com PATCH/GET e reflexo no catálogo em ambiente isolado; CT05 segue desligado por padrão |
+| Ambiente de apresentação | Conciliar URL absoluta da API com proxy Nginx/CORS e configuração do segredo/CT05 no destino; imports welcome já corrigidos na frontend24 |
 
 A PR #10 já integrou as definições e scripts; aplicação no banco compartilhado e
 conclusão funcional dos cards não são consequências automáticas da documentação.
@@ -56,6 +58,6 @@ conclusão funcional dos cards não são consequências automáticas da document
 
 Revisar junto das fichas/fluxos do frontend, cuja PR #6 já foi integrada na main
 078f6dc. Os documentos foram recuperados de 51f9923 e seguem o ADR 0008.
-Modal ainda sem envio HTTP; campos visuais não equivalem a contrato.
+Modal já envia HTTP na frontend25; campos visuais não criam contrato de dataLimite.
 Fichas acadêmicas originais devem refletir decisões validadas, sem apagar a origem.
 Nenhum card/tempo foi alterado no OpenProject nesta revisão.

@@ -1,6 +1,8 @@
 package com.archflow.solicitacao;
 
 import com.archflow.material.Material;
+import com.archflow.usuario.Usuario;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,7 +22,19 @@ public class Solicitacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long solicitacaoId;
 
+    // O nome da coluna vai escrito aqui de proposito. Sem isso o Hibernate ve
+    // dois nomes logicos diferentes para a mesma coluna usuario_id, um por este
+    // campo e outro pelo @JoinColumn do aluno abaixo, e recusa subir.
+    @Column(name = "usuario_id")
     private Long usuarioId;
+
+    // O mesmo usuario_id, agora lido como o aluno inteiro, para a fila e o
+    // historico mostrarem o nome de quem pediu. So leitura: quem grava o dono
+    // do pedido continua sendo o usuarioId acima, por isso insertable e
+    // updatable ficam falsos e a coluna nao e escrita duas vezes.
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", insertable = false, updatable = false)
+    private Usuario aluno;
 
     @ManyToOne
     @JoinColumn(name = "material_id")
@@ -68,6 +82,12 @@ public class Solicitacao {
             throw new IllegalArgumentException("O pedido precisa ser de algum aluno.");
         }
         this.usuarioId = usuarioId;
+    }
+
+    // Vem nulo no pedido recem-montado na memoria, que ainda nao passou pelo
+    // banco: quem mostra o nome checa antes.
+    public Usuario getAluno() {
+        return this.aluno;
     }
 
     public Material getMaterial() {

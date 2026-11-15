@@ -40,6 +40,15 @@ public class SolicitacaoFilaSaidaTest {
         assertEquals(StatusSolicitacao.PENDENTE, saida.getStatus());
     }
 
+    // Pedido montado so na memoria nao passou pelo banco, entao nao tem o aluno
+    // carregado. A fila continua saindo, com o nome vazio.
+    @Test
+    public void pedidoSemAlunoCarregadoSaiComONomeVazio() {
+        SolicitacaoFilaSaida saida = new SolicitacaoFilaSaida(this.pedidoComMedida());
+
+        assertNull(saida.getAluno());
+    }
+
     @Test
     public void pedidoSemMedidaNemObservacaoSaiComOsCamposVazios() {
         Solicitacao pedido = new Solicitacao(12L, this.madeira(), 1, null);

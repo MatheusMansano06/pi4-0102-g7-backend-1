@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -205,6 +206,71 @@ public class SolicitacaoCriacaoBancoTest {
         }
     }
 
+    // H05.3: a fila e o historico do responsavel dizem de quem e cada pedido.
+    // O nome vem da tabela usuarios pela mesma coluna usuario_id que ja gravava
+    // o dono, entao a prova so vale lendo de novo do PostgreSQL.
+    @Test
+    public void filaEHistoricoDoResponsavelTrazemONomeDoAlunoDono() throws Exception {
+        Long pedidoId = this.criarPedido();
+        this.entidades.flush();
+        this.entidades.clear();
+
+        assertEquals("Fixture CT03 aluno", this.alunoDoPedido(this.consultarFila(), pedidoId));
+        assertEquals("Fixture CT03 aluno",
+                this.alunoDoPedido(this.consultarHistorico(this.tokenDoResponsavel), pedidoId));
+    }
+
+    // H05.3: a tela da fila tem coluna de prazo. Pedido novo nasce sem previsao,
+    // e a previsao gravada pelo responsavel no CT12 precisa aparecer na fila.
+    @Test
+    public void filaTrazAPrevisaoDeRetiradaGravadaPeloResponsavel() throws Exception {
+        Long pedidoId = this.criarPedido();
+        this.entidades.flush();
+        this.entidades.clear();
+        assertTrue(this.pedidoDaLista(this.consultarFila(), pedidoId)
+                .path("previsaoRetirada").isNull(), "Pedido novo nao tem previsao marcada.");
+
+        LocalDateTime previsao = LocalDateTime.now().plusDays(2).withNano(0);
+        this.marcarEmSeparacao(pedidoId, previsao);
+        this.entidades.flush();
+        this.entidades.clear();
+
+        JsonNode pedido = this.pedidoDaLista(this.consultarFila(), pedidoId);
+        assertEquals(previsao, LocalDateTime.parse(pedido.path("previsaoRetirada").asText()));
+    }
+
+    // H08.3: o painel de prazos do aluno mostra a previsao de cada pedido, e o
+    // aluno le os pedidos dele pelo CT08. A data que o responsavel marcou
+    // precisa chegar la.
+    @Test
+    public void historicoDoAlunoTrazAPrevisaoMarcadaPeloResponsavel() throws Exception {
+        Long pedidoId = this.criarPedido();
+        this.entidades.flush();
+        this.entidades.clear();
+        assertTrue(this.pedidoDaLista(this.consultarHistorico(this.tokenDoAluno), pedidoId)
+                .path("previsaoRetirada").isNull(), "Pedido novo nao tem previsao marcada.");
+
+        LocalDateTime previsao = LocalDateTime.now().plusDays(3).withNano(0);
+        this.marcarEmSeparacao(pedidoId, previsao);
+        this.entidades.flush();
+        this.entidades.clear();
+
+        JsonNode pedido = this.pedidoDaLista(this.consultarHistorico(this.tokenDoAluno), pedidoId);
+        assertEquals(previsao, LocalDateTime.parse(pedido.path("previsaoRetirada").asText()));
+    }
+
+    // H10.3: a tela do historico do responsavel tem coluna de dimensao e deixa
+    // ordenar por ela, entao o CT08 precisa devolver a medida do pedido.
+    @Test
+    public void historicoTrazADimensaoDoPedido() throws Exception {
+        Long pedidoId = this.criarPedido();
+        this.entidades.flush();
+        this.entidades.clear();
+
+        JsonNode pedido = this.pedidoDaLista(this.consultarHistorico(this.tokenDoAluno), pedidoId);
+        assertEquals("300 x 200 mm", pedido.path("dimensao").asText());
+    }
+
     @Test
     public void semTokenOuComTokenInvalidoNaoGravaMesmoComCabecalhosLivres() throws Exception {
         long antes = this.solicitacoes.count();
@@ -234,6 +300,39 @@ public class SolicitacaoCriacaoBancoTest {
                 "INSERT INTO usuarios (nome, email, senha_hash, perfil, ra, curso) "
                         + "VALUES (?, ?, ?, 'ALUNO', ?, ?) RETURNING usuario_id", Long.class,
                 "Fixture CT03 aluno", email, hash, ra, "Curso de teste");
+    }
+
+    // Leva o pedido para EM_SEPARACAO ja com a previsao, como o CT12 faz.
+    private void marcarEmSeparacao(Long pedidoId, LocalDateTime previsao) throws Exception {
+        SolicitacaoStatusEntrada entrada = new SolicitacaoStatusEntrada();
+        entrada.setStatus("EM_SEPARACAO");
+        entrada.setPrevisaoRetirada(previsao);
+        this.api.perform(patch("/api/solicitacoes/{solicitacaoId}/status", pedidoId)
+                .header("Authorization", "Bearer " + this.tokenDoResponsavel)
+                .contentType(MediaType.APPLICATION_JSON).content(this.json.writeValueAsBytes(entrada)))
+                .andExpect(status().isOk());
+    }
+
+    private JsonNode consultarFila() throws Exception {
+        byte[] resposta = this.api.perform(get("/api/solicitacoes/fila")
+                .header("Authorization", "Bearer " + this.tokenDoResponsavel))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+        return this.json.readTree(resposta);
+    }
+
+    // Acha o pedido na lista e devolve o nome do aluno que veio nele.
+    private String alunoDoPedido(JsonNode lista, Long pedidoId) {
+        return this.pedidoDaLista(lista, pedidoId).path("aluno").asText(null);
+    }
+
+    private JsonNode pedidoDaLista(JsonNode lista, Long pedidoId) {
+        for (JsonNode pedido : lista) {
+            if (pedido.path("solicitacaoId").longValue() == pedidoId.longValue()) {
+                return pedido;
+            }
+        }
+        fail("O pedido " + pedidoId + " devia estar na lista.");
+        return null;
     }
 
     private JsonNode consultarHistorico(String token) throws Exception {

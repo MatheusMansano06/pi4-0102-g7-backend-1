@@ -3,7 +3,8 @@
 Definição #1136 conciliada com o POST parcial integrado pela PR #14.
 [Campos e regras](../especificacao/colunas-materiais-e-solicitacoes.md) definidos
 pelo Luis; [identidade no backend](../H04.1-CRIAR-SOLICITACAO.md) obtida do JWT
-emitido no CT01, conforme a PR #19. A prova pela tela depende do #1141/#1147.
+emitido no CT01, conforme a PR #19. A prova pela tela de #1141/#1147 foi
+concluída nas PRs frontend 24/25; ver [revisão das integrações](../especificacao/revisao-integracoes-2026-11-14.md).
 
 | Linha | Valor |
 | --- | --- |
@@ -93,5 +94,5 @@ A entrada valida dimensão e observação com String.length(): até 255 unidades
 UTF-16, sem contar bytes, cortar ou aparar o texto. Acima disso, recusa antes
 da persistência e identifica o campo na mensagem; null/ausência são permitidos.
 A API não analisa os números no texto dimensao. O formulário
-compõe largura/altura em mm na futura integração #1147. O filtro produz
+compõe largura/altura em mm na integração #1147, já publicada na PR frontend 25. O filtro produz
 UsuarioAutenticado com o token do CT01; sem Bearer válido a chamada recebe 401.

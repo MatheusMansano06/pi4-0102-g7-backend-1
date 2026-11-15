@@ -15,6 +15,11 @@ public class CodigosDeErro {
     public static final String PARAMETROS_INVALIDOS = "PARAMETROS_INVALIDOS";
     public static final String STATUS_INVALIDO = "STATUS_INVALIDO";
     public static final String PREVISAO_INVALIDA = "PREVISAO_INVALIDA";
+    public static final String SENHA_FRACA = "SENHA_FRACA";
+
+    // Cadastro: o banco ja tem alguem com esse e-mail ou esse RA.
+    public static final String EMAIL_JA_CADASTRADO = "EMAIL_JA_CADASTRADO";
+    public static final String RA_JA_CADASTRADO = "RA_JA_CADASTRADO";
 
     // Coisas que nao existem
     public static final String MATERIAL_NAO_ENCONTRADO = "MATERIAL_NAO_ENCONTRADO";
