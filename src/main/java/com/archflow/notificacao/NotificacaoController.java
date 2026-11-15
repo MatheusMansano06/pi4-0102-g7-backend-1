@@ -1,6 +1,8 @@
 package com.archflow.notificacao;
 
 import com.archflow.comum.UsuarioAutenticado;
+import com.archflow.comum.CodigosDeErro;
+import com.archflow.comum.NegocioException;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -28,12 +30,23 @@ public class NotificacaoController {
                     required = false)
             UsuarioAutenticado identidade,
 
-            @RequestParam(defaultValue = "false")
-            boolean somenteNaoLidas) {
+            @RequestParam(name = "somenteNaoLidas", required = false)
+            String somenteNaoLidas) {
 
         return notificacaoService.listar(
                 identidade,
-                somenteNaoLidas
+                this.lerSomenteNaoLidas(somenteNaoLidas)
         );
+    }
+
+    private boolean lerSomenteNaoLidas(String valor) {
+        if (valor == null || "false".equals(valor)) {
+            return false;
+        }
+        if ("true".equals(valor)) {
+            return true;
+        }
+        throw new NegocioException(CodigosDeErro.DADOS_INVALIDOS,
+                "Informe true ou false em somenteNaoLidas.");
     }
 }

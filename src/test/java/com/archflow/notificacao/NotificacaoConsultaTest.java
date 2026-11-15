@@ -21,9 +21,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 // A identidade interna e a consulta são fixtures. Este teste não liga PostgreSQL.
-@WebMvcTest(value = NotificacaoController.class, properties = "archflow.notificacoes.em-desenvolvimento=true")
+@WebMvcTest(NotificacaoController.class)
 @Import(NotificacaoService.class)
 public class NotificacaoConsultaTest {
 
@@ -31,13 +32,13 @@ public class NotificacaoConsultaTest {
     private MockMvc api;
 
     @MockBean
-    private ConsultaDeNotificacoes consulta;
+    private NotificacaoRepository consulta;
 
     @Test
     public void semFiltroDevolveLidasENaoLidasComCamposDoContrato() throws Exception {
-        List<NotificacaoSaida> avisos = this.listaCom(this.aviso(55L, false, 101L));
+        List<Notificacao> avisos = this.listaCom(this.aviso(55L, false, 101L));
         avisos.add(this.aviso(56L, true, null));
-        when(this.consulta.listarDoUsuario(12L, false)).thenReturn(avisos);
+        when(this.consulta.findByUsuarioIdOrderByCriadoEmDesc(12L)).thenReturn(avisos);
         this.api.perform(this.pedido(12L, PerfilUsuario.ALUNO)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.notificacoes.length()").value(2))
                 .andExpect(jsonPath("$.notificacoes[0].notificacaoId").value(55))
@@ -49,32 +50,32 @@ public class NotificacaoConsultaTest {
                 .andExpect(jsonPath("$.notificacoes[0].usuarioId").doesNotExist())
                 .andExpect(jsonPath("$.notificacoes[1].lida").value(true))
                 .andExpect(jsonPath("$.notificacoes[1].solicitacaoId").value(nullValue()));
-        verify(this.consulta).listarDoUsuario(12L, false);
+        verify(this.consulta).findByUsuarioIdOrderByCriadoEmDesc(12L);
     }
 
     @Test
     public void solicitaSomenteNaoLidasParaOUsuarioDaIdentidade() throws Exception {
-        when(this.consulta.listarDoUsuario(12L, true)).thenReturn(this.listaCom(this.aviso(55L, false, 101L)));
+        when(this.consulta.findByUsuarioIdAndLidaFalseOrderByCriadoEmDesc(12L)).thenReturn(this.listaCom(this.aviso(55L, false, 101L)));
         this.api.perform(this.pedido(12L, PerfilUsuario.ALUNO).param("somenteNaoLidas", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.notificacoes.length()").value(1))
                 .andExpect(jsonPath("$.notificacoes[0].lida").value(false));
-        verify(this.consulta).listarDoUsuario(12L, true);
+        verify(this.consulta).findByUsuarioIdAndLidaFalseOrderByCriadoEmDesc(12L);
     }
 
     @Test
     public void outroUsuarioTemSuaPropriaConsultaMesmoQuandoEResponsavel() throws Exception {
-        when(this.consulta.listarDoUsuario(23L, false)).thenReturn(this.listaCom(this.aviso(92L, true, null)));
+        when(this.consulta.findByUsuarioIdOrderByCriadoEmDesc(23L)).thenReturn(this.listaCom(this.aviso(92L, true, null)));
         this.api.perform(this.pedido(23L, PerfilUsuario.RESPONSAVEL)
                 .param("usuarioId", "12").param("somenteNaoLidas", "false"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.notificacoes.length()").value(1))
                 .andExpect(jsonPath("$.notificacoes[0].notificacaoId").value(92));
-        verify(this.consulta).listarDoUsuario(23L, false);
+        verify(this.consulta).findByUsuarioIdOrderByCriadoEmDesc(23L);
     }
 
     @Test
     public void consultaSemResultadoDevolveListaVazia() throws Exception {
-        when(this.consulta.listarDoUsuario(12L, true)).thenReturn(new ArrayList<NotificacaoSaida>());
+        when(this.consulta.findByUsuarioIdAndLidaFalseOrderByCriadoEmDesc(12L)).thenReturn(new ArrayList<Notificacao>());
         this.api.perform(this.pedido(12L, PerfilUsuario.ALUNO).param("somenteNaoLidas", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.notificacoes").isArray())
@@ -99,7 +100,7 @@ public class NotificacaoConsultaTest {
 
     @Test
     public void falhaDaConsultaNaoExpoeDetalhesInternos() throws Exception {
-        when(this.consulta.listarDoUsuario(12L, false)).thenThrow(new IllegalStateException("detalhe interno"));
+        when(this.consulta.findByUsuarioIdOrderByCriadoEmDesc(12L)).thenThrow(new IllegalStateException("detalhe interno"));
         this.api.perform(this.pedido(12L, PerfilUsuario.ALUNO))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.codigo").value("ERRO_INTERNO"))
@@ -111,13 +112,16 @@ public class NotificacaoConsultaTest {
                 new UsuarioAutenticado(usuarioId, perfil));
     }
 
-    private NotificacaoSaida aviso(Long id, boolean lida, Long solicitacaoId) {
-        return new NotificacaoSaida(id, "PEDIDO_PRONTO", "Seu pedido está pronto.",
-                LocalDateTime.of(2026, 10, 13, 12, 15, 10), lida, solicitacaoId);
+    private Notificacao aviso(Long id, boolean lida, Long solicitacaoId) {
+        Notificacao aviso = new Notificacao(12L, solicitacaoId, "PEDIDO_PRONTO", "Seu pedido está pronto.");
+        ReflectionTestUtils.setField(aviso, "notificacaoId", id);
+        ReflectionTestUtils.setField(aviso, "criadoEm", LocalDateTime.of(2026, 10, 13, 12, 15, 10));
+        ReflectionTestUtils.setField(aviso, "lida", lida);
+        return aviso;
     }
 
-    private List<NotificacaoSaida> listaCom(NotificacaoSaida aviso) {
-        List<NotificacaoSaida> avisos = new ArrayList<NotificacaoSaida>();
+    private List<Notificacao> listaCom(Notificacao aviso) {
+        List<Notificacao> avisos = new ArrayList<Notificacao>();
         avisos.add(aviso);
         return avisos;
     }

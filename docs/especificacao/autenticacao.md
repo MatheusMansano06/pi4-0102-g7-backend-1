@@ -35,7 +35,7 @@ de aluno CT14 são públicos em `/api/auth/`, prefixo dispensado pelo filtro.
 | CT04 | GET /api/solicitacoes/fila | RESPONSAVEL | Publicado |
 | CT05 | PATCH /api/materiais/{materialId}/estoque | RESPONSAVEL quando habilitada | Parcial; desativada por padrão |
 | CT06 | PATCH /api/solicitacoes/{solicitacaoId}/status | RESPONSAVEL | Publicado |
-| CT07 | GET /api/notificacoes | Usuário autenticado; somente seus avisos | Parcial; desativada por padrão até ligar o CT13 ao banco |
+| CT07 | GET /api/notificacoes | Usuário autenticado; somente seus avisos | Integrada na PR37; consulta JPA por identidade, validada no #1161 |
 | CT08 | GET /api/solicitacoes/historico | ALUNO: próprios pedidos; RESPONSAVEL: todos | Publicado |
 | CT09 | GET /api/prazos | ALUNO; somente seus pedidos | Previsto |
 | CT14 | POST /api/auth/cadastro | Sem token prévio; cria apenas ALUNO | Publicado; tela já integrada |

@@ -26,11 +26,11 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.util.ReflectionTestUtils;
 
 // Filtro, assinatura e leitura JWT reais; a consulta permanece simulada.
 // Não comprova adaptador de banco nem avisos produzidos pelo H09.1.
 @WebMvcTest(value = NotificacaoController.class, properties = {
-        "archflow.notificacoes.em-desenvolvimento=true",
         "archflow.token.segredo=segredo-exclusivo-da-prova-ct07-com-jwt-2026"
 })
 @Import({NotificacaoService.class, ConfiguracaoDeIdentidade.class})
@@ -46,11 +46,11 @@ public class NotificacaoTokenTest {
     private JwtEncoder assinador;
 
     @MockBean
-    private ConsultaDeNotificacoes consulta;
+    private NotificacaoRepository consulta;
 
     @Test
     public void alunoConsultaSomenteDestinatarioDoToken() throws Exception {
-        when(this.consulta.listarDoUsuario(12L, true)).thenReturn(this.avisos(55L));
+        when(this.consulta.findByUsuarioIdAndLidaFalseOrderByCriadoEmDesc(12L)).thenReturn(this.avisos(55L));
         this.api.perform(get("/api/notificacoes")
                 .header("Authorization", this.bearer(12L, PerfilUsuario.ALUNO))
                 .header("X-Perfil", "RESPONSAVEL")
@@ -58,18 +58,18 @@ public class NotificacaoTokenTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.notificacoes[0].notificacaoId").value(55))
                 .andExpect(jsonPath("$.notificacoes[0].usuarioId").doesNotExist());
-        verify(this.consulta).listarDoUsuario(12L, true);
+        verify(this.consulta).findByUsuarioIdAndLidaFalseOrderByCriadoEmDesc(12L);
     }
 
     @Test
     public void responsavelTambemConsultaSomenteDestinatarioDoToken() throws Exception {
-        when(this.consulta.listarDoUsuario(23L, false)).thenReturn(this.avisos(92L));
+        when(this.consulta.findByUsuarioIdOrderByCriadoEmDesc(23L)).thenReturn(this.avisos(92L));
         this.api.perform(get("/api/notificacoes")
                 .header("Authorization", this.bearer(23L, PerfilUsuario.RESPONSAVEL))
                 .param("usuarioId", "12"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.notificacoes[0].notificacaoId").value(92));
-        verify(this.consulta).listarDoUsuario(23L, false);
+        verify(this.consulta).findByUsuarioIdOrderByCriadoEmDesc(23L);
     }
 
     @Test
@@ -133,10 +133,11 @@ public class NotificacaoTokenTest {
                 JwsHeader.with(MacAlgorithm.HS256).build(), dados)).getTokenValue();
     }
 
-    private List<NotificacaoSaida> avisos(Long id) {
-        List<NotificacaoSaida> lista = new ArrayList<NotificacaoSaida>();
-        lista.add(new NotificacaoSaida(id, "PEDIDO_PRONTO", "Seu pedido está pronto.",
-                LocalDateTime.of(2026, 11, 15, 9, 0), false, null));
+    private List<Notificacao> avisos(Long id) {
+        List<Notificacao> lista = new ArrayList<Notificacao>();
+        Notificacao aviso = new Notificacao(12L, null, "PEDIDO_PRONTO", "Seu pedido está pronto.");
+        ReflectionTestUtils.setField(aviso, "notificacaoId", id);
+        lista.add(aviso);
         return lista;
     }
 }

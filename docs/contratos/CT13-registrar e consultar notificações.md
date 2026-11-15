@@ -41,25 +41,21 @@
 
 ## Consulta por destinatário (#1161)
 
-`ConsultaDeNotificacoes.listarDoUsuario(usuarioId, somenteNaoLidas)` é a
-interface interna usada pelo CT07. O usuarioId vem da identidade validada.
-A implementação de banco deve restringir a leitura ao destinatário em todos
-os casos e, com `somenteNaoLidas=true`, selecionar apenas registros com
-`lida=false`. Não incluir outros destinatários no resultado, inclusive para
-o perfil RESPONSAVEL.
+O esquema oficial da PR37 cria notificacoes, com notificacao_id, usuario_id,
+solicitacao_id opcional, tipo, mensagem, lida e criado_em. FKs ligam destinatário
+a usuarios e solicitação a solicitacoes. criado_em é exposto como criadaEm.
 
-A consulta retorna os campos do CT07, sem expor usuarioId no JSON, e devolve
-uma lista vazia se não houver avisos correspondentes. Não modifica o estado
-dos avisos. O esquema físico e a implementação dessa leitura aguardam H01.2.
-O registro de avisos continua sendo responsabilidade de H09.1.
+NotificacaoRepository restringe consulta por usuarioId em todos os casos;
+findByUsuarioIdAndLidaFalseOrderByCriadoEmDesc também filtra lida=false.
+O destinatário vem do JWT, inclusive para RESPONSAVEL. A lista retorna os
+campos de CT07, sem usuarioId; não cria nem marca avisos como lidos.
 
-A [prova local do CT07](CT07-listarNotificacoes.md#prova-local-da-consulta)
-usa nomes físicos exclusivos de uma tabela temporária para exercitar o
-filtro no PostgreSQL. Esses nomes não definem a migração oficial.
+H09.1/Lara registra avisos no atualizarStatus transacional. A prova #1161
+exercita a geração oficial e força falha de INSERT somente no banco descartável
+para comprovar rollback de status/previsão/data e ausência do aviso.
+A produção integrada gera avisos para outros status além dos dois mínimos
+AGUARDANDO_COMPRA e PRONTO_PARA_RETIRADA; conciliar documentação H01.5/#1137.
 
-Em 11/11/2026, o recorte foi atualizado para a main 3af147b e a prova isolada
-passou a ser executada no PostgreSQL local. A leitura de referência e sua
-tabela continuam somente em src/test; a interface de produção segue sem
-adaptador até H01.2 publicar o esquema. Isso não implementa gravação de avisos,
-triggers, alteração de leitura, SQL compartilhado ou frontend.
-
+[Prova HTTP e PostgreSQL oficiais](../integracao/H09.2-retomada-jwt.md).
+As tabelas temporárias antigas não definem mais o adaptador de produção e
+foram retiradas desta branch ao conciliar a entrega oficial.

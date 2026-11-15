@@ -1,8 +1,6 @@
 # CT07: listarNotificacoes
 
-> Entrega parcial #1161: contrato HTTP/serviço testados com consulta simulada;
-> consulta de referência validada em tabela temporária PostgreSQL. A rota
-> continua desativada por padrão até ligar a leitura ao esquema oficial.
+> #1161 conciliado com a implementação oficial das PRs37/38. Consulta JPA e geração H09.1 integradas; prova HTTP com login/JWT/PostgreSQL reais em banco isolado.
 
 | Linha | Valor |
 | :--- | :--- |
@@ -49,64 +47,19 @@ O backend obtém usuarioId da identidade validada e o envia à consulta CT13.
 ALUNO e RESPONSAVEL recebem somente seus próprios avisos. Parâmetros da URL
 não escolhem outro destinatário. Ordenação e paginação não são definidas aqui.
 
-Neste recorte, `archflow.notificacoes.em-desenvolvimento` fica ligada apenas
-nos testes. Há cenários com identidade interna e uma prova MockMvc com JWT
-assinado/validado pelo filtro real; a consulta desta prova é simulada. Não habilitar
-a propriedade em um ambiente compartilhado: ainda falta implementar a consulta
-com o esquema de H01.2, provar o isolamento nesse esquema e exercitar avisos
-gerados por H09.1. A configuração padrão não registra a rota.
+A rota é registrada normalmente desde a PR37; não depende da flag antiga da
+PR22. NotificacaoService consulta NotificacaoRepository sobre notificacoes,
+com usuarioId da identidade. O campo físico criado_em vira criadaEm no JSON.
+Filtro informado vazio, 1/0, on ou letras maiúsculas é recusado com400 e
+DADOS_INVALIDOS; somente true/false são aceitos.
 
-## Prova local da consulta
+## Prova integrada e reprodução
 
-`ConsultaNotificacoesBancoTest` liga o serviço a uma consulta de referência,
-apenas no código de teste. A tabela temporária tem dois destinatários, cada
-um com um aviso lido e um não lido. Os cenários conferem o isolamento dos dois
-perfis, o filtro, a lista vazia, os campos do aviso e que ler a lista não marca
-avisos como lidos.
+Ver [resultado e roteiro oficial](../integracao/H09.2-retomada-jwt.md).
+NotificacaoBancoTest usa servidor HTTP em porta aleatória, login BCrypt/JWT,
+JPA e as quatro tabelas do SQL oficial. Não usa consulta/tabela temporária.
+Os testes MockMvc de contrato e assinatura continuam complementares.
 
-1. Criar um banco PostgreSQL local descartável com nome no formato
-   `archflow_ct07_teste_<sufixo>` (sufixo com minúsculas, números ou sublinhado).
-   Ele pode estar vazio: o teste cria só a tabela temporária da sua conexão.
-2. No processo do teste, definir `ARCHFLOW_CT07_TESTE_URL` no formato
-   `jdbc:postgresql://127.0.0.1:<porta>/<banco>`, junto com
-   `ARCHFLOW_CT07_TESTE_USUARIO` e `ARCHFLOW_CT07_TESTE_SENHA` do banco local.
-3. Executar `mvn -Dtest=ConsultaNotificacoesBancoTest test` e conferir quatro
-   cenários executados, sem ignorados. Sem a URL local no formato dedicado,
-   os testes ficam desabilitados.
-
-A prova não inicia a aplicação, não habilita o endpoint e não escreve em
-tabelas permanentes. A conexão desfaz a transação e descarta a tabela ao
-final de cada cenário. A tabela e a consulta de referência não substituem
-o esquema nem a consulta real de H01.2.
-
-## Resultado da validação de 11/11/2026
-
-Registro histórico da execução abaixo; para a retomada de 15/11, ver
-[prova de autenticação e dependências atuais](../integracao/H09.2-retomada-jwt.md).
-
-Branch atualizada com main 3af147b, incluindo o login próprio validado, o novo
-DDL de usuários e a persistência de estoque. O conflito em docs/pendencias.md
-foi conciliado, mantendo essas entregas e separando consulta/produção de avisos.
-
-Os quatro cenários ConsultaNotificacoesBancoTest usam PostgreSQL 16.15 local
-isolado. Conferem os avisos de cada destinatário, o filtro de não lidas sem
-mudança de estado, lista vazia para outro usuário e os campos/referência nula.
-O usuário e o perfil dessa prova são fixtures internas; ela não passa pelo
-filtro JWT nem pelo endpoint. Os sete testes WebMvc separados usam consulta
-simulada; o teste de configuração confere que a rota permanece desativada.
-
-Suíte completa: **116 testes aprovados, zero falhas e zero ignorados**.
-Inclui os quatro CT07 e os 18 testes PostgreSQL de login/pedido/estoque da
-base. Na execução padrão sem essas variáveis, 22 cenários de PostgreSQL ficam
-desabilitados; o verde da CI padrão não substitui esta prova local.
-
-Ao terminar, CT07 não deixou tabela permanente nem avisos_ct07_teste em
-nenhum esquema temporário do seu banco. Os outros bancos não continham
-usuários/materiais/pedidos de fixture restantes. Os quatro bancos descartáveis
-foram removidos e a instância isolada encerrada. O Compose declara PostgreSQL
-15 e não foi executado nessa prova com PostgreSQL 16.15.
-
-Esta prova é independente de tabela permanente de notificações e de H09.1.
-Ela não permite habilitar a propriedade no ambiente compartilhado. Falta
-implementar ConsultaDeNotificacoes sobre o esquema oficial, provar o endpoint
-com identidade real e esse adaptador, e integrar avisos gerados por H09.1.
+As provas antigas de11/11 e a preparação de15/11 com consulta simulada estão
+preservadas no histórico Git; não são evidência da implementação atual.
+A leitura não cria avisos nem altera lida. Marcação de leitura é outro escopo.

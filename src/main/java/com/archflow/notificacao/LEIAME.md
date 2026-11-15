@@ -1,20 +1,14 @@
 # Consulta de notificações #1161
 
-O CT07 está preparado em NotificacaoController/NotificacaoService. Recebe o
-usuário da identidade validada e pede a ConsultaDeNotificacoes somente os
-avisos desse destinatário, com filtro opcional de não lidas. A consulta não
-cria avisos nem marca leitura. Os campos de saída estão em CT07/CT13.
+Controller/Service/Repository/Entity oficiais publicados pela Lara na PR37.
+O filtro JWT identifica o destinatário; a consulta JPA devolve somente os seus
+avisos, com filtro opcional estrito de não lidas. A rota está registrada sem
+flag de desenvolvimento desde a integração oficial. Ler não cria avisos nem
+marca leitura. A tabela e o campo criado_em são os do SQL oficial.
 
-A rota e o serviço permanecem desativados na configuração padrão. Não há
-adaptador de produção ou tabela oficial de notificações nesta entrega.
-H01.2 define o esquema e H09.1 gera os avisos nas mudanças de status previstas.
+A geração H09.1 é chamada na mesma transação da mudança de status. O #1161
+preserva essa implementação e comprova a consulta com HTTP/login/JWT/banco
+reais, incluindo rollback em falha do aviso. Não há adaptador paralelo.
 
-ConsultaDeNotificacoesTemporaria existe apenas em src/test. Usa uma tabela
-temporária de sessão, consulta parametrizada e rollback para validar o filtro.
-Os nomes físicos dessa fixture não são uma proposta de migração da equipe.
-Ver o [roteiro do CT07](../../../../../../docs/contratos/CT07-listarNotificacoes.md).
-
-Na retomada de 15/11/2026, a PR22 incorporou main27f6e1c e acrescentou
-NotificacaoTokenTest: filtro e JWT reais com consulta simulada, sem prova do
-adaptador/banco ou produção H09.1. Ver
-[resultado e dependências](../../../../../../docs/integracao/H09.2-retomada-jwt.md).
+[Contrato CT07](../../../../../../docs/contratos/CT07-listarNotificacoes.md) e
+[prova/reprodução](../../../../../../docs/integracao/H09.2-retomada-jwt.md).
