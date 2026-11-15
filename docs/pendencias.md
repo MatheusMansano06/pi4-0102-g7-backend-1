@@ -6,8 +6,7 @@ H01.2, sem ter de elaborar regras funcionais que faltavam na especificação.
 
 Conferência vigente de 15/11/2026: backend85d3296/frontendaf5c775. Login,
 pedido e estoque pela tela integrados nas frontend24/25/26, com provas isoladas.
-A PR28 corrigiu a carga de exemplos. Migração/habilitação no destino e avisos
-continuam pendentes. [Revisão documental](especificacao/revisao-integracoes-2026-11-14.md).
+A PR28 corrigiu a carga de exemplos. Migração/habilitação do estoque no destino continuam pendentes; avisos integrados nas PRs37/38 e frontend28, com prova #1161. [Revisão documental](especificacao/revisao-integracoes-2026-11-14.md).
 
 ## Definições já tomadas
 
@@ -31,8 +30,9 @@ continuam pendentes. [Revisão documental](especificacao/revisao-integracoes-202
 | Metadados aceitos/obrigatórios no catálogo | Derivar dos booleanos no DTO; contrato alvo definido, ainda sem implementação |
 | Formulário enviar pedido | Concluído no #1147/frontend25: PENDENTE/aluno/data/opcionais comprovados |
 | Data limite do formulário | Definir significado em recorte próprio; CT03 ainda recusa dataLimite |
+| Leitura de notificações | #1161/PR22 conciliada com PR37: consulta JPA oficial, filtro estrito e prova HTTP/login/JWT/banco; sem flag antiga |
+| Geração de notificações | H09.1/PR37 integrado; rollback em falha do aviso comprovado no #1161, sem marcar leitura |
 | Validação da data de estoque | #1154/Luis: PR #23 integrada, releitura com JWT/PostgreSQL provada; verificar migração e integração no destino antes de habilitar a rota |
-| Notificações | H09.1/H01.2: esquema e produção de avisos; #1161 consulta na PR #22 ainda incompleta |
 | Prova PostgreSQL do pedido | [PR #25](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/25) corrige os cinco testes antigos para JWT e acrescenta recusas; 95 testes aprovados, incluindo nove PostgreSQL, em ambiente isolado |
 | Login/histórico/prazos na tela | Integrações publicadas; E8/E9 usam CT08. CT09 separado é proposta, não chamada atual |
 | Estoque na tela | Concluído no #1156/frontend26, com PATCH/GET e reflexo no catálogo em ambiente isolado; CT05 segue desligado por padrão |
