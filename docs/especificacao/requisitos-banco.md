@@ -5,12 +5,14 @@ aplicação no destino. O [dicionário](colunas-materiais-e-solicitacoes.md) def
 as seis colunas. Não há pendência de a Lara escolher regras: o Luis confirmou
 as duas medidas opcionais para todos os materiais do MVP.
 
-Base atual: main bd733aa, após as PRs #19, #23 e #24, em 11/11/2026.
+Base atual: main85d3296, conferida em 15/11/2026. A PR28 já corrigiu a carga
+de exemplos: os avisos de incompatibilidade da PR24 abaixo são históricos.
+Cadastro CT14 e RA/curso também já estão mapeados. Ver [revisão vigente](revisao-integracoes-2026-11-14.md).
 O Java continua em ddl-auto: validate.
 
 | Conjunto | Definição / situação |
 | --- | --- |
-| materiais | Campos básicos existentes; quatro BOOLEAN anuláveis, defaults TRUE/FALSE/TRUE/FALSE. CHECKs recusam saldos/mínimos negativos e exigir medida não aceita. Exemplos da PR #24 ainda divergem da política uniforme. |
+| materiais | Campos básicos e quatro BOOLEAN com defaults TRUE/FALSE/TRUE/FALSE; CHECKs de saldo/mínimo e política. Carga atual da PR28 alinhada às medidas opcionais. |
 | solicitacoes | dimensao VARCHAR(255), diametro DOUBLE PRECISION e observacao VARCHAR(255) anuláveis. usuario_id/material_id NOT NULL e FKs para usuarios/materiais. CHECKs de quantidade positiva e diâmetro ausente ou positivo. Identidade, PENDENTE e datas do servidor. |
 | parametrosAceitos / parametrosObrigatorios | Projeções dos booleanos, sem colunas/arrays adicionais. Ainda ausentes no DTO do catálogo. |
 | Data do estoque | #1154 mapeia materiais.atualizada_em (TIMESTAMP WITHOUT TIME ZONE, anulável, sem default). Em banco existente, revisar/aplicar com H01.2 antes de iniciar a versão, mesmo com o PATCH desativado. |
@@ -21,9 +23,10 @@ O Java continua em ddl-auto: validate.
 
 01-tabelas.sql já cria as três tabelas e é compatível com os mapeamentos usados
 na prova isolada da [PR #25](https://github.com/MatheusMansano06/pi4-0102-g7-backend-1/pull/25).
-Isso não torna a carga de exemplos compatível: a execução de 02-dados-exemplo.sql
-foi reproduzida separadamente e falhou na coluna materiais.categoria. A lista
-abaixo foi conferida contra o DDL e os enums/entidades, sem alterar os scripts.
+Na revisão de 11/11, a carga então publicada falhou em materiais.categoria.
+A PR28 corrigiu nomes, estados, política e hashes BCrypt por pgcrypto. A tabela
+abaixo preserva o diagnóstico histórico da PR24; não é uma lista de erros do
+arquivo atual, nem comprova aplicação da carga corrigida no destino.
 
 | Arquivo de exemplos | Esquema/contrato vigente | Ajuste necessário em H01.2 |
 | --- | --- | --- |
@@ -37,9 +40,10 @@ abaixo foi conferida contra o DDL e os enums/entidades, sem alterar os scripts.
 
 O SQL de usuários exige RA e curso para ALUNO, com matrícula funcional/cargo
 nulos; para RESPONSAVEL exige matrícula funcional/cargo, com RA/curso nulos.
-A entidade Usuario lê apenas os seis campos comuns. Não presumir que salvar um
-novo Usuario pela entidade atual satisfaça esses CHECKs; fixtures/provisionamento
-devem preencher também os dados específicos exigidos pelo SQL.
+A entidade Usuario já lê RA/curso e o construtor de cadastro CT14 preenche os
+dados obrigatórios do aluno. O construtor genérico não preenche todos os dados
+específicos de perfil; provisionamento de responsável deve preencher matrícula/
+cargo pelo procedimento de banco. A carga atual cria apenas três alunos.
 
 Nenhuma dessas divergências modifica a definição das seis colunas, autoriza
 alterar contratos silenciosamente ou comprova migração no banco da equipe.

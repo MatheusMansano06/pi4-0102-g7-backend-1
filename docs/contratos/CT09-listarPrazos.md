@@ -2,6 +2,12 @@
 
 > Revisão #1136: contrato alvo em revisão; propostas e diferenças para o código estão em [H01.4](../especificacao/H01.4-alinhamento.md).
 
+**Estado em 15/11/2026:** este endpoint continua proposto, não publicado. O
+painel Solicitações/E9 da main frontend af5c775 usa CT08, com status e
+previsaoRetirada, e exclui CANCELADO. A tabela abaixo preserva o desenho de uma
+eventual operação separada; não é a chamada que a tela faz hoje. Não há motivo
+para recriar a integração de E9 ou inventar dataLimite nesta revisão documental.
+
 | Linha | Valor |
 | :--- | :--- |
 | Fronteira | HTTP |

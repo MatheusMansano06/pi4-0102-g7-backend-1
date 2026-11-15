@@ -1,6 +1,12 @@
 # Cadastro de aluno: o que falta no frontend
 
-O backend já tem a operação. Falta a tela chamar.
+**Guia histórico, superado pela integração já publicada.** Em 15/11/2026,
+StudentRegister e cadastrarAluno já enviam nome/RA/curso/email/senha e guardam
+a sessão retornada. Não implementar de novo os exemplos de ligação abaixo.
+CT14 agora registra curso na resposta e os limites reais do serviço.
+A carga atual foi corrigida na PR28; DEMO_SEM_LOGIN/categoria descrevem a
+versão antiga citada por este guia, não os scripts atuais. Ver
+[revisão vigente](../especificacao/revisao-integracoes-2026-11-14.md).
 
 Rota: `POST /api/auth/cadastro`. Ficha completa em
 [CT14](../contratos/CT14-cadastrarAluno.md). É pública, igual ao login: não
