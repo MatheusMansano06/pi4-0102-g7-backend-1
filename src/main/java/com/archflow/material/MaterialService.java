@@ -43,14 +43,56 @@ public class MaterialService {
         return new MaterialEstoqueSaida(this.materialRepository.saveAndFlush(material));
     }
 
+    // #1144 Cadastro de um novo material.
+    @Transactional
+    public MaterialSaida cadastrarMaterial(
+            UsuarioAutenticado identidade,
+            MaterialCriacaoEntrada entrada) {
+
+        this.exigirResponsavel(identidade);
+
+        if (entrada == null
+                || entrada.getNome() == null
+                || entrada.getNome().trim().isEmpty()
+                || entrada.getEspecificacao() == null
+                || entrada.getEspecificacao().trim().isEmpty()) {
+            throw new NegocioException(
+                    CodigosDeErro.DADOS_INVALIDOS,
+                    "Nome e especificação são obrigatórios.");
+        }
+
+        if (entrada.getQuantidadeDisponivel() == null
+                || entrada.getQuantidadeDisponivel() < 0
+                || entrada.getQuantidadeMinima() == null
+                || entrada.getQuantidadeMinima() < 0) {
+            throw new NegocioException(
+                    CodigosDeErro.QUANTIDADE_INVALIDA,
+                    "As quantidades devem ser inteiros não negativos.");
+        }
+
+        Material material = new Material(
+                entrada.getNome(),
+                entrada.getDescricao(),
+                entrada.getEspecificacao(),
+                entrada.getQuantidadeDisponivel(),
+                entrada.getQuantidadeMinima());
+
+        Material salvo = this.materialRepository.saveAndFlush(material);
+
+        return new MaterialSaida(salvo);
+    }
+
     private void exigirResponsavel(UsuarioAutenticado identidade) {
         if (identidade == null) {
-            throw new NaoAutenticadoException(CodigosDeErro.NAO_AUTENTICADO,
-                    "É preciso estar autenticado para atualizar o estoque.");
+            throw new NaoAutenticadoException(
+                    CodigosDeErro.NAO_AUTENTICADO,
+                    "É preciso estar autenticado para realizar esta operação.");
         }
+
         if (!PerfilUsuario.RESPONSAVEL.equals(identidade.getPerfil())) {
-            throw new AcessoNegadoException(CodigosDeErro.ACESSO_NEGADO,
-                    "Só o responsável pode atualizar o estoque.");
+            throw new AcessoNegadoException(
+                    CodigosDeErro.ACESSO_NEGADO,
+                    "Só o responsável pode realizar esta operação.");
         }
     }
 
