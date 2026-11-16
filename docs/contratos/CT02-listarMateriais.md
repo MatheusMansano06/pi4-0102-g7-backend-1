@@ -50,8 +50,10 @@ divergência a alinhar antes de prometer esse comportamento na API.
 
 Saldo zero produz INDISPONIVEL; saldo positivo até quantidadeMinima produz BAIXO;
 acima disso, DISPONIVEL. A interface adapta os nomes para rótulos/classes CSS.
-O GET atual exige Bearer, validado pelo filtro antes do controller. Na main do
-frontend, a chamada ainda não envia esse token; a PR frontend #14 acrescenta o envio.
+O GET exige Bearer, validado pelo filtro antes do controller. A main do frontend
+já envia esse token; a PR frontend 24 integrou também o envio pela tela de
+estoque. A PR frontend 26 passou a usar o status devolvido pelo servidor na
+releitura após o PATCH, sem limiar fixo na interface.
 
 ## Regra definida no MVP
 

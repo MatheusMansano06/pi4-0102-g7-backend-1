@@ -23,11 +23,14 @@
 | :--- | :--- | :--- | :--- |
 | corpo | lista direta de objetos SolicitacaoHistorico | sim | `[]` quando vazio |
 | solicitacaoId | inteiro | sim, por solicitação | 101 |
+| aluno | texto ou null | presente, nome obtido da relação carregada | Ana Silva |
 | material | texto | sim, por solicitação | Madeira |
 | quantidade | inteiro | sim, por solicitação | 2 |
 | status | texto | sim, por solicitação | CONCLUIDO |
 | criadaEm | data e hora (ISO 8601) | sim, por solicitação | 2026-10-10T09:00:00 |
 | atualizadaEm | data e hora (ISO 8601) ou null | sim, por solicitação | 2026-10-11T13:00:00 |
+| dimensao | texto ou null | presente; null sem medida | 300 x 200 mm |
+| previsaoRetirada | data e hora ISO 8601 ou null | presente; null sem previsão | 2026-10-15T14:00:00 |
 
 ## Erros
 
@@ -42,3 +45,11 @@ Sucesso: HTTP 200 com lista direta em ordem decrescente de criação, sem filtro
 de status. ALUNO recebe somente seus pedidos, pelo usuarioId do token;
 RESPONSAVEL recebe todos. A chamada não recebe usuarioId da tela. Filtros novos
 não fazem parte desta revisão.
+
+A tela Solicitações/E9 consome este CT08, excluindo CANCELADO e incluindo os
+demais estados, inclusive CONCLUIDO. Não chama o CT09. Previsão ausente aparece
+como “Sem previsão”. O histórico E8 também consulta CT08; filtros/ordenação
+são locais. O rótulo visual “retirada” usa atualizadaEm ou criadaEm como fallback,
+sem representar um horário de retirada efetiva próprio. Não há dataLimite
+persistida. Diâmetro/observação são preservados no pedido, mas não fazem parte
+deste DTO; aparecem na fila CT04.

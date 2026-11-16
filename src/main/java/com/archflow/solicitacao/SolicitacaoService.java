@@ -11,16 +11,22 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import com.archflow.notificacao.NotificacaoService;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SolicitacaoService {
 
     private final SolicitacaoRepository solicitacaoRepository;
+    private final NotificacaoService notificacaoService;
 
-    public SolicitacaoService(SolicitacaoRepository solicitacaoRepository) {
+    public SolicitacaoService(
+            SolicitacaoRepository solicitacaoRepository,
+            NotificacaoService notificacaoService) {
+
         this.solicitacaoRepository = solicitacaoRepository;
+        this.notificacaoService = notificacaoService;
     }
-
     // CT04: a fila e so do responsavel, em ordem de chegada.
     public List<SolicitacaoFilaSaida> listarFila(UsuarioAutenticado identidade, String status) {
         this.exigirResponsavel(identidade);
@@ -33,16 +39,38 @@ public class SolicitacaoService {
     }
 
     // CT06: so o responsavel muda o status, pelos caminhos permitidos.
-    public SolicitacaoStatusSaida atualizarStatus(UsuarioAutenticado identidade, Long solicitacaoId,
+    @Transactional
+    public SolicitacaoStatusSaida atualizarStatus(
+            UsuarioAutenticado identidade,
+            Long solicitacaoId,
             SolicitacaoStatusEntrada entrada) {
+
         this.exigirResponsavel(identidade);
-        StatusSolicitacao novoStatus = this.converterStatus(entrada.getStatus());
-        this.exigirPrevisaoNoFuturo(entrada.getPrevisaoRetirada());
+
+        StatusSolicitacao novoStatus =
+                this.converterStatus(entrada.getStatus());
+
+        this.exigirPrevisaoNoFuturo(
+                entrada.getPrevisaoRetirada());
+
         Solicitacao solicitacao = this.buscar(solicitacaoId);
+
         this.exigirTransicaoPermitida(solicitacao, novoStatus);
+
         solicitacao.setStatus(novoStatus);
-        this.guardarPrevisao(solicitacao, entrada.getPrevisaoRetirada());
-        return new SolicitacaoStatusSaida(this.solicitacaoRepository.save(solicitacao));
+
+        this.guardarPrevisao(
+                solicitacao,
+                entrada.getPrevisaoRetirada());
+
+        Solicitacao solicitacaoSalva =
+                this.solicitacaoRepository.save(solicitacao);
+
+        this.notificacaoService.registrarMudancaDeStatus(
+                solicitacaoSalva,
+                novoStatus);
+
+        return new SolicitacaoStatusSaida(solicitacaoSalva);
     }
 
     // CT08: o aluno ve so os pedidos dele; o responsavel ve os de todos.

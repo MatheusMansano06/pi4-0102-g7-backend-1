@@ -38,6 +38,7 @@ emitido, para a pessoa não ter que entrar de novo logo depois de se cadastrar.
 | :--- | :--- | :--- | :--- |
 | usuarioId | inteiro | sim | 12 |
 | nome | texto | sim | Ana Silva |
+| curso | texto | sim, curso do aluno cadastrado | Arquitetura |
 | perfil | sempre ALUNO | sim | ALUNO |
 | token | texto | sim | JWT assinado pelo backend, válido por 8 horas |
 
@@ -59,25 +60,32 @@ esta ficha não altera esse mapeamento. O código distingue o caso para a tela.
 
 ## Regras
 
-- O e-mail é conferido **sem diferenciar maiúscula de minúscula**, porque o
-  banco tem índice único por `LOWER(email)`. O e-mail é gravado como a pessoa
-  digitou; a conferência é que ignora a caixa.
+- O cadastro verifica duplicidade com `findByEmailIgnoreCase` e o banco tem
+  índice único por `LOWER(email)`. A entidade remove espaços nas extremidades;
+  a caixa informada é preservada. O login CT01 ainda consulta `findByEmail`
+  após trim; não prometer login insensível à caixa a partir da regra do cadastro.
 - O RA também é único no banco. A recusa acontece antes do `INSERT`, para a
   tela receber a mensagem em vez da violação do índice.
 - A senha é gravada **só como hash BCrypt**. A senha digitada nunca vai para o
   banco nem para o token.
-- O limite de 72 caracteres existe porque o BCrypt só lê os 72 primeiros bytes:
-  sem o limite, duas senhas diferentes passariam a valer a mesma coisa.
+- O serviço verifica 8 a 72 por `String.length()` (unidades UTF-16). Essa
+  verificação não equivale a limitar 72 bytes para senhas Unicode; a ficha não
+  declara resolvida essa diferença nem modifica a autenticação nesta revisão.
 - A conta nasce com `ativo = true`, com `matricula_funcional` e `cargo` nulos,
   satisfazendo o `CHECK ck_usuarios_dados_perfil` da tabela `usuarios`.
 
 ## O que esta ficha resolve do banco
 
-Os usuários de `banco/02-dados-exemplo.sql` têm `senha_hash = 'DEMO_SEM_LOGIN'`,
-que não é um hash BCrypt: **nenhum deles consegue entrar**. Com o CT14, dá para
-criar pela tela uma conta de aluno com hash válido e entrar com ela, sem esperar
-a correção da carga de exemplos. Isso **não substitui** essa correção, que
-continua pendente em H01.2 — ver [requisitos-banco](../especificacao/requisitos-banco.md).
+A PR backend28 já corrigiu a carga de exemplos para usar BCrypt com pgcrypto;
+o aviso histórico de DEMO_SEM_LOGIN não descreve o arquivo atual. O cadastro
+CT14 também já é chamado por StudentRegister na main do frontend. A carga
+continua criando apenas alunos, sem responsável de demonstração. Publicar SQL
+ou integrar cadastro não comprova aplicação no destino; ver
+[requisitos-banco](../especificacao/requisitos-banco.md).
+
+RA/curso têm capacidades físicas 30/120 no SQL. O serviço verifica presença,
+mas não antecipa todos os limites de coluna; excesso não tem recusa de negócio
+específica documentada. A senha/hash nunca entram nas evidências.
 
 ## Prova
 

@@ -54,6 +54,12 @@ public class TratadorDeErros {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErroSaida tratarFalhaInesperada(Exception erro) {
-        return new ErroSaida(CodigosDeErro.ERRO_INTERNO, "Erro interno no servidor.");
+
+        erro.printStackTrace();
+
+        return new ErroSaida(
+            CodigosDeErro.ERRO_INTERNO,
+            "Erro interno no servidor."
+        );
     }
-}
+    }

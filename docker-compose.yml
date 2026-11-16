@@ -41,6 +41,7 @@ services:
       BANCO_SENHA: ${POSTGRES_PASSWORD}
       # Senha secreta com que o backend assina e confere o token do login.
       ARCHFLOW_TOKEN_SEGREDO: ${ARCHFLOW_TOKEN_SEGREDO}
+      JAVA_TOOL_OPTIONS: "-Darchflow.estoque.em-desenvolvimento=true"
     ports:
       - "${PORTA_BACKEND}:8080"
     depends_on:

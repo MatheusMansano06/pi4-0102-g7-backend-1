@@ -10,9 +10,11 @@
 Em 11/11, a PR #24 passou a criar `usuarios` em 01-tabelas.sql. Além dos
 campos lidos pela entidade, o banco exige RA e curso para ALUNO; para
 RESPONSAVEL exige matrícula funcional e cargo, com campos do outro perfil nulos.
-Esses campos extras não são uma nova saída do CT01/CT10 nem estão mapeados na
-entidade Usuario. Fixtures e provisionamento precisam respeitar as restrições.
-Os hashes DEMO_SEM_LOGIN dos exemplos não são BCrypt válidos para autenticar.
+RA e curso já estão mapeados na entidade Usuario para o CT14. Curso também
+está na resposta CT01/CT14 (null para responsável). Matrícula funcional/cargo
+continuam exigidos pelo SQL para responsável e fora do cadastro público.
+Fixtures e provisionamento precisam respeitar essas restrições. A carga atual
+da PR28 já usa BCrypt; o aviso antigo de DEMO_SEM_LOGIN ficou superado.
 
 O índice de unicidade usa LOWER(email); a consulta atual findByEmail compara
 o e-mail informado após trim. Não prometer consulta sem distinção de caixa
@@ -42,6 +44,8 @@ somente pela existência do índice.
 | senhaHash | texto | sim, para validação interna | hash armazenado |
 | perfil | ALUNO ou RESPONSAVEL | sim, se encontrado | ALUNO |
 | ativo | booleano | sim, se encontrado | true |
+| ra | texto ou null | dado específico do aluno | 2026001 |
+| curso | texto ou null | dado específico do aluno | Arquitetura |
 
 ## Erros
 

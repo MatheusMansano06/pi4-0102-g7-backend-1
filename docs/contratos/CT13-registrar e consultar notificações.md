@@ -39,3 +39,23 @@
 | Solicitação associada inexistente | Backend trata como referência inválida |
 | Falha ao registrar ou consultar | Falha de persistência tratada pelo Backend |
 
+## Consulta por destinatário (#1161)
+
+O esquema oficial da PR37 cria notificacoes, com notificacao_id, usuario_id,
+solicitacao_id opcional, tipo, mensagem, lida e criado_em. FKs ligam destinatário
+a usuarios e solicitação a solicitacoes. criado_em é exposto como criadaEm.
+
+NotificacaoRepository restringe consulta por usuarioId em todos os casos;
+findByUsuarioIdAndLidaFalseOrderByCriadoEmDesc também filtra lida=false.
+O destinatário vem do JWT, inclusive para RESPONSAVEL. A lista retorna os
+campos de CT07, sem usuarioId; não cria nem marca avisos como lidos.
+
+H09.1/Lara registra avisos no atualizarStatus transacional. A prova #1161
+exercita a geração oficial e força falha de INSERT somente no banco descartável
+para comprovar rollback de status/previsão/data e ausência do aviso.
+A produção integrada gera avisos para outros status além dos dois mínimos
+AGUARDANDO_COMPRA e PRONTO_PARA_RETIRADA; conciliar documentação H01.5/#1137.
+
+[Prova HTTP e PostgreSQL oficiais](../integracao/H09.2-retomada-jwt.md).
+As tabelas temporárias antigas não definem mais o adaptador de produção e
+foram retiradas desta branch ao conciliar a entrega oficial.
