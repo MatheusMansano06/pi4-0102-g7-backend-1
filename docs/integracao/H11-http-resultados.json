@@ -1,0 +1,125 @@
+{
+  "dataRespostaPATCH": "2026-11-16T01:18:24",
+  "origem": "http://localhost:8081",
+  "banco": "PostgreSQL 15, volume novo",
+  "tokensRegistrados": false,
+  "materialId": 8,
+  "pedidoNaoBaixouEstoque": true,
+  "avisosDoPedido": 2,
+  "pedidoId": 7,
+  "cenarios": [
+    {
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "http": 200
+    },
+    {
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "http": 200
+    },
+    {
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "rota": "/materiais",
+      "http": 401
+    },
+    {
+      "metodo": "POST",
+      "rota": "/materiais",
+      "http": 200
+    },
+    {
+      "metodo": "POST",
+      "rota": "/solicitacoes",
+      "http": 201
+    },
+    {
+      "metodo": "PATCH",
+      "rota": "/solicitacoes/7/status",
+      "http": 403
+    },
+    {
+      "metodo": "PATCH",
+      "rota": "/solicitacoes/7/status",
+      "http": 200
+    },
+    {
+      "metodo": "PATCH",
+      "rota": "/solicitacoes/7/status",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "rota": "/solicitacoes/fila?status=PRONTO_PARA_RETIRADA",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "rota": "/solicitacoes/prazos",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "rota": "/solicitacoes/prazos",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "rota": "/notificacoes",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "rota": "/notificacoes",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "rota": "/notificacoes?somenteNaoLidas=true",
+      "http": 200
+    },
+    {
+      "metodo": "PATCH",
+      "rota": "/solicitacoes/7/status",
+      "http": 400
+    },
+    {
+      "metodo": "GET",
+      "rota": "/materiais",
+      "http": 200
+    },
+    {
+      "metodo": "PATCH",
+      "rota": "/materiais/8/estoque",
+      "http": 200
+    },
+    {
+      "metodo": "PATCH",
+      "rota": "/materiais/8/estoque",
+      "http": 200
+    },
+    {
+      "metodo": "PATCH",
+      "rota": "/materiais/8/estoque",
+      "http": 403
+    },
+    {
+      "metodo": "POST",
+      "rota": "/materiais",
+      "http": 400
+    },
+    {
+      "metodo": "GET",
+      "rota": "/materiais",
+      "http": 200
+    }
+  ],
+  "ambiente": "Compose isolado archflow-fechamento-1511",
+  "isolamentoEntreAlunos": true,
+  "saldoFinal": 12
+}

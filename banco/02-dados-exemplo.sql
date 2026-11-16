@@ -1,11 +1,8 @@
 -- Dados de exemplo, para o sistema abrir com conteudo na tela.
 --
 -- Sem isto o catalogo e a fila respondem lista vazia e parece que nada funciona.
--- A tela de cadastro nao faz parte do MVP; o POST H04.1 ja foi integrado parcialmente,
--- mas ainda depende de identidade validada. Estes sao dados de demonstracao.
---
--- Os numeros de aluno (1, 2 e 3) sao provisorios: a tabela usuarios ainda nao
--- existe, entao nao ha de onde puxar nome nem curso.
+-- Dados públicos de demonstração, usados somente na inicialização de banco vazio.
+-- Os usuários abaixo permitem exercitar os perfis ALUNO e RESPONSAVEL.
 
 -- #1136: Luis confirmou dimensao e diametro opcionais para todos os materiais.
 -- Gera hashes BCrypt compativeis com o PasswordEncoder do Spring.
@@ -58,6 +55,12 @@ ON CONFLICT (usuario_id) DO UPDATE SET
     matricula_funcional = EXCLUDED.matricula_funcional,
     cargo = EXCLUDED.cargo;
 
+
+-- Conta exclusiva de demonstração em banco vazio. Não aplicar seed em banco compartilhado.
+INSERT INTO usuarios (usuario_id,nome,email,senha_hash,perfil,ativo,matricula_funcional,cargo)
+VALUES (4,'Responsavel Demonstracao','responsavel@archflow.demo',
+        crypt('Archflow@123',gen_salt('bf',10)),'RESPONSAVEL',TRUE,'DEMO-R','Atelie')
+ON CONFLICT DO NOTHING;
 -- MATERIAIS
 
 

@@ -60,6 +60,9 @@ public class MaterialService {
                     CodigosDeErro.DADOS_INVALIDOS,
                     "Nome e especificação são obrigatórios.");
         }
+        this.exigirTamanhoTexto(entrada.getNome());
+        this.exigirTamanhoTexto(entrada.getDescricao());
+        this.exigirTamanhoTexto(entrada.getEspecificacao());
 
         if (entrada.getQuantidadeDisponivel() == null
                 || entrada.getQuantidadeDisponivel() < 0
@@ -80,6 +83,13 @@ public class MaterialService {
         Material salvo = this.materialRepository.saveAndFlush(material);
 
         return new MaterialSaida(salvo);
+    }
+
+    private void exigirTamanhoTexto(String valor) {
+        if (valor != null && valor.length() > 255) {
+            throw new NegocioException(CodigosDeErro.DADOS_INVALIDOS,
+                    "Os textos do material devem ter até 255 caracteres.");
+        }
     }
 
     private void exigirResponsavel(UsuarioAutenticado identidade) {

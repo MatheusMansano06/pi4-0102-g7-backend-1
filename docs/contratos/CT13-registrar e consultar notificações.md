@@ -54,7 +54,7 @@ H09.1/Lara registra avisos no atualizarStatus transacional. A prova #1161
 exercita a geração oficial e força falha de INSERT somente no banco descartável
 para comprovar rollback de status/previsão/data e ausência do aviso.
 A produção integrada gera avisos para outros status além dos dois mínimos
-AGUARDANDO_COMPRA e PRONTO_PARA_RETIRADA; conciliar documentação H01.5/#1137.
+AGUARDANDO_COMPRA e PRONTO_PARA_RETIRADA; tipos consolidados em [H01.5](../especificacao/H01.5-fechamento.md).
 
 [Prova HTTP e PostgreSQL oficiais](../integracao/H09.2-retomada-jwt.md).
 As tabelas temporárias antigas não definem mais o adaptador de produção e

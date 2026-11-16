@@ -56,6 +56,8 @@ services:
     # direto e mandamos o comando. Assim a Mirele nao precisa mexer em Docker.
     image: node:20-alpine
     working_dir: /app
+    environment:
+      API_PROXY_TARGET: http://backend:8080
     volumes:
       - ../pi4-0102-g7-frontend:/app
       # Mantem a pasta node_modules dentro do container, separada da maquina.

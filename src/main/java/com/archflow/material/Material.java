@@ -52,6 +52,10 @@ public class Material {
         this.setQuantidadeDisponivel(quantidadeDisponivel);
         this.setQuantidadeMinima(quantidadeMinima);
         this.setAtivo(true);
+        this.aceitaDimensao = true;
+        this.exigeDimensao = false;
+        this.aceitaDiametro = true;
+        this.exigeDiametro = false;
     }
 
     public Long getMaterialId() {

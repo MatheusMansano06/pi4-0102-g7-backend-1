@@ -54,5 +54,7 @@ Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/
 
 Sucesso: HTTP 200. A data da alteração é gravada via CT12. A previsão é opcional;
 na implementação atual, ausência/null conserva a previsão já existente. O
-perfil RESPONSAVEL vem do token. A criação de notificação CT13 continua
-pendente, embora status/transições já existam.
+perfil RESPONSAVEL vem do token. Status, previsão, data e notificação CT13 são
+gravados na mesma transação. Falha ao registrar o aviso desfaz a alteração.
+Os tipos oficiais estão no alinhamento H01.5. Nenhum saldo é descontado por
+esta operação; estoque continua sendo atualização manual pelo responsável.

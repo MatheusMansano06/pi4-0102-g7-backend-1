@@ -197,6 +197,42 @@ public class NotificacaoBancoTest {
                 Integer.class, this.aluno));
     }
 
+    @Test
+    public void cadastroOficialCriaMaterialComMedidasOpcionaisEPedidoDoAluno() {
+        String corpo = "{\"nome\":\"Material final\",\"especificacao\":\"Chapa\","
+                + "\"quantidadeDisponivel\":8,\"quantidadeMinima\":2}";
+        ResponseEntity<JsonNode> resposta = this.requisitar("/api/materiais", HttpMethod.POST,
+                this.tokenResponsavel, corpo);
+        this.conferirStatus(resposta, HttpStatus.OK);
+        Long novo = resposta.getBody().path("materialId").asLong();
+        try {
+            assertEquals(2, resposta.getBody().path("parametrosAceitos").size());
+            assertTrue(resposta.getBody().path("parametrosObrigatorios").isEmpty());
+            this.conferirStatus(this.requisitar("/api/solicitacoes", HttpMethod.POST, this.tokenAluno,
+                    "{\"materialId\":" + novo + ",\"quantidade\":1}"), HttpStatus.CREATED);
+            assertEquals(8, this.sql.queryForObject(
+                    "SELECT quantidade_disponivel FROM materiais WHERE material_id = ?", Integer.class, novo));
+        } finally {
+            this.sql.update("DELETE FROM solicitacoes WHERE material_id = ?", novo);
+            this.sql.update("DELETE FROM materiais WHERE material_id = ?", novo);
+        }
+    }
+
+    @Test
+    public void cadastroRecusaAlunoEQuantidadesSemConverterFracaoOuTexto() {
+        String prefixo = "{\"nome\":\"Inválido\",\"especificacao\":\"Chapa\",\"quantidadeMinima\":0,"
+                + "\"quantidadeDisponivel\":";
+        this.conferirErro(this.requisitar("/api/materiais", HttpMethod.POST,
+                this.tokenAluno, prefixo + "1}"), HttpStatus.FORBIDDEN, "ACESSO_NEGADO");
+        String[] valores = {"1.5", "\"2\"", "true", "-1", "null", "2147483648"};
+        for (String valor : valores) {
+            this.conferirErro(this.requisitar("/api/materiais", HttpMethod.POST,
+                    this.tokenResponsavel, prefixo + valor + "}"), HttpStatus.BAD_REQUEST, "QUANTIDADE_INVALIDA");
+        }
+        assertEquals(0, this.sql.queryForObject("SELECT count(*) FROM materiais WHERE nome = 'Inválido'",
+                Integer.class));
+    }
+
     private Long criarAluno(String nome, String hash) {
         Long id = this.sql.queryForObject("INSERT INTO usuarios (nome,email,senha_hash,perfil,ra,curso) "
                 + "VALUES (?,?,?,'ALUNO',?,'Curso de teste') RETURNING usuario_id",

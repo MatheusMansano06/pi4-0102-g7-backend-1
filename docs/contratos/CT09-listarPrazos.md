@@ -1,49 +1,11 @@
-# CT09: listarPrazos
+# CT09 — listarPrazos
 
-> Revisão #1136: contrato alvo em revisão; propostas e diferenças para o código estão em [H01.4](../especificacao/H01.4-alinhamento.md).
+Operação publicada pela Lara e adotada no painel E9.
 
-**Estado em 15/11/2026:** este endpoint continua proposto, não publicado. O
-painel Solicitações/E9 da main frontend af5c775 usa CT08, com status e
-previsaoRetirada, e exclui CANCELADO. A tabela abaixo preserva o desenho de uma
-eventual operação separada; não é a chamada que a tela faz hoje. Não há motivo
-para recriar a integração de E9 ou inventar dataLimite nesta revisão documental.
+`GET /api/solicitacoes/prazos`, autenticado por Bearer JWT. Sem parâmetros. Retorna HTTP 200 e uma lista direta, inclusive `[]` quando vazia, no mesmo formato de CT08: `solicitacaoId`, `material`, `quantidade`, `dimensao`, `diametro`, `status`, `criadaEm`, `atualizadaEm` e `previsaoRetirada` opcional. Confira os DTOs do histórico para os campos completos.
 
-| Linha | Valor |
-| :--- | :--- |
-| Fronteira | HTTP |
-| Quem chama | Frontend |
-| Quem responde | Backend API |
-| Atende | E9 |
-| Como chamar | `GET /api/prazos` |
-| Autenticação prevista para esta rota | `Authorization: Bearer <token>`; ver [rotas e erros](../especificacao/autenticacao.md) |
+ALUNO consulta somente seus pedidos. RESPONSAVEL mantém a abrangência do serviço de histórico. Credencial ausente/inválida recebe 401/NAO_AUTENTICADO; perfil não permitido, 403/ACESSO_NEGADO; falha interna, 500/ERRO_INTERNO. Erros têm `codigo` e `mensagem`.
 
-## Entrada
+O painel do aluno exclui CANCELADO, preserva pedidos das outras etapas e mostra Sem previsão quando o servidor retorna null. Não usa `/api/prazos` nem envelope `solicitacoes`, que pertenciam à proposta anterior. Não inventa prazo nem `dataLimite`.
 
-| Campo | Tipo | Obrigatório | Exemplo |
-| :--- | :--- | :--- | :--- |
-| nenhum | — | — | O Backend identifica o aluno autenticado |
-
-## Saída
-
-| Campo | Tipo | Obrigatório | Exemplo |
-| :--- | :--- | :--- | :--- |
-| solicitacoes | lista de objetos SolicitacaoPrazo | sim | pedidos do aluno |
-| solicitacaoId | inteiro | sim, por solicitação | 101 |
-| status | texto | sim, por solicitação | PRONTO_PARA_RETIRADA |
-| previsaoRetirada | data e hora (ISO 8601) | não | 2026-10-15T14:00:00 |
-| atualizadaEm | data e hora (ISO 8601) | sim | 2026-10-13T12:10:00 |
-
-## Erros
-
-| Quando | HTTP | O que volta |
-| :--- | :--- | :--- |
-| Usuário sem autenticação | 401 | Erro `NAO_AUTENTICADO` |
-| Falha ao consultar prazos | 500 | Erro `ERRO_INTERNO` |
-
-Formato dos erros: `{ "codigo": "...", "mensagem": "..." }`. Credencial ausente/inválida/expirada em rota protegida recebe HTTP 401 / NAO_AUTENTICADO.
-
-Proposta de resposta: HTTP 200 com objeto { "solicitacoes": [] } quando vazio.
-Identificar o ALUNO pela credencial e consultar apenas seus pedidos no CT12;
-perfil não permitido retorna 403 / ACESSO_NEGADO. Previsão ausente permanece null,
-sem data inventada. A rota não existe na main. Definir com o módulo quais estados
-do pedido compõem o painel; não confundir esta ficha com o histórico completo.
+Ver [H01.5](../especificacao/H01.5-fechamento.md).

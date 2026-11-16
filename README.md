@@ -1,143 +1,62 @@
-# ArchFlow - Backend API
+# ArchFlow — Backend
 
-Backend do ArchFlow, sistema de solicitacao e controle de materiais do Atelie CEATEC.
+Sistema de solicitação e controle de materiais do Ateliê CEATEC, PI IV, turma 0102, grupo 7. Java 17, Spring Boot, JPA e PostgreSQL 15. Frontend React no [repositório da interface](https://github.com/anadiasxavier/pi4-0102-g7-frontend).
 
-Projeto Integrador IV - PUC-Campinas - Turma 0102 - Grupo 7.
+## Instalação em máquina limpa
 
-A [criação de solicitação H04.1](docs/H04.1-CRIAR-SOLICITACAO.md) já foi integrada parcialmente. O [dicionário das seis colunas](docs/especificacao/colunas-materiais-e-solicitacoes.md) define medidas permitidas e opcionais para todos os materiais. Aplicar a atualização no banco existente antes de demonstrar o fluxo real.
-
-O controle de estoque tem uma [entrega parcial](docs/ESTOQUE-PARCIAL.md): regras
-e testes preparados, com saldo/data persistidos desde a PR #23. A rota de
-alteração continua desativada por padrão até validar o ambiente e a integração
-da tela. O catálogo segue disponível para chamadas autenticadas.
-
-Para construir o banco a partir do backend atual, consultar o
-[guia consolidado para a Lara](docs/GUIA-BANCO-PARA-LARA.md): entidades,
-entregas da equipe, campos pendentes e sequência de validação.
-
-| | |
-| :--- | :--- |
-| Linguagem | Java 17 |
-| Framework | Spring Boot 3.2 |
-| Banco | PostgreSQL 15 |
-| Ambiente | Docker Compose |
-| Frontend | [pi4-0102-g7-frontend](https://github.com/anadiasxavier/pi4-0102-g7-frontend) (React) |
-
-## Como subir numa maquina limpa
-
-Precisa ter **Docker** instalado. Nao precisa de Java nem de Maven: o Docker compila tudo.
-
-**1.** Clone os dois repositorios **lado a lado**, numa pasta qualquer:
+Requisitos: Git e Docker Desktop iniciado com suporte a contêineres Linux. Clone os dois repositórios lado a lado, preservando os nomes:
 
 ```bash
 git clone https://github.com/MatheusMansano06/pi4-0102-g7-backend-1.git
 git clone https://github.com/anadiasxavier/pi4-0102-g7-frontend.git
-```
-
-A pasta precisa ficar assim, com esses nomes:
-
-```
-uma-pasta-qualquer/
-├── pi4-0102-g7-backend-1/     <- o Compose mora aqui
-└── pi4-0102-g7-frontend/
-```
-
-**2.** Dentro do backend, crie o seu arquivo de variaveis:
-
-```bash
 cd pi4-0102-g7-backend-1
 cp .env.example .env
 ```
 
-**3.** Suba tudo:
+No PowerShell, o último comando é `Copy-Item .env.example .env`. No `.env`, defina sua senha de banco e um `ARCHFLOW_TOKEN_SEGREDO` com pelo menos 32 caracteres. O arquivo não é versionado. Na primeira instalação, o Compose cria as tabelas oficiais e os exemplos automaticamente em um volume novo.
 
-Antes da primeira instalação, conferir as [pendências dos scripts de exemplo](docs/especificacao/requisitos-banco.md).
-A PR #24 já criou `usuarios`, mas seu arquivo `02-dados-exemplo.sql` ainda usa
-colunas e status incompatíveis com o esquema/Java e não fornece contas com hashes
-BCrypt válidos para login. A sequência abaixo depende de conciliar esses exemplos;
-ela não comprova que a instalação atual esteja pronta. Em banco existente,
-combinar a migração com H01.2, preservando o volume.
+Para a apresentação, com interface compilada e servida pelo nginx:
 
 ```bash
-docker compose up
+docker compose -f docker-compose.prod.yml up --build -d
+docker compose -f docker-compose.prod.yml ps
 ```
 
-Pronto. Fica disponivel em:
+Abra [http://localhost:8081](http://localhost:8081). A API fica em `http://localhost:8080/api`; a tela encaminha `/api` internamente, sem depender de outro endereço de servidor. As portas de apresentação ficam limitadas à própria máquina. `PORTA_APRESENTACAO` e `PORTA_BACKEND` permitem escolher outras portas livres.
 
-| O que | Endereco |
-| :--- | :--- |
-| Tela do sistema | http://localhost:5173 |
-| API | http://localhost:8080/api |
-| Banco | localhost:5432 |
+Contas públicas de demonstração, exclusivamente para banco novo com os exemplos:
 
-A pessoa entra pela tela de login, que chama `POST /api/auth/login` com e-mail e senha. O backend
-confere a senha contra o hash gravado na tabela `usuarios` e devolve um token, que a tela manda em
-todas as outras chamadas (`Authorization: Bearer <token>`): sem token a API responde 401. Quem
-assina e confere esse token e o proprio backend, com a senha secreta de `ARCHFLOW_TOKEN_SEGREDO`
-no `.env`. Ver o [ADR 0008](docs/adr/0008-login-proprio-sem-keycloak.md).
+| Perfil | E-mail | Senha |
+| --- | --- | --- |
+| Aluno | aluno1@archflow.demo | Archflow@123 |
+| Outro aluno | aluno2@archflow.demo | Archflow@123 |
+| Responsável | responsavel@archflow.demo | Archflow@123 |
 
-Esse é o fluxo esperado: a main do frontend ainda tem formulários sem chamada
-de login. A PR frontend #14 liga login e catálogo; a #15 depende dela para ligar
-os históricos. Conferir as integrações antes da demonstração.
+O cadastro de aluno também está disponível na tela. O login é próprio, BCrypt/JWT, conforme ADR 0008. O token identifica o usuário e o perfil nas rotas protegidas.
 
-Para parar, `Ctrl+C`. Para parar e apagar os dados do banco, `docker compose down -v`.
+Para desenvolvimento, use `docker compose up --build`; a interface fica em `http://localhost:5173`, com proxy `/api`, e o banco em localhost:5432. Os arquivos de desenvolvimento são montados no contêiner. Não execute os dois ambientes simultaneamente nas mesmas portas.
 
-## Versao de apresentacao
+Para parar a apresentação preservando dados, use `docker compose -f docker-compose.prod.yml down`. O ambiente de desenvolvimento e o de apresentação usam volumes diferentes.
 
-O arquivo acima e o do dia a dia: a tela atualiza sozinha quando alguem salva um arquivo do front.
-Para a demonstracao existe uma versao com o React ja compilado e servido pelo nginx:
+## Banco existente e estoque
 
-```bash
-docker compose -f docker-compose.prod.yml up --build
-```
+Os scripts de `banco/` são inicializadores de banco vazio. Não reaplique o seed em banco existente. Confira o esquema com [H07.1](docs/sql/H07.1-conferir-implantacao.sql) e combine a atualização com quem administra o destino. A coluna `materiais.atualizada_em`, as regras de medidas, os campos do pedido e a tabela `notificacoes` precisam existir antes da ativação.
 
-O `Dockerfile` e o `nginx.conf` ja estao commitados na raiz do repositorio do frontend. Nesta
-versao o nginx repassa `/api` para o backend por dentro do Docker. Para usar esse
-encaminhamento, ainda é necessário conciliar o endereço da API no frontend,
-que hoje é absoluto em localhost:8080; o CORS atual só autoriza a porta 5173.
-O Compose de apresentação também precisa encaminhar ARCHFLOW_TOKEN_SEGREDO,
-como o de desenvolvimento. Conferir os imports com caixa divergente de welcome
-antes do build Linux; a compilação Windows não elimina essa pendência.
+CT05 fica desligado se a aplicação for iniciada sem a propriedade `archflow.estoque.em-desenvolvimento`. Os dois Compose habilitam explicitamente o fluxo no ambiente local preparado. Para outro destino, valide o esquema e a integração antes de habilitar. Atualizar estoque substitui o saldo e grava a data no servidor; criar pedido ou alterar status não baixa saldo automaticamente.
 
-## Organizacao das pastas
+Dimensão e diâmetro são opcionais para todos os materiais do MVP. Materiais cadastrados pelo responsável seguem essa política. Não existe `dataLimite` contratada; a previsão pertence ao pedido e pode permanecer vazia.
 
-```
-.
-├── banco/      scripts SQL que criam as tabelas (modulo de banco de dados)
-├── docs/
-│   ├── adr/          decisoes de arquitetura e o porque de cada uma
-│   ├── contratos/    os treze contratos CT01 a CT13
-│   ├── convencoes-codigo.md
-│   └── pendencias.md o que ainda falta decidir, e com quem
-└── src/
-    ├── main/java/com/archflow/
-    │   ├── autenticacao/   login, logout e conferencia do token
-    │   ├── usuario/        usuarios e perfis
-    │   ├── material/       catalogo e estoque
-    │   ├── solicitacao/    pedidos, fila, status, historico e prazos
-    │   ├── notificacao/    avisos dentro da plataforma
-    │   └── comum/          tratamento de erro e configuracao
-    └── test/java/com/archflow/
-```
+## Fluxo de apresentação
 
-Cada pasta dentro de `com/archflow` guarda apenas uma funcionalidade, com tudo que ela precisa:
-Controller, Service, Repository, Entity e DTOs. Quem abre a pasta `solicitacao` ve a solicitacao
-inteira sem procurar em outro lugar.
+1. Entre como aluno, consulte o catálogo e crie uma solicitação com observação.
+2. Entre como responsável, confira a fila e filtre por status. Atualize o pedido para Em separação e depois Pronto para retirada, informando previsão futura.
+3. Entre novamente como aluno: confira o painel de prazos, histórico e avisos. Outro aluno não deve receber esse pedido/aviso.
+4. Como responsável, cadastre um material e atualize o saldo; confira saldo e data após recarregar a tela.
 
-## Como trabalhamos
+Status, previsão, data e aviso são transacionais. Os tipos de aviso seguem o [alinhamento H01.5](docs/especificacao/H01.5-fechamento.md). Não há envio de e-mail nem marcação de aviso como lido no MVP.
 
-A revisão funcional em andamento do card #1136 está em
-[H01.4 — alinhamento de contratos, telas e banco](docs/especificacao/H01.4-alinhamento.md).
-As propostas pendentes não devem ser tratadas como decisões já aceitas ou código pronto.
+## Validação
 
-- Uma branch por card do OpenProject, com o nome do card: `h05-listar-fila`.
-- Antes de escrever codigo, leia `docs/convencoes-codigo.md`.
-- Toda decisao que muda o rumo do projeto vira um arquivo em `docs/adr/`.
+Com Java 17 e Maven: `mvn test`. Os testes reais de PostgreSQL exigem as variáveis indicadas nas classes de teste CT01/CT03/CT05/CT07/CT14; sem elas, esses cenários são ignorados. Um resultado verde sem banco não comprova integração. A evidência do fechamento está em [H11](docs/integracao/H11-fechamento.md).
 
-## Quem faz o que no backend
-
-| Pessoa | Cards |
-| :--- | :--- |
-| Matheus | H01.1, H01.3, H02.2, H05.1, H08.1, H10.1, H11.2 e as integracoes H05.3, H08.3, H10.3 |
-| Luis | H01.4, H02.1, H04.1, H07.1, H09.2 e as integracoes H02.4, H04.3, H07.3 |
-| Lara | H01.2 (banco), H01.5, H03.1, H06.1, H09.1 e as integracoes H03.3, H06.3, H09.4 |
+Contratos em `docs/contratos`, decisões em `docs/adr` e entidades/serviços em `src/main/java/com/archflow`. A disciplina e a revisão de código orientam o uso das estruturas já adotadas no projeto.
