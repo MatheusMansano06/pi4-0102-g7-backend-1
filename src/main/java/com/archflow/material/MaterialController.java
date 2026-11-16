@@ -12,6 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestAttribute;
 
 import com.archflow.comum.UsuarioAutenticado;
+import com.archflow.comum.CodigosDeErro;
+import com.archflow.comum.ErroSaida;
+import com.archflow.comum.NegocioException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RestController
 @RequestMapping("/api/materiais")
@@ -42,5 +49,19 @@ public class MaterialController {
 
         return this.materialService.cadastrarMaterial(
                 identidade, entrada);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErroSaida tratarCorpoInvalido(HttpMessageNotReadableException erro) {
+        Throwable causa = erro;
+        while (causa != null) {
+            if (causa instanceof NegocioException) {
+                NegocioException regra = (NegocioException) causa;
+                return new ErroSaida(regra.getCodigo(), regra.getMessage());
+            }
+            causa = causa.getCause();
+        }
+        return new ErroSaida(CodigosDeErro.DADOS_INVALIDOS, "Informe um objeto JSON válido para o material.");
     }
 }

@@ -55,7 +55,7 @@ public class TratadorDeErros {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErroSaida tratarFalhaInesperada(Exception erro) {
 
-        erro.printStackTrace();
+        // Detalhes internos não fazem parte da resposta pública.
 
         return new ErroSaida(
             CodigosDeErro.ERRO_INTERNO,

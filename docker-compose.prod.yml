@@ -33,8 +33,10 @@ services:
       BANCO_URL: jdbc:postgresql://banco:5432/${POSTGRES_DB}
       BANCO_USUARIO: ${POSTGRES_USER}
       BANCO_SENHA: ${POSTGRES_PASSWORD}
+      ARCHFLOW_TOKEN_SEGREDO: ${ARCHFLOW_TOKEN_SEGREDO:?Defina o segredo JWT no arquivo de ambiente}
+      JAVA_TOOL_OPTIONS: "-Darchflow.estoque.em-desenvolvimento=true"
     ports:
-      - "${PORTA_BACKEND}:8080"
+      - "127.0.0.1:${PORTA_BACKEND:-8080}:8080"
     depends_on:
       banco:
         condition: service_healthy
@@ -44,7 +46,7 @@ services:
   frontend:
     build: ../pi4-0102-g7-frontend
     ports:
-      - "80:80"
+      - "127.0.0.1:${PORTA_APRESENTACAO:-8081}:80"
     depends_on:
       - backend
     networks:

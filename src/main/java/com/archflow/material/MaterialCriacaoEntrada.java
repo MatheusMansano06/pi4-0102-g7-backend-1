@@ -1,5 +1,8 @@
 package com.archflow.material;
 
+import com.archflow.comum.CodigosDeErro;
+import com.archflow.comum.NegocioException;
+
 public class MaterialCriacaoEntrada {
 
     private String nome;
@@ -39,15 +42,26 @@ public class MaterialCriacaoEntrada {
         return this.quantidadeDisponivel;
     }
 
-    public void setQuantidadeDisponivel(Integer quantidadeDisponivel) {
-        this.quantidadeDisponivel = quantidadeDisponivel;
+    public void setQuantidadeDisponivel(Object quantidadeDisponivel) {
+        this.quantidadeDisponivel = this.lerInteiro(quantidadeDisponivel);
     }
 
     public Integer getQuantidadeMinima() {
         return this.quantidadeMinima;
     }
 
-    public void setQuantidadeMinima(Integer quantidadeMinima) {
-        this.quantidadeMinima = quantidadeMinima;
+    public void setQuantidadeMinima(Object quantidadeMinima) {
+        this.quantidadeMinima = this.lerInteiro(quantidadeMinima);
+    }
+
+    private Integer lerInteiro(Object valor) {
+        if (valor == null) {
+            return null;
+        }
+        if (!(valor instanceof Integer)) {
+            throw new NegocioException(CodigosDeErro.QUANTIDADE_INVALIDA,
+                    "As quantidades devem ser números inteiros.");
+        }
+        return (Integer) valor;
     }
 }
