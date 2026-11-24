@@ -2,6 +2,8 @@
 
 Sistema de solicitação e controle de materiais do Ateliê CEATEC, PI IV, turma 0102, grupo 7. Java 17, Spring Boot, JPA e PostgreSQL 15. Frontend React no [repositório da interface](https://github.com/anadiasxavier/pi4-0102-g7-frontend).
 
+Consulte o [Documento de Projeto](docs/documento-de-projeto.md) para a arquitetura, os requisitos e os demais capítulos da entrega.
+
 ## Instalação em máquina limpa
 
 Requisitos: Git e Docker Desktop iniciado com suporte a contêineres Linux. Clone os dois repositórios lado a lado, preservando os nomes:
